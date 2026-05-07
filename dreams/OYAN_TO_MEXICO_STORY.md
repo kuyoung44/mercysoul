@@ -1,6 +1,6 @@
 # From Oyan to Mexico 🌟
 
-![OyanToMexicoImage](link-to-image)
+![OyanToMexicoImage](https://github.com/kuyoung44/mercysoul/blob/main/dreams/oyan_to_mexico_ai_image.png)
 
 *Ankara meets Sombrero. Tacos meet Pounded Yam spirit.*
 
