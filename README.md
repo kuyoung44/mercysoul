@@ -1,12 +1,28 @@
-# Mercysoul 🌟
+# MercySoul OS
 
-Minimal visual structures designed for attention and controlled impact.
+MercySoul Vision intake and automation core.
 
-## Latest Dream 🌟
-[Oyan to Mexico](https://github.com/kuyoung44/mercysoul/blob/main/dreams/OYAN_TO_MEXICO_STORY.md)
+## Run locally
 
-Ankara meets Sombrero. AI-generated but commanded by truth.
+Requires Node.js 20+.
 
-#MercysoulDreams
+```bash
+npm install
+cp .env.example .env
+npm start
+```
 
-Ase.
+Open `http://localhost:3000`.
+
+## API
+
+- `GET /health`
+- `POST /api/visions`
+- `GET /api/visions`
+- `POST /api/orders`
+- `GET /api/orders`
+- `POST /api/payments/webhook`
+
+## Production
+
+Set real secrets only in the deployment environment. Never commit API/payment secrets. Add persistent database storage, object storage, HTTPS, authentication, rate limiting, transactional email, image generation credentials, and social publishing credentials before opening the service publicly.
