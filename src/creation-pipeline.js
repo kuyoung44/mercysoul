@@ -4,12 +4,15 @@ import { saveArtworkJob, updateArtwork } from './artwork-store.js';
 
 export async function runCreationPipeline(vision, order) {
   const job = createArtworkJob(vision, order);
-  if (job.status !== 'queued') return job;
+  if (job.status !== 'ready_for_creation') return job;
 
   const saved = await saveArtworkJob(job);
   if (saved.error) throw saved.error;
 
   const artworkId = saved.data?.id || job.id;
+  const queuedJob = { ...job, id: artworkId, status: 'creating' };
+  await updateArtwork(artworkId, { status: 'creating' });
+
   const generation = await generateImage(job.prompt);
 
   if (generation.status === 'completed') {
@@ -18,9 +21,9 @@ export async function runCreationPipeline(vision, order) {
       image_url: generation.imageUrl
     });
     if (result.error) throw result.error;
-    return { ...job, id: artworkId, ...generation, status: 'completed' };
+    return { ...queuedJob, ...generation, status: 'completed' };
   }
 
   await updateArtwork(artworkId, { status: generation.status });
-  return { ...job, id: artworkId, status: generation.status, provider: generation.provider };
+  return { ...queuedJob, status: generation.status, provider: generation.provider, message: generation.message };
 }
