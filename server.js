@@ -1,4 +1,5 @@
 import express from 'express';
+import helmet from 'helmet';
 import crypto from 'node:crypto';
 import { verifyVision, verifyOrder, paymentApproval } from './src/verification.js';
 import { storeMode, saveVision, saveOrder, listOrders, logEvent, persistenceRequirement } from './src/store.js';
@@ -8,10 +9,13 @@ import { evaluateAlignment, AUTONOMY } from './src/alignment.js';
 import { moderatePost, buildModeratorPost } from './src/post-moderator.js';
 import { moderateWebContent } from './src/web-moderation-gateway.js';
 
-const VERSION = '2.3.0';
+const VERSION = '2.3.1';
 const app = express();
+app.disable('x-powered-by');
 app.set('trust proxy', 1);
+app.use(helmet());
 app.use(express.json({ limit: '2mb' }));
+
 const orders = new Map();
 const visions = new Map();
 const events = [];
@@ -19,10 +23,16 @@ const processedPayments = new Set();
 const rateBuckets = new Map();
 const RATE_WINDOW_MS = 60_000;
 const RATE_LIMIT = 30;
+const MAX_RATE_BUCKETS = 10_000;
 
 function rateLimit(req, res, next) {
   const key = req.ip || 'unknown';
   const now = Date.now();
+  if (rateBuckets.size > MAX_RATE_BUCKETS) {
+    for (const [bucketKey, bucket] of rateBuckets) {
+      if (now - bucket.start >= RATE_WINDOW_MS) rateBuckets.delete(bucketKey);
+    }
+  }
   const bucket = rateBuckets.get(key) || { start: now, count: 0 };
   if (now - bucket.start >= RATE_WINDOW_MS) { bucket.start = now; bucket.count = 0; }
   bucket.count += 1;
@@ -99,6 +109,7 @@ app.get('/health', (_req, res) => res.json({
   moderation: 'enabled',
   postModerator: 'enabled',
   webModerationGateway: 'enabled',
+  securityHeaders: 'enabled',
   alignment: 'enforced',
   persistence: storeMode(),
   persistenceRequirement: persistenceRequirement(),
@@ -114,6 +125,7 @@ app.get('/api/status', (_req, res) => res.json({
   gateways: ['railway', 'render'],
   pipeline: ['verification', 'web-ingress-moderation', 'post-moderation', 'moderation', 'alignment', 'creation', 'persistence', 'audit'],
   runtime: { persistence: storeMode(), persistenceRequirement: persistenceRequirement() },
+  security: { helmet: true, promptInjectionDetection: true, rateLimit: true },
   moderation: { synchronized: true, decisions: ['allow', 'review', 'block'] }
 }));
 
@@ -218,7 +230,13 @@ app.post('/api/payments/webhook', async (req, res) => {
   res.sendStatus(200);
 });
 
-app.get('/', (_req, res) => res.send(`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>MercySoul OS</title><style>body{font-family:system-ui;max-width:760px;margin:40px auto;padding:20px}textarea,button{width:100%;padding:12px;margin:7px 0;box-sizing:border-box}button{cursor:pointer}.card{padding:16px;border:1px solid #ddd;border-radius:12px;margin-top:16px}pre{white-space:pre-wrap}</style></head><body><h1>MercySoul OS 2.3</h1><p>You describe it. MercySoul structures it, verifies it, moderates it, filters integrated web content, aligns it, and prepares it for creation.</p><textarea id="vision" rows="7" placeholder="Describe what you imagine..."></textarea><button onclick="capture()">Verify & Build Creative Brief</button><div id="out"></div><script>async function capture(){const vision=document.getElementById('vision').value;const r=await fetch('/api/visions',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rawIdea:vision})});const d=await r.json();const pre=document.createElement('pre');pre.textContent=JSON.stringify(d,null,2);const card=document.createElement('div');card.className='card';card.appendChild(pre);document.getElementById('out').replaceChildren(card);}</script></body></html>`));
+app.get('/', (_req, res) => res.send(`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>MercySoul OS</title><style>body{font-family:system-ui;max-width:760px;margin:40px auto;padding:20px}textarea,button{width:100%;padding:12px;margin:7px 0;box-sizing:border-box}button{cursor:pointer}.card{padding:16px;border:1px solid #ddd;border-radius:12px;margin-top:16px}pre{white-space:pre-wrap}</style></head><body><h1>MercySoul OS 2.3.1</h1><p>You describe it. MercySoul structures it, verifies it, moderates it, filters integrated web content, aligns it, and prepares it for creation.</p><textarea id="vision" rows="7" placeholder="Describe what you imagine..."></textarea><button onclick="capture()">Verify & Build Creative Brief</button><div id="out"></div><script>async function capture(){const vision=document.getElementById('vision').value;const r=await fetch('/api/visions',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rawIdea:vision})});const d=await r.json();const pre=document.createElement('pre');pre.textContent=JSON.stringify(d,null,2);const card=document.createElement('div');card.className='card';card.appendChild(pre);document.getElementById('out').replaceChildren(card);}</script></body></html>`));
+
+app.use((_req, res) => res.status(404).json({ error: 'Not found' }));
+app.use((err, _req, res, _next) => {
+  console.error('MercySoul request error:', err);
+  res.status(500).json({ error: 'Internal server error' });
+});
 
 const port = Number(process.env.PORT || 3000);
 app.listen(port, () => console.log(`MercySoul OS ${VERSION} listening on ${port} | persistence=${storeMode()} | requirement=${persistenceRequirement()}`));
