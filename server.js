@@ -1,11 +1,12 @@
 import express from 'express';
 import crypto from 'node:crypto';
 import { verifyVision, verifyOrder, paymentApproval } from './src/verification.js';
-import { storeMode, saveVision, saveOrder, listOrders, logEvent } from './src/store.js';
+import { storeMode, saveVision, saveOrder, listOrders, logEvent, persistenceRequirement } from './src/store.js';
 import { buildCreativeBrief } from './src/vision-brain.js';
 import { runCreationPipeline } from './src/creation-pipeline.js';
 import { evaluateAlignment, AUTONOMY } from './src/alignment.js';
 
+const VERSION = '2.0.0';
 const app = express();
 app.set('trust proxy', 1);
 app.use(express.json({ limit: '2mb' }));
@@ -72,19 +73,16 @@ function evaluateCreationAlignment(vision, order) {
 async function startCreation(order) {
   const vision = visions.get(order.visionId);
   if (!vision) return { status: 'awaiting_vision' };
-
   const moderation = moderateCreationInput(vision, order);
   if (!moderation.approved) {
     await log('creation_moderated', { orderId: order.id, ...moderation }, order.id);
     return { status: 'moderation_required', moderation };
   }
-
   const alignment = evaluateCreationAlignment(vision, order);
   if (alignment.decision !== AUTONOMY.AUTO) {
     await log('creation_unaligned', { orderId: order.id, decision: alignment.decision, reason: alignment.reason }, order.id);
     return { status: 'awaiting_confirmation', alignment };
   }
-
   const result = await runCreationPipeline(vision, order);
   order.artwork = result;
   await log('creation_started', { orderId: order.id, artworkId: result.id, status: result.status }, order.id);
@@ -94,27 +92,35 @@ async function startCreation(order) {
 app.get('/health', (_req, res) => res.json({
   ok: true,
   service: 'MercySoul OS',
-  version: '1.5.3',
+  version: VERSION,
   verification: 'enabled',
   moderation: 'enabled',
   alignment: 'enforced',
   persistence: storeMode(),
+  persistenceRequirement: persistenceRequirement(),
   visionBrain: 'enabled',
   creationEngine: 'enabled',
-  adminApi: process.env.ADMIN_API_TOKEN ? 'configured' : 'not_configured'
+  adminApi: process.env.ADMIN_API_TOKEN ? 'configured' : 'not_configured',
+  paymentWebhook: process.env.NODE_ENV === 'production' ? (process.env.PAYSTACK_SECRET_KEY ? 'configured' : 'not_configured') : 'development'
+}));
+
+app.get('/api/status', (_req, res) => res.json({
+  service: 'MercySoul OS',
+  version: VERSION,
+  gateways: ['railway', 'render'],
+  pipeline: ['verification', 'moderation', 'alignment', 'creation', 'persistence', 'audit'],
+  runtime: { persistence: storeMode(), persistenceRequirement: persistenceRequirement() }
 }));
 
 app.post('/api/visions', rateLimit, async (req, res) => {
   const check = verifyVision(req.body);
   if (!check.approved) return res.status(422).json({ approved: false, errors: check.errors });
-
   const brief = buildCreativeBrief(req.body.rawIdea);
   const moderation = moderateCreationInput({ rawIdea: req.body.rawIdea, brief }, { status: 'paid' });
   if (!moderation.approved) {
     await log('vision_moderated', { reason: moderation.reason, matchedTerm: moderation.matchedTerm || null });
     return res.status(422).json({ approved: false, status: 'moderation_required', moderation: { reason: moderation.reason } });
   }
-
   const id = `VIS-${crypto.randomUUID()}`;
   const vision = { id, ...req.body, brief, status: 'verified', approval: 'automatic', createdAt: new Date().toISOString() };
   const saved = await saveVision(vision);
@@ -192,7 +198,7 @@ app.post('/api/payments/webhook', async (req, res) => {
   res.sendStatus(200);
 });
 
-app.get('/', (_req, res) => res.send(`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>MercySoul OS</title><style>body{font-family:system-ui;max-width:760px;margin:40px auto;padding:20px}textarea,button{width:100%;padding:12px;margin:7px 0;box-sizing:border-box}button{cursor:pointer}.card{padding:16px;border:1px solid #ddd;border-radius:12px;margin-top:16px}pre{white-space:pre-wrap}</style></head><body><h1>MercySoul OS</h1><p>You describe it. MercySoul structures it.</p><textarea id="vision" rows="7" placeholder="Describe what you imagine..."></textarea><button onclick="capture()">Verify & Build Creative Brief</button><div id="out"></div><script>async function capture(){const vision=document.getElementById('vision').value;const r=await fetch('/api/visions',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rawIdea:vision})});const d=await r.json();const pre=document.createElement('pre');pre.textContent=JSON.stringify(d,null,2);const card=document.createElement('div');card.className='card';card.appendChild(pre);const out=document.getElementById('out');out.replaceChildren(card);}</script></body></html>`));
+app.get('/', (_req, res) => res.send(`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>MercySoul OS</title><style>body{font-family:system-ui;max-width:760px;margin:40px auto;padding:20px}textarea,button{width:100%;padding:12px;margin:7px 0;box-sizing:border-box}button{cursor:pointer}.card{padding:16px;border:1px solid #ddd;border-radius:12px;margin-top:16px}pre{white-space:pre-wrap}</style></head><body><h1>MercySoul OS 2.0</h1><p>You describe it. MercySoul structures it.</p><textarea id="vision" rows="7" placeholder="Describe what you imagine..."></textarea><button onclick="capture()">Verify & Build Creative Brief</button><div id="out"></div><script>async function capture(){const vision=document.getElementById('vision').value;const r=await fetch('/api/visions',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rawIdea:vision})});const d=await r.json();const pre=document.createElement('pre');pre.textContent=JSON.stringify(d,null,2);const card=document.createElement('div');card.className='card';card.appendChild(pre);document.getElementById('out').replaceChildren(card);}</script></body></html>`));
 
 const port = Number(process.env.PORT || 3000);
-app.listen(port, () => console.log(`MercySoul OS 1.5.3 listening on ${port} | persistence=${storeMode()}`));
+app.listen(port, () => console.log(`MercySoul OS ${VERSION} listening on ${port} | persistence=${storeMode()} | requirement=${persistenceRequirement()}`));
