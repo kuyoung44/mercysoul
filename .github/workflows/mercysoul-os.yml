@@ -37,7 +37,11 @@ jobs:
           node src/alignment.test.js
           node src/creation-engine.test.js
 
-      - name: Generate report
+      - name: Diagnose repository state
+        if: always()
+        run: node scripts/ci-diagnose.js
+
+      - name: Generate CI report
         if: always()
         run: |
           mkdir -p reports
@@ -46,13 +50,13 @@ jobs:
             echo "Generated: $(date -u +%FT%TZ)"
             echo "Commit: $GITHUB_SHA"
             echo "Node: $(node --version)"
-            echo "Status: ${{ job.status }}"
+            echo "Workflow status: ${{ job.status }}"
           } > reports/build-report.md
 
-      - name: Upload report
+      - name: Upload diagnostic artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: mercysoul-os-report-${{ github.run_id }}
-          path: reports/build-report.md
+          path: reports/
           retention-days: 14
