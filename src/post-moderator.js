@@ -1,3 +1,5 @@
+import crypto from 'node:crypto';
+
 const RULES = [
   { category: 'sexual_exploitation', action: 'block', patterns: [/child\s*(sexual|porn|nude)/i, /minor\s*(sexual|porn|nude)/i, /sexual\s*exploitation/i] },
   { category: 'violent_threat', action: 'review', patterns: [/\b(i will|we will|going to)\s+(kill|murder|shoot)\b/i, /\bkill you\b/i] },
@@ -17,15 +19,11 @@ export function moderatePost(input = {}) {
   const title = normalize(input.title);
   const combined = `${title} ${text}`.trim();
 
-  if (!combined) {
-    return { decision: 'review', score: 1, confidence: 1, reasons: ['Post content is empty'], categories: ['invalid'], normalizedText: combined };
-  }
+  if (!combined) return { decision: 'review', score: 1, confidence: 1, reasons: ['Post content is empty'], categories: ['invalid'], normalizedText: combined };
 
   const matches = [];
   for (const rule of RULES) {
-    if (rule.patterns.some((pattern) => pattern.test(combined))) {
-      matches.push({ category: rule.category, action: rule.action });
-    }
+    if (rule.patterns.some((pattern) => pattern.test(combined))) matches.push({ category: rule.category, action: rule.action });
   }
 
   const categories = [...new Set(matches.map((m) => m.category))];
