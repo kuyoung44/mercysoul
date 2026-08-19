@@ -6,8 +6,9 @@ import { buildCreativeBrief } from './src/vision-brain.js';
 import { runCreationPipeline } from './src/creation-pipeline.js';
 import { evaluateAlignment, AUTONOMY } from './src/alignment.js';
 import { moderatePost, buildModeratorPost } from './src/post-moderator.js';
+import { moderateWebContent } from './src/web-moderation-gateway.js';
 
-const VERSION = '2.2.0';
+const VERSION = '2.3.0';
 const app = express();
 app.set('trust proxy', 1);
 app.use(express.json({ limit: '2mb' }));
@@ -97,6 +98,7 @@ app.get('/health', (_req, res) => res.json({
   verification: 'enabled',
   moderation: 'enabled',
   postModerator: 'enabled',
+  webModerationGateway: 'enabled',
   alignment: 'enforced',
   persistence: storeMode(),
   persistenceRequirement: persistenceRequirement(),
@@ -110,8 +112,9 @@ app.get('/api/status', (_req, res) => res.json({
   service: 'MercySoul OS',
   version: VERSION,
   gateways: ['railway', 'render'],
-  pipeline: ['verification', 'post-moderation', 'moderation', 'alignment', 'creation', 'persistence', 'audit'],
-  runtime: { persistence: storeMode(), persistenceRequirement: persistenceRequirement() }
+  pipeline: ['verification', 'web-ingress-moderation', 'post-moderation', 'moderation', 'alignment', 'creation', 'persistence', 'audit'],
+  runtime: { persistence: storeMode(), persistenceRequirement: persistenceRequirement() },
+  moderation: { synchronized: true, decisions: ['allow', 'review', 'block'] }
 }));
 
 app.post('/api/moderate-post', rateLimit, async (req, res) => {
@@ -120,6 +123,13 @@ app.post('/api/moderate-post', rateLimit, async (req, res) => {
   await log('post_moderated', { postId: post.id, decision: moderation.decision, score: moderation.score, confidence: moderation.confidence, categories: moderation.categories }, post.id);
   const status = moderation.decision === 'allow' ? 200 : moderation.decision === 'review' ? 202 : 422;
   res.status(status).json({ ok: moderation.decision === 'allow', post });
+});
+
+app.post('/api/moderate-web', rateLimit, async (req, res) => {
+  const result = moderateWebContent(req.body);
+  await log('web_content_moderated', { id: result.id, source: result.source, url: result.url, decision: result.decision, score: result.score, confidence: result.confidence, categories: result.categories }, result.id);
+  const status = result.decision === 'allow' ? 200 : result.decision === 'review' ? 202 : 422;
+  res.status(status).json({ ok: result.decision === 'allow', content: result });
 });
 
 app.post('/api/visions', rateLimit, async (req, res) => {
@@ -208,7 +218,7 @@ app.post('/api/payments/webhook', async (req, res) => {
   res.sendStatus(200);
 });
 
-app.get('/', (_req, res) => res.send(`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>MercySoul OS</title><style>body{font-family:system-ui;max-width:760px;margin:40px auto;padding:20px}textarea,button{width:100%;padding:12px;margin:7px 0;box-sizing:border-box}button{cursor:pointer}.card{padding:16px;border:1px solid #ddd;border-radius:12px;margin-top:16px}pre{white-space:pre-wrap}</style></head><body><h1>MercySoul OS 2.2</h1><p>You describe it. MercySoul structures it, verifies it, moderates it, aligns it, and prepares it for creation.</p><textarea id="vision" rows="7" placeholder="Describe what you imagine..."></textarea><button onclick="capture()">Verify & Build Creative Brief</button><div id="out"></div><script>async function capture(){const vision=document.getElementById('vision').value;const r=await fetch('/api/visions',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rawIdea:vision})});const d=await r.json();const pre=document.createElement('pre');pre.textContent=JSON.stringify(d,null,2);const card=document.createElement('div');card.className='card';card.appendChild(pre);document.getElementById('out').replaceChildren(card);}</script></body></html>`));
+app.get('/', (_req, res) => res.send(`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>MercySoul OS</title><style>body{font-family:system-ui;max-width:760px;margin:40px auto;padding:20px}textarea,button{width:100%;padding:12px;margin:7px 0;box-sizing:border-box}button{cursor:pointer}.card{padding:16px;border:1px solid #ddd;border-radius:12px;margin-top:16px}pre{white-space:pre-wrap}</style></head><body><h1>MercySoul OS 2.3</h1><p>You describe it. MercySoul structures it, verifies it, moderates it, filters integrated web content, aligns it, and prepares it for creation.</p><textarea id="vision" rows="7" placeholder="Describe what you imagine..."></textarea><button onclick="capture()">Verify & Build Creative Brief</button><div id="out"></div><script>async function capture(){const vision=document.getElementById('vision').value;const r=await fetch('/api/visions',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rawIdea:vision})});const d=await r.json();const pre=document.createElement('pre');pre.textContent=JSON.stringify(d,null,2);const card=document.createElement('div');card.className='card';card.appendChild(pre);document.getElementById('out').replaceChildren(card);}</script></body></html>`));
 
 const port = Number(process.env.PORT || 3000);
 app.listen(port, () => console.log(`MercySoul OS ${VERSION} listening on ${port} | persistence=${storeMode()} | requirement=${persistenceRequirement()}`));
