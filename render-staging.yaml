@@ -13,3 +13,9 @@ services:
         value: staging
       - key: REQUIRE_DURABLE_PERSISTENCE
         value: "false"
+      - key: ADMIN_API_TOKEN
+        sync: false
+      - key: IMAGE_PROVIDER
+        sync: false
+      - key: IMAGE_PROVIDER_API_KEY
+        sync: false
