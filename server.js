@@ -5,8 +5,9 @@ import { storeMode, saveVision, saveOrder, listOrders, logEvent, persistenceRequ
 import { buildCreativeBrief } from './src/vision-brain.js';
 import { runCreationPipeline } from './src/creation-pipeline.js';
 import { evaluateAlignment, AUTONOMY } from './src/alignment.js';
+import { moderatePost, buildModeratorPost } from './src/post-moderator.js';
 
-const VERSION = '2.1.0';
+const VERSION = '2.2.0';
 const app = express();
 app.set('trust proxy', 1);
 app.use(express.json({ limit: '2mb' }));
@@ -95,6 +96,7 @@ app.get('/health', (_req, res) => res.json({
   version: VERSION,
   verification: 'enabled',
   moderation: 'enabled',
+  postModerator: 'enabled',
   alignment: 'enforced',
   persistence: storeMode(),
   persistenceRequirement: persistenceRequirement(),
@@ -108,9 +110,17 @@ app.get('/api/status', (_req, res) => res.json({
   service: 'MercySoul OS',
   version: VERSION,
   gateways: ['railway', 'render'],
-  pipeline: ['verification', 'moderation', 'alignment', 'creation', 'persistence', 'audit'],
+  pipeline: ['verification', 'post-moderation', 'moderation', 'alignment', 'creation', 'persistence', 'audit'],
   runtime: { persistence: storeMode(), persistenceRequirement: persistenceRequirement() }
 }));
+
+app.post('/api/moderate-post', rateLimit, async (req, res) => {
+  const moderation = moderatePost(req.body);
+  const post = buildModeratorPost(req.body, moderation);
+  await log('post_moderated', { postId: post.id, decision: moderation.decision, score: moderation.score, confidence: moderation.confidence, categories: moderation.categories }, post.id);
+  const status = moderation.decision === 'allow' ? 200 : moderation.decision === 'review' ? 202 : 422;
+  res.status(status).json({ ok: moderation.decision === 'allow', post });
+});
 
 app.post('/api/visions', rateLimit, async (req, res) => {
   const check = verifyVision(req.body);
@@ -198,7 +208,7 @@ app.post('/api/payments/webhook', async (req, res) => {
   res.sendStatus(200);
 });
 
-app.get('/', (_req, res) => res.send(`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>MercySoul OS</title><style>body{font-family:system-ui;max-width:760px;margin:40px auto;padding:20px}textarea,button{width:100%;padding:12px;margin:7px 0;box-sizing:border-box}button{cursor:pointer}.card{padding:16px;border:1px solid #ddd;border-radius:12px;margin-top:16px}pre{white-space:pre-wrap}</style></head><body><h1>MercySoul OS 2.1</h1><p>You describe it. MercySoul structures it, verifies it, aligns it, and prepares it for creation.</p><textarea id="vision" rows="7" placeholder="Describe what you imagine..."></textarea><button onclick="capture()">Verify & Build Creative Brief</button><div id="out"></div><script>async function capture(){const vision=document.getElementById('vision').value;const r=await fetch('/api/visions',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rawIdea:vision})});const d=await r.json();const pre=document.createElement('pre');pre.textContent=JSON.stringify(d,null,2);const card=document.createElement('div');card.className='card';card.appendChild(pre);document.getElementById('out').replaceChildren(card);}</script></body></html>`));
+app.get('/', (_req, res) => res.send(`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>MercySoul OS</title><style>body{font-family:system-ui;max-width:760px;margin:40px auto;padding:20px}textarea,button{width:100%;padding:12px;margin:7px 0;box-sizing:border-box}button{cursor:pointer}.card{padding:16px;border:1px solid #ddd;border-radius:12px;margin-top:16px}pre{white-space:pre-wrap}</style></head><body><h1>MercySoul OS 2.2</h1><p>You describe it. MercySoul structures it, verifies it, moderates it, aligns it, and prepares it for creation.</p><textarea id="vision" rows="7" placeholder="Describe what you imagine..."></textarea><button onclick="capture()">Verify & Build Creative Brief</button><div id="out"></div><script>async function capture(){const vision=document.getElementById('vision').value;const r=await fetch('/api/visions',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rawIdea:vision})});const d=await r.json();const pre=document.createElement('pre');pre.textContent=JSON.stringify(d,null,2);const card=document.createElement('div');card.className='card';card.appendChild(pre);document.getElementById('out').replaceChildren(card);}</script></body></html>`));
 
 const port = Number(process.env.PORT || 3000);
 app.listen(port, () => console.log(`MercySoul OS ${VERSION} listening on ${port} | persistence=${storeMode()} | requirement=${persistenceRequirement()}`));
