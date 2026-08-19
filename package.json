@@ -1,6 +1,6 @@
 {
   "name": "mercysoul-os",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,7 +8,7 @@
     "start:traced": "NODE_OPTIONS=--require=dd-trace/init node server.js",
     "dev": "node --watch server.js",
     "health": "node scripts/health-check.js",
-    "check": "node --check server.js && node --check src/verification.js && node --check src/store.js && node --check src/vision-brain.js && node --check src/alignment.js && node --check src/creation-engine.js && node --check src/creation-pipeline.js && node --check src/artwork-store.js && node --check src/image-provider.js && node --check src/post-moderator.js && node --check scripts/security-check.js && node --check scripts/ci-diagnose.js && node --check scripts/health-check.js && node --check src/alignment.test.js && node --check src/creation-engine.test.js"
+    "check": "node --check server.js && node --check src/verification.js && node --check src/store.js && node --check src/vision-brain.js && node --check src/alignment.js && node --check src/creation-engine.js && node --check src/creation-pipeline.js && node --check src/artwork-store.js && node --check src/image-provider.js && node --check src/post-moderator.js && node --check src/web-moderation-gateway.js && node --check scripts/security-check.js && node --check scripts/ci-diagnose.js && node --check scripts/health-check.js && node --check src/alignment.test.js && node --check src/creation-engine.test.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.0",
