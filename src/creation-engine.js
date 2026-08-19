@@ -20,7 +20,7 @@ export function createArtworkJob(vision, order) {
     id: `ART-${crypto.randomUUID()}`,
     orderId: order.id,
     visionId: vision.id,
-    status: 'queued',
+    status: 'ready_for_creation',
     provider: process.env.IMAGE_PROVIDER || 'not_configured',
     prompt: vision.brief.direction,
     brief: vision.brief,
