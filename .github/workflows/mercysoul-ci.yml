@@ -1,0 +1,48 @@
+name: MercySoul OS — Build, Verify & Report
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '17 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install
+        run: npm install
+      - name: Syntax check
+        run: node --check server.js && node --check src/verification.js
+      - name: Dependency audit
+        run: npm audit --audit-level=high || true
+      - name: Build report
+        run: |
+          mkdir -p reports
+          {
+            echo "# MercySoul OS automated report"
+            echo
+            echo "- Commit: $GITHUB_SHA"
+            echo "- Trigger: $GITHUB_EVENT_NAME"
+            echo "- Node: $(node --version)"
+            echo "- npm: $(npm --version)"
+            echo "- Status: verification workflow completed"
+          } > reports/build-report.md
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: mercysoul-build-report
+          path: reports/build-report.md
