@@ -3,6 +3,8 @@ import crypto from 'node:crypto';
 import { verifyVision, verifyOrder, paymentApproval } from './src/verification.js';
 import { storeMode, saveVision, saveOrder, listOrders, logEvent } from './src/store.js';
 import { buildCreativeBrief } from './src/vision-brain.js';
+import { runCreationPipeline } from './src/creation-pipeline.js';
+import { evaluateAlignment, AUTONOMY } from './src/alignment.js';
 
 const app = express();
 app.use(express.json({ limit: '2mb' }));
@@ -15,7 +17,18 @@ async function log(type, data, entityId = null) {
   await logEvent(type, entityId, data);
 }
 
-app.get('/health', (_req, res) => res.json({ ok: true, service: 'MercySoul OS', version: '1.3.0', verification: 'enabled', persistence: storeMode(), visionBrain: 'enabled' }));
+async function startCreation(order) {
+  const vision = visions.get(order.visionId);
+  if (!vision) return { status: 'awaiting_vision' };
+  const alignment = evaluateAlignment('generate_art', { authorized: true, customerIntent: true });
+  if (alignment.decision !== AUTONOMY.AUTO) return { status: 'awaiting_confirmation', alignment };
+  const result = await runCreationPipeline(vision, order);
+  order.artwork = result;
+  await log('creation_started', { orderId: order.id, artworkId: result.id, status: result.status }, order.id);
+  return result;
+}
+
+app.get('/health', (_req, res) => res.json({ ok: true, service: 'MercySoul OS', version: '1.5.0', verification: 'enabled', persistence: storeMode(), visionBrain: 'enabled', creationEngine: 'enabled', alignment: 'enabled' }));
 
 app.post('/api/visions', async (req, res) => {
   const check = verifyVision(req.body);
@@ -56,6 +69,19 @@ app.get('/api/orders', async (_req, res) => {
 app.get('/api/visions', (_req, res) => res.json([...visions.values()]));
 app.get('/api/events', (_req, res) => res.json(events.slice(-100)));
 
+app.post('/api/orders/:id/create', async (req, res) => {
+  const order = orders.get(req.params.id);
+  if (!order) return res.status(404).json({ error: 'Order not found' });
+  if (order.status !== 'paid') return res.status(409).json({ error: 'Order must be paid before creation' });
+  try {
+    const result = await startCreation(order);
+    res.status(202).json({ orderId: order.id, ...result });
+  } catch (error) {
+    await log('creation_failed', { orderId: order.id, error: error.message }, order.id);
+    res.status(500).json({ error: 'Creation pipeline failed' });
+  }
+});
+
 app.post('/api/payments/webhook', async (req, res) => {
   const signature = req.headers['x-paystack-signature'];
   if (process.env.PAYSTACK_SECRET_KEY) {
@@ -69,6 +95,7 @@ app.post('/api/payments/webhook', async (req, res) => {
       order.status = 'paid';
       order.payment = { reference: data.reference, status: data.status, verifiedAt: new Date().toISOString() };
       await log('payment_verified', { orderId: order.id, reference: data.reference }, order.id);
+      try { await startCreation(order); } catch (error) { await log('creation_failed', { orderId: order.id, error: error.message }, order.id); }
     }
   }
   res.sendStatus(200);
@@ -77,4 +104,4 @@ app.post('/api/payments/webhook', async (req, res) => {
 app.get('/', (_req, res) => res.send(`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>MercySoul OS</title><style>body{font-family:system-ui;max-width:760px;margin:40px auto;padding:20px}textarea,button{width:100%;padding:12px;margin:7px 0;box-sizing:border-box}button{cursor:pointer}.card{padding:16px;border:1px solid #ddd;border-radius:12px;margin-top:16px}</style></head><body><h1>MercySoul OS</h1><p>You describe it. MercySoul structures it.</p><textarea id="vision" rows="7" placeholder="Describe what you imagine..."></textarea><button onclick="capture()">Verify & Build Creative Brief</button><div id="out"></div><script>async function capture(){const vision=document.getElementById('vision').value;const r=await fetch('/api/visions',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rawIdea:vision})});const d=await r.json();document.getElementById('out').innerHTML='<div class="card"><pre>'+JSON.stringify(d,null,2)+'</pre></div>'}</script></body></html>`));
 
 const port = Number(process.env.PORT || 3000);
-app.listen(port, () => console.log(`MercySoul OS 1.3.0 listening on ${port} | persistence=${storeMode()}`));
+app.listen(port, () => console.log(`MercySoul OS 1.5.0 listening on ${port} | persistence=${storeMode()}`));
