@@ -12,6 +12,9 @@ on:
 permissions:
   contents: read
 
+env:
+  NODE_ENV: test
+
 jobs:
   build-test-report:
     runs-on: ubuntu-latest
@@ -40,6 +43,18 @@ jobs:
       - name: Security gate
         run: node scripts/security-check.js
 
+      - name: Start server for health gate
+        run: node server.js > /tmp/mercysoul-server.log 2>&1 &
+
+      - name: Runtime health gate
+        run: |
+          for i in {1..10}; do
+            if node scripts/health-check.js; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/mercysoul-server.log
+          exit 1
+
       - name: Diagnose repository state
         if: always()
         run: node scripts/ci-diagnose.js
@@ -55,6 +70,7 @@ jobs:
             echo "Node: $(node --version)"
             echo "Workflow status: ${{ job.status }}"
           } > reports/build-report.md
+          if [ -f /tmp/mercysoul-server.log ]; then cp /tmp/mercysoul-server.log reports/server.log; fi
 
       - name: Upload diagnostic artifacts
         if: always()
