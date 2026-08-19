@@ -1,10 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 
 const hasSupabase = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+const requireDurable = process.env.REQUIRE_DURABLE_PERSISTENCE === 'true';
+if (requireDurable && !hasSupabase) throw new Error('Durable persistence is required but Supabase is not configured');
 const supabase = hasSupabase ? createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } }) : null;
 
 export function storeMode() { return hasSupabase ? 'supabase' : 'memory'; }
 export function durablePersistenceEnabled() { return hasSupabase; }
+export function persistenceRequirement() { return requireDurable ? 'required' : 'optional'; }
 
 export async function saveVision(vision) {
   if (!supabase) return { data: vision, error: null };
