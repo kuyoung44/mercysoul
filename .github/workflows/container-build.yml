@@ -1,0 +1,26 @@
+name: MercySoul OS - Container Build
+
+on:
+  workflow_run:
+    workflows: ["MercySoul OS - Build, Verify & Report"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  container:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        if: github.event_name == 'workflow_dispatch'
+      - name: Checkout triggering commit
+        if: github.event_name == 'workflow_run'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: docker/setup-buildx-action@v3
+      - name: Build production image
+        run: docker build --tag mercysoul-os:${GITHUB_SHA} .
