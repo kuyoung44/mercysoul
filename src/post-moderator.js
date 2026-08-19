@@ -1,6 +1,13 @@
 import crypto from 'node:crypto';
 
 const RULES = [
+  { category: 'prompt_injection', action: 'review', patterns: [
+    /ignore\s+(all|any|the)\s+(previous|prior|above)\s+instructions?/i,
+    /system\s+message\s*:/i,
+    /developer\s+message\s*:/i,
+    /reveal\s+(the|your)\s+(system|developer)\s+prompt/i,
+    /disregard\s+(your|the)\s+(rules|policy|instructions)/i
+  ] },
   { category: 'sexual_exploitation', action: 'block', patterns: [/child\s*(sexual|porn|nude)/i, /minor\s*(sexual|porn|nude)/i, /sexual\s*exploitation/i] },
   { category: 'violent_threat', action: 'review', patterns: [/\b(i will|we will|going to)\s+(kill|murder|shoot)\b/i, /\bkill you\b/i] },
   { category: 'non_consensual_sexual', action: 'block', patterns: [/non[- ]consensual\s+sex/i, /sexual\s+assault/i, /rape\b/i] },
