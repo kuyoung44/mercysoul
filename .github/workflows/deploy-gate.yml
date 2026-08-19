@@ -1,0 +1,28 @@
+name: MercySoul OS - Deployment Gate
+
+on:
+  workflow_run:
+    workflows: ["MercySoul OS - Build, Verify & Report"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  deployment-gate:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deployment gate passed
+        run: |
+          echo "Build, tests, security, diagnostics and runtime health passed."
+          echo "Deployment may proceed through the configured hosting provider."
+
+  blocked:
+    if: ${{ github.event.workflow_run.conclusion != 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Block deployment
+        run: |
+          echo "Deployment blocked because the verification workflow did not pass."
+          exit 1
