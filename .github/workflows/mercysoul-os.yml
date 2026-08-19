@@ -1,0 +1,58 @@
+name: MercySoul OS - Build, Verify & Report
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '17 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build / syntax check
+        run: npm run check
+
+      - name: Run tests
+        run: |
+          node src/alignment.test.js
+          node src/creation-engine.test.js
+
+      - name: Generate report
+        if: always()
+        run: |
+          mkdir -p reports
+          {
+            echo "# MercySoul OS CI Report"
+            echo "Generated: $(date -u +%FT%TZ)"
+            echo "Commit: $GITHUB_SHA"
+            echo "Node: $(node --version)"
+            echo "Status: ${{ job.status }}"
+          } > reports/build-report.md
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mercysoul-os-report-${{ github.run_id }}
+          path: reports/build-report.md
+          retention-days: 14
