@@ -6,7 +6,7 @@ import { buildCreativeBrief } from './src/vision-brain.js';
 import { runCreationPipeline } from './src/creation-pipeline.js';
 import { evaluateAlignment, AUTONOMY } from './src/alignment.js';
 
-const VERSION = '2.0.0';
+const VERSION = '2.1.0';
 const app = express();
 app.set('trust proxy', 1);
 app.use(express.json({ limit: '2mb' }));
@@ -122,7 +122,7 @@ app.post('/api/visions', rateLimit, async (req, res) => {
     return res.status(422).json({ approved: false, status: 'moderation_required', moderation: { reason: moderation.reason } });
   }
   const id = `VIS-${crypto.randomUUID()}`;
-  const vision = { id, ...req.body, brief, status: 'verified', approval: 'automatic', createdAt: new Date().toISOString() };
+  const vision = { id, ...req.body, brief, status: 'verified', approval: 'verified', createdAt: new Date().toISOString() };
   const saved = await saveVision(vision);
   if (saved.error) return res.status(500).json({ approved: false, error: 'Vision persistence failed' });
   visions.set(id, vision);
@@ -141,7 +141,7 @@ app.post('/api/orders', rateLimit, async (req, res) => {
   if (!check.approved) return res.status(422).json({ approved: false, errors: check.errors });
   if (!visions.has(req.body.visionId)) return res.status(404).json({ approved: false, error: 'Vision not found' });
   const id = `ORD-${crypto.randomUUID()}`;
-  const order = { id, ...req.body, status: 'pending_payment', approval: 'automatic', createdAt: new Date().toISOString() };
+  const order = { id, ...req.body, status: 'pending_payment', approval: 'verified', createdAt: new Date().toISOString() };
   const saved = await saveOrder(order);
   if (saved.error) return res.status(500).json({ approved: false, error: 'Order persistence failed' });
   orders.set(id, order);
@@ -198,7 +198,7 @@ app.post('/api/payments/webhook', async (req, res) => {
   res.sendStatus(200);
 });
 
-app.get('/', (_req, res) => res.send(`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>MercySoul OS</title><style>body{font-family:system-ui;max-width:760px;margin:40px auto;padding:20px}textarea,button{width:100%;padding:12px;margin:7px 0;box-sizing:border-box}button{cursor:pointer}.card{padding:16px;border:1px solid #ddd;border-radius:12px;margin-top:16px}pre{white-space:pre-wrap}</style></head><body><h1>MercySoul OS 2.0</h1><p>You describe it. MercySoul structures it.</p><textarea id="vision" rows="7" placeholder="Describe what you imagine..."></textarea><button onclick="capture()">Verify & Build Creative Brief</button><div id="out"></div><script>async function capture(){const vision=document.getElementById('vision').value;const r=await fetch('/api/visions',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rawIdea:vision})});const d=await r.json();const pre=document.createElement('pre');pre.textContent=JSON.stringify(d,null,2);const card=document.createElement('div');card.className='card';card.appendChild(pre);document.getElementById('out').replaceChildren(card);}</script></body></html>`));
+app.get('/', (_req, res) => res.send(`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>MercySoul OS</title><style>body{font-family:system-ui;max-width:760px;margin:40px auto;padding:20px}textarea,button{width:100%;padding:12px;margin:7px 0;box-sizing:border-box}button{cursor:pointer}.card{padding:16px;border:1px solid #ddd;border-radius:12px;margin-top:16px}pre{white-space:pre-wrap}</style></head><body><h1>MercySoul OS 2.1</h1><p>You describe it. MercySoul structures it, verifies it, aligns it, and prepares it for creation.</p><textarea id="vision" rows="7" placeholder="Describe what you imagine..."></textarea><button onclick="capture()">Verify & Build Creative Brief</button><div id="out"></div><script>async function capture(){const vision=document.getElementById('vision').value;const r=await fetch('/api/visions',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rawIdea:vision})});const d=await r.json();const pre=document.createElement('pre');pre.textContent=JSON.stringify(d,null,2);const card=document.createElement('div');card.className='card';card.appendChild(pre);document.getElementById('out').replaceChildren(card);}</script></body></html>`));
 
 const port = Number(process.env.PORT || 3000);
 app.listen(port, () => console.log(`MercySoul OS ${VERSION} listening on ${port} | persistence=${storeMode()} | requirement=${persistenceRequirement()}`));
