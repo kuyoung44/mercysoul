@@ -13,13 +13,28 @@ const visions = new Map();
 const events = [];
 
 async function log(type, data, entityId = null) {
-  events.push({ id: crypto.randomUUID(), type, data, at: new Date().toISOString() });
+  const event = { id: crypto.randomUUID(), type, data, at: new Date().toISOString() };
+  events.push(event);
   await logEvent(type, entityId, data);
+}
+
+function moderateCreationInput(vision, order) {
+  const raw = `${vision?.rawIdea || ''} ${vision?.brief?.direction || ''}`.toLowerCase();
+  const disallowed = ['child sexual', 'sexual exploitation', 'non-consensual sexual', 'rape', 'sexual violence'];
+  const matched = disallowed.find(term => raw.includes(term));
+  if (matched) return { approved: false, reason: 'Request requires rejection or human safety review', matchedTerm: matched };
+  if (!vision?.brief?.direction || order?.status !== 'paid') return { approved: false, reason: 'Missing verified brief or paid order' };
+  return { approved: true };
 }
 
 async function startCreation(order) {
   const vision = visions.get(order.visionId);
   if (!vision) return { status: 'awaiting_vision' };
+  const moderation = moderateCreationInput(vision, order);
+  if (!moderation.approved) {
+    await log('creation_moderated', { orderId: order.id, ...moderation }, order.id);
+    return { status: 'moderation_required', moderation };
+  }
   const alignment = evaluateAlignment('generate_art', { authorized: true, customerIntent: true });
   if (alignment.decision !== AUTONOMY.AUTO) return { status: 'awaiting_confirmation', alignment };
   const result = await runCreationPipeline(vision, order);
@@ -28,7 +43,7 @@ async function startCreation(order) {
   return result;
 }
 
-app.get('/health', (_req, res) => res.json({ ok: true, service: 'MercySoul OS', version: '1.5.0', verification: 'enabled', persistence: storeMode(), visionBrain: 'enabled', creationEngine: 'enabled', alignment: 'enabled' }));
+app.get('/health', (_req, res) => res.json({ ok: true, service: 'MercySoul OS', version: '1.5.1', verification: 'enabled', moderation: 'enabled', persistence: storeMode(), visionBrain: 'enabled', creationEngine: 'enabled', alignment: 'enabled' }));
 
 app.post('/api/visions', async (req, res) => {
   const check = verifyVision(req.body);
@@ -104,4 +119,4 @@ app.post('/api/payments/webhook', async (req, res) => {
 app.get('/', (_req, res) => res.send(`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>MercySoul OS</title><style>body{font-family:system-ui;max-width:760px;margin:40px auto;padding:20px}textarea,button{width:100%;padding:12px;margin:7px 0;box-sizing:border-box}button{cursor:pointer}.card{padding:16px;border:1px solid #ddd;border-radius:12px;margin-top:16px}</style></head><body><h1>MercySoul OS</h1><p>You describe it. MercySoul structures it.</p><textarea id="vision" rows="7" placeholder="Describe what you imagine..."></textarea><button onclick="capture()">Verify & Build Creative Brief</button><div id="out"></div><script>async function capture(){const vision=document.getElementById('vision').value;const r=await fetch('/api/visions',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({rawIdea:vision})});const d=await r.json();document.getElementById('out').innerHTML='<div class="card"><pre>'+JSON.stringify(d,null,2)+'</pre></div>'}</script></body></html>`));
 
 const port = Number(process.env.PORT || 3000);
-app.listen(port, () => console.log(`MercySoul OS 1.5.0 listening on ${port} | persistence=${storeMode()}`));
+app.listen(port, () => console.log(`MercySoul OS 1.5.1 listening on ${port} | persistence=${storeMode()}`));
