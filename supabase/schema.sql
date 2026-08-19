@@ -1,4 +1,5 @@
 -- MercySoul OS persistent data layer (Supabase/Postgres)
+-- IDs are text because the application intentionally uses VIS-/ORD-/ART- identifiers.
 create extension if not exists pgcrypto;
 
 create table if not exists customers (
@@ -10,41 +11,43 @@ create table if not exists customers (
 );
 
 create table if not exists visions (
-  id uuid primary key default gen_random_uuid(),
+  id text primary key,
   customer_id uuid references customers(id) on delete set null,
   raw_idea text not null,
   status text not null default 'verified',
-  approval text not null default 'automatic',
+  approval text not null default 'verified',
   created_at timestamptz not null default now()
 );
 
 create table if not exists orders (
-  id uuid primary key default gen_random_uuid(),
+  id text primary key,
   customer_id uuid references customers(id) on delete set null,
-  vision_id uuid references visions(id) on delete set null,
+  vision_id text references visions(id) on delete set null,
   package text,
   amount numeric(14,2),
   currency text not null default 'NGN',
   status text not null default 'pending_payment',
-  approval text not null default 'automatic',
+  approval text not null default 'verified',
   payment_reference text,
   created_at timestamptz not null default now(),
   paid_at timestamptz
 );
 
 create table if not exists artworks (
-  id uuid primary key default gen_random_uuid(),
-  order_id uuid references orders(id) on delete set null,
+  id text primary key,
+  order_id text references orders(id) on delete set null,
+  vision_id text references visions(id) on delete set null,
   status text not null default 'queued',
   prompt text,
   image_url text,
+  provider text,
   created_at timestamptz not null default now()
 );
 
 create table if not exists events (
   id uuid primary key default gen_random_uuid(),
   type text not null,
-  entity_id uuid,
+  entity_id text,
   data jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()
 );
