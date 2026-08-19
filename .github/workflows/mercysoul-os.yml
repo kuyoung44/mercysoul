@@ -37,6 +37,9 @@ jobs:
           node src/alignment.test.js
           node src/creation-engine.test.js
 
+      - name: Security gate
+        run: node scripts/security-check.js
+
       - name: Diagnose repository state
         if: always()
         run: node scripts/ci-diagnose.js
