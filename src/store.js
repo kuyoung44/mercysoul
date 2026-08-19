@@ -4,6 +4,7 @@ const hasSupabase = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SER
 const supabase = hasSupabase ? createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } }) : null;
 
 export function storeMode() { return hasSupabase ? 'supabase' : 'memory'; }
+export function durablePersistenceEnabled() { return hasSupabase; }
 
 export async function saveVision(vision) {
   if (!supabase) return { data: vision, error: null };
@@ -20,6 +21,11 @@ export async function saveOrder(order) {
 export async function listOrders() {
   if (!supabase) return { data: null, error: null };
   return supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(100);
+}
+
+export async function listVisions() {
+  if (!supabase) return { data: null, error: null };
+  return supabase.from('visions').select('*').order('created_at', { ascending: false }).limit(100);
 }
 
 export async function logEvent(type, entityId, data = {}) {
