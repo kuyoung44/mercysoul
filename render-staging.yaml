@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: mercysoul-os-staging
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /health
+    autoDeploy: true
+    branch: main
+    envVars:
+      - key: NODE_ENV
+        value: staging
+      - key: REQUIRE_DURABLE_PERSISTENCE
+        value: "false"
