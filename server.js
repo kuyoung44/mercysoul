@@ -1,39 +1,3 @@
-import express from 'express';
-import helmet from 'helmet';
-import crypto from 'node:crypto';
-import { verifyVision, verifyOrder, paymentApproval } from './src/verification.js';
-import { storeMode, saveVision, saveOrder, listOrders, logEvent, persistenceRequirement } from './src/store.js';
-import { buildCreativeBrief } from './src/vision-brain.js';
-import { runCreationPipeline } from './src/creation-pipeline.js';
-import { evaluateAlignment, AUTONOMY } from './src/alignment.js';
-import { moderatePost, buildModeratorPost } from './src/post-moderator.js';
-import { moderateWebContent } from './src/web-moderation-gateway.js';
-import { osStatus, processInput } from './src/os-core.js';
-
-const VERSION = '2.4.0';
-const app = express();
-app.disable('x-powered-by');
-app.set('trust proxy', 1);
-app.use(helmet());
-app.use(express.json({ limit: '2mb' }));
-
-const orders = new Map();
-const visions = new Map();
-const events = [];
-const processedPayments = new Set();
-const rateBuckets = new Map();
-const RATE_WINDOW_MS = 60_000;
-const RATE_LIMIT = 30;
-const MAX_RATE_BUCKETS = 10_000;
-
-function rateLimit(req, res, next) {
-  const key = req.ip || 'unknown';
-  const now = Date.now();
-  if (rateBuckets.size > MAX_RATE_BUCKETS) {
-    for (const [bucketKey, bucket] of rateBuckets) if (now - bucket.start >= RATE_WINDOW_MS) rateBuckets.delete(bucketKey);
-  }
-  const bucket = rateBuckets.get(key) || { start: now, count: 0 };
-  if (now - bucket.start >= RATE_WINDOW_MS) { bucket.start = now; bucket.count = 0; }
   bucket.count += 1;
   rateBuckets.set(key, bucket);
   if (bucket.count > RATE_LIMIT) return res.status(429).json({ error: 'Too many requests' });
