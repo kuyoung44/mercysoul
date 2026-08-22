@@ -1,8 +1,1 @@
-import express from 'express';
-const app = express();
-app.use(express.json());
-app.get('/', (req,res) => res.send('MercySoul OS LIVE v2.4.1 Gemini 2.5 FIXED'));
-app.post('/api/verify', async (req,res) => {
-  res.json({success:true, text:'Gemini 2.5 ready - test: '+ (req.body.prompt||'')});
-});
-app.listen(process.env.PORT||10000, ()=>console.log('LIVE'));
+
