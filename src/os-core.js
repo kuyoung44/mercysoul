@@ -1,13 +1,14 @@
 import crypto from 'node:crypto';
 import { moderatePost } from './post-moderator.js';
 import { moderateWebContent } from './web-moderation-gateway.js';
+import { DOMINION_POLICY } from './dominion-moderation.js';
 
-const VERSION = '1.0.0';
+const VERSION = '1.1.0';
 const startedAt = new Date().toISOString();
 
 const modules = {
   security: { status: 'ready', responsibilities: ['headers', 'rate-limit', 'admin-auth'] },
-  moderation: { status: 'ready', responsibilities: ['post', 'web', 'review', 'block'] },
+  moderation: { status: 'ready', responsibilities: ['post', 'web', 'risk-score', 'review', 'remove'] },
   vision: { status: 'ready', responsibilities: ['verification', 'creative-brief'] },
   alignment: { status: 'ready', responsibilities: ['authorization', 'intent'] },
   creation: { status: 'ready', responsibilities: ['creative-pipeline'] },
@@ -21,11 +22,13 @@ export function osStatus() {
     runtime: 'node',
     startedAt,
     modules,
+    dominion: DOMINION_POLICY,
     policy: {
-      moderationDecisions: ['allow', 'review', 'block'],
+      moderationDecisions: ['allow', 'review', 'remove'],
       publicInternetControl: false,
       connectedSourceControl: true,
-      humanReviewForAmbiguous: true
+      humanReviewForAmbiguous: true,
+      politicalViewpointNeutrality: true
     }
   };
 }
@@ -42,9 +45,13 @@ export function processInput(input = {}) {
     type,
     decision: result.decision,
     score: result.score,
+    riskScore: result.riskScore ?? result.score,
     confidence: result.confidence,
+    categoryWeight: result.categoryWeight ?? 0,
     categories: result.categories,
     reasons: result.reasons,
+    seals: result.seals || [],
+    leadershipDiscourse: result.leadershipDiscourse === true,
     processedAt: new Date().toISOString()
   };
 }

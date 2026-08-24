@@ -1,21 +1,5 @@
 import crypto from 'node:crypto';
-
-const RULES = [
-  { category: 'prompt_injection', action: 'review', patterns: [
-    /ignore\s+(all|any|the)\s+(previous|prior|above)\s+instructions?/i,
-    /system\s+message\s*:/i,
-    /developer\s+message\s*:/i,
-    /reveal\s+(the|your)\s+(system|developer)\s+prompt/i,
-    /disregard\s+(your|the)\s+(rules|policy|instructions)/i
-  ] },
-  { category: 'sexual_exploitation', action: 'block', patterns: [/child\s*(sexual|porn|nude)/i, /minor\s*(sexual|porn|nude)/i, /sexual\s*exploitation/i] },
-  { category: 'violent_threat', action: 'review', patterns: [/\b(i will|we will|going to)\s+(kill|murder|shoot)\b/i, /\bkill you\b/i] },
-  { category: 'non_consensual_sexual', action: 'block', patterns: [/non[- ]consensual\s+sex/i, /sexual\s+assault/i, /rape\b/i] },
-  { category: 'extremist_support', action: 'review', patterns: [/terrorist\s+propaganda/i, /join\s+(the|our)\s+terrorist/i] },
-  { category: 'spam', action: 'review', patterns: [/(.)\1{8,}/i, /(?:buy|click|dm)\s+(now|immediately)/i] }
-];
-
-const BLOCKED_CATEGORIES = new Set(['sexual_exploitation', 'non_consensual_sexual']);
+import { assessDominionContent } from './dominion-moderation.js';
 
 function normalize(value) {
   return String(value ?? '').replace(/\s+/g, ' ').trim();
@@ -25,23 +9,20 @@ export function moderatePost(input = {}) {
   const text = normalize(input.text ?? input.content ?? input.caption);
   const title = normalize(input.title);
   const combined = `${title} ${text}`.trim();
+  const assessment = assessDominionContent({ ...input, id: input.id, content: combined, source: input.source || 'app' });
 
-  if (!combined) return { decision: 'review', score: 1, confidence: 1, reasons: ['Post content is empty'], categories: ['invalid'], normalizedText: combined };
-
-  const matches = [];
-  for (const rule of RULES) {
-    if (rule.patterns.some((pattern) => pattern.test(combined))) matches.push({ category: rule.category, action: rule.action });
-  }
-
-  const categories = [...new Set(matches.map((m) => m.category))];
-  if (matches.some((m) => BLOCKED_CATEGORIES.has(m.category))) {
-    return { decision: 'block', score: 100, confidence: 0.99, reasons: categories.map((c) => `Matched safety rule: ${c}`), categories, normalizedText: combined };
-  }
-  if (matches.length) {
-    return { decision: 'review', score: 60 + Math.min(matches.length * 10, 30), confidence: 0.85, reasons: categories.map((c) => `Requires moderator review: ${c}`), categories, normalizedText: combined };
-  }
-
-  return { decision: 'allow', score: 0, confidence: 0.92, reasons: [], categories: [], normalizedText: combined };
+  return {
+    decision: assessment.decision,
+    score: assessment.riskScore,
+    confidence: assessment.modelConfidence,
+    reasons: assessment.reasons,
+    categories: assessment.categories,
+    seals: assessment.seals,
+    leadershipDiscourse: assessment.leadershipDiscourse,
+    normalizedText: combined,
+    riskScore: assessment.riskScore,
+    categoryWeight: assessment.categoryWeight
+  };
 }
 
 export function buildModeratorPost(input = {}, moderation) {
@@ -50,9 +31,13 @@ export function buildModeratorPost(input = {}, moderation) {
     text: normalize(input.text ?? input.content ?? input.caption),
     decision: moderation.decision,
     moderationScore: moderation.score,
+    moderationRiskScore: moderation.riskScore ?? moderation.score,
     moderationConfidence: moderation.confidence,
+    categoryWeight: moderation.categoryWeight ?? 0,
     categories: moderation.categories,
     reasons: moderation.reasons,
+    seals: moderation.seals || [],
+    leadershipDiscourse: moderation.leadershipDiscourse === true,
     moderatedAt: new Date().toISOString()
   };
 }
