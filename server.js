@@ -12,6 +12,7 @@ app.get('/', (req, res) => res.json({
   dominion: 'MercySoul Dominion Auto Metric'
 }));
 
+app.get('/health', (req, res) => res.status(200).json({ ok: true, service: 'MercySoul OS', dominion: true }));
 app.get('/api/status', (req, res) => res.json(osStatus()));
 app.get('/api/moderation/policy', (req, res) => res.json(DOMINION_POLICY));
 
