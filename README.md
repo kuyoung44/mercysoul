@@ -2,9 +2,37 @@
 
 MercySoul OS is the core orchestration layer for the MercySoul ecosystem — turning intent into structured, safe, actionable workflows.
 
-## MercySoul Dominion 2.8.0
+## MercySoul Dominion Constitution 3.0.0
 
-The Dominion moderation gateway uses a deterministic, auditable risk engine:
+**One Vision, Many Connections, Governed by Privacy, Security, and Human-Centered Intelligence.**
+
+The Constitution governs VisionBrain, connections, moderation, and creation. Its precedence is:
+
+`Security → Privacy → Identity → Connection → Vision → Creation`
+
+Security and privacy always win when constitutional layers conflict. The ruler/administrator receives no privileged safety, privacy, or security bypass.
+
+### Vision
+
+VisionBrain must determine whether intent is sufficiently clear and safe. If ambiguity materially affects safety, privacy, or the requested outcome, it asks for clarification.
+
+### Identity
+
+No external data, location, or social profile is accessed, stored, or shared without explicit consent. Visual similarity is not treated as evidence of identity or connection.
+
+### Connection
+
+MercySoul facilitates honest and respectful interaction. It does not force, manipulate, or exploit relationships.
+
+### Security
+
+Auto Metric moderation and privacy/security validation apply equally to every actor, including the ruler. Political and leadership content receives no special moderation immunity.
+
+### Creation
+
+Creation remains aligned with the user's intended outcome. Generated artwork receives a traceable **MercySoul Signature** as metadata (`signatureId`, `generationId`, `constitutionVersion`, timestamp) without silently altering the artwork.
+
+## Dominion moderation
 
 `riskScore = modelConfidence × categoryWeight`
 
@@ -12,26 +40,18 @@ The Dominion moderation gateway uses a deterministic, auditable risk engine:
 - **Risk 2.0–4.5:** human review
 - **Risk > 4.5:** remove only for high-confidence hard-safety categories; otherwise human review
 
-The moderation contract now records request ID, policy version, model identifier, risk score, categories, reasons, contextual seals, and whether human review is required. Classifier confidence is validated before it can affect a decision.
-
-The active model is explicitly identified as the deterministic local fallback. The architecture remains ready for an ONNX/DistilBERT adapter without pretending that an external model is currently active.
-
-### Peace and governance safeguards
-
-- **Radiate Peace** and **Sovereign Peace** are contextual seals, not safety bypasses.
-- Political and leadership discourse receives no special moderation immunity.
-- The same safety rules apply to leadership, criticism, and ordinary user content.
-- Connected web/app integrations are moderated only when content is submitted to the gateway; MercySoul does not claim direct control of Facebook or the public internet without an authorized integration.
+Radiate Peace and Sovereign Peace are contextual seals, never safety bypasses. Connected integrations moderate submitted content only; MercySoul does not claim direct control of Facebook or the public internet.
 
 ## API
 
 - `GET /health` — deployment health
-- `GET /api/status` — runtime and Dominion status
-- `GET /api/moderation/policy` — active policy and model boundary
+- `GET /api/status` — runtime, Dominion, and Constitution status
+- `GET /api/moderation/policy` — active moderation policy
+- `GET /api/governance/constitution` — Constitution v3.0.0
+- `POST /api/governance/evaluate-constitution` — evaluate constitutional prerequisites
+- `POST /api/governance/evaluate` — evaluate content under equal-treatment governance
 - `POST /api/moderate` — moderate submitted app/post content
 - `POST /api/moderate/web` — moderate submitted web-integration content
-- `GET /api/governance/constitution` — active governance safeguards
-- `POST /api/governance/evaluate` — evaluate content under equal-treatment governance
 
 ## Runtime
 
@@ -54,4 +74,4 @@ Never commit service-role keys or other secrets. Production deployments should p
 
 ## Current package
 
-**MercySoul OS 2.8.0 — MercySoul Dominion Auto Metric Hardened**
+**MercySoul OS 3.0.0 — MercySoul Dominion Constitution**
