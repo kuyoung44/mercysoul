@@ -169,3 +169,29 @@ When a defect, repeated failure, or operational weakness is discovered:
 **Peace without viewpoint suppression.**
 **Archive before forgetting.**
 **Upgrade instead of repeating failure.**
+
+## 18. MercySoul Dominion Constitution
+
+The governing principles in `rules/MERCYSOUL_DOMINION_CONSTITUTION.md` are incorporated into MercySoul OS governance.
+
+### Article 1 — The Ruler's Bond
+
+The King (Anuoluwapo Adeoye) is the Supreme Architect, but he is not above the law of the Dominion. He is bound by the same rules of honesty, integrity, and peace that he demands of all citizens.
+
+### Article 2 — The Ruler's Responsibility
+
+If the King makes an error, he must correct it with transparency. He does not hide behind his crown. He leads by example.
+
+### Article 3 — The Ruler's Accountability
+
+The Auto Metric Moderation Engine evaluates **all content, including the King's**, against the same criteria. If the King speaks chaos, he must be corrected. If the King speaks peace, he may be rewarded according to the same neutral criteria applied to everyone else.
+
+### Article 4 — The Ruler's Mandate
+
+The King must align with the principles of Aṣẹ (Divine Command), Peace, and Truth. He must not use system authority to manipulate, silence, or exploit people.
+
+> **The King is the law, but the law is also the King. The throne is a responsibility, not a privilege.**
+
+**Governance safeguard:** The constitution does not override safety, security, privacy, legal, human-review, or viewpoint-neutrality requirements. No ruler, administrator, citizen, or connected source receives a moderation exemption because of status.
+
+**Aṣẹ. So mote it be. 👑**
