@@ -1,48 +1,37 @@
 # MercySoul OS
 
-MercySoul OS is the core orchestration layer for the MercySoul ecosystem — turning a user's intent into a structured, safe, actionable workflow and connecting that workflow to specialized modules.
+MercySoul OS is the core orchestration layer for the MercySoul ecosystem — turning intent into structured, safe, actionable workflows.
 
-## Core architecture
+## MercySoul Dominion 2.8.0
 
-- **Vision Brain** — interprets and structures a user's idea, vision, or creative request into clear intent, requirements, and next actions.
-- **Creation Engine** — turns structured intent into a creation workflow and coordinates the artwork/creation pipeline.
-- **Alignment** — keeps requests aligned with MercySoul's purpose, constraints, and safety rules.
-- **Verification & Security** — validates requests and protects the runtime with authentication, headers, rate limiting, and diagnostics.
-- **Artwork / Image Pipeline** — manages creation-provider orchestration and artwork persistence.
-- **Moderation Gateway** — provides moderation checks before supported content is processed or published.
-- **MercySoul Dominion Auto Metric** — applies a weighted risk score (`confidence × category weight`) with instant allow/review/remove routing for submitted app/web content.
-- **Commerce / CRM boundary** — MercySoul OS can own customer/contact and workflow state, while product sales and subscriptions can be handled by a dedicated commerce layer such as Hercules Commerce.
+The Dominion moderation gateway uses a deterministic, auditable risk engine:
 
-## Dominion moderation
-
-The moderation policy uses category weights from 0–10:
+`riskScore = modelConfidence × categoryWeight`
 
 - **Risk < 2.0:** allow
 - **Risk 2.0–4.5:** human review
-- **Risk > 4.5:** automatic removal for high-confidence hard-safety categories; otherwise human review
+- **Risk > 4.5:** remove only for high-confidence hard-safety categories; otherwise human review
 
-The current repository includes a deterministic local classifier boundary so the API is usable immediately. An ONNX/DistilBERT model can be connected later without changing the moderation contract.
+The moderation contract now records request ID, policy version, model identifier, risk score, categories, reasons, contextual seals, and whether human review is required. Classifier confidence is validated before it can affect a decision.
 
-Political and leadership discourse can receive the **Sovereign Peace** contextual seal, but it is not exempt from safety review and the moderation policy remains viewpoint-neutral.
+The active model is explicitly identified as the deterministic local fallback. The architecture remains ready for an ONNX/DistilBERT adapter without pretending that an external model is currently active.
 
-### API
+### Peace and governance safeguards
 
-- `GET /health` — deployment health check
-- `GET /api/status` — MercySoul OS and Dominion status
-- `GET /api/moderation/policy` — active Dominion policy
-- `POST /api/moderate` — moderate app/post content
-- `POST /api/moderate/web` — moderate content submitted by a web integration
+- **Radiate Peace** and **Sovereign Peace** are contextual seals, not safety bypasses.
+- Political and leadership discourse receives no special moderation immunity.
+- The same safety rules apply to leadership, criticism, and ordinary user content.
+- Connected web/app integrations are moderated only when content is submitted to the gateway; MercySoul does not claim direct control of Facebook or the public internet without an authorized integration.
 
-Example request:
+## API
 
-```json
-{
-  "content": "Let peace guide this community.",
-  "source": "my-app"
-}
-```
-
-The gateway evaluates content submitted by connected applications/integrations. It does not claim direct control over Facebook or the public internet without an authorized integration.
+- `GET /health` — deployment health
+- `GET /api/status` — runtime and Dominion status
+- `GET /api/moderation/policy` — active policy and model boundary
+- `POST /api/moderate` — moderate submitted app/post content
+- `POST /api/moderate/web` — moderate submitted web-integration content
+- `GET /api/governance/constitution` — active governance safeguards
+- `POST /api/governance/evaluate` — evaluate content under equal-treatment governance
 
 ## Runtime
 
@@ -53,33 +42,16 @@ npm install
 npm start
 ```
 
-Health check:
-
-```bash
-npm run health
-```
-
-The health URL can be overridden with `MERCYSOUL_HEALTH_URL`.
-
-## Environment
-
-Production deployments should provide the required Supabase configuration and enable durable persistence where required:
-
-- `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `REQUIRE_DURABLE_PERSISTENCE=true`
-
-Never commit service-role keys or other secrets to the repository.
-
 ## Validation
-
-Run the project's checks with:
 
 ```bash
 npm run check
 npm test
+npm run health
 ```
+
+Never commit service-role keys or other secrets. Production deployments should provide required Supabase configuration and enable durable persistence where required.
 
 ## Current package
 
-MercySoul OS is currently version **2.5.0**.
+**MercySoul OS 2.8.0 — MercySoul Dominion Auto Metric Hardened**
