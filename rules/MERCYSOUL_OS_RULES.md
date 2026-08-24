@@ -1,8 +1,8 @@
 # MercySoul OS — Operating Rules
 
-**Version:** 2.0.0
+**Version:** 2.1.0
 **Status:** Active
-**Updated:** 2026-08-19
+**Updated:** 2026-08-24
 
 ## 1. Core Identity
 
@@ -67,7 +67,28 @@ MercySoul OS must reject or route for human review requests involving sexual exp
 
 Safety checks must happen before creative execution, not after generation.
 
-## 9. Security Rule
+## 9. MercySoul Dominion Auto Metric
+
+The Dominion moderation layer evaluates submitted app/web content using:
+
+`riskScore = modelConfidence × categoryWeight`
+
+Category weights are 0–10. The default policy is:
+
+- **risk < 2.0:** allow;
+- **2.0 ≤ risk ≤ 4.5:** human review;
+- **risk > 4.5:** automatic removal only when the signal is high-confidence and belongs to a defined hard-safety category; otherwise human review.
+
+The implementation is designed for fast classification and can accept an ONNX/DistilBERT classifier through the classifier boundary. Until such a model is configured, a deterministic local fallback is used; the system does not pretend that an external model is running when it is not.
+
+### MercySoul Seal
+
+- Content detected as a peace/chaos conflict may receive **Radiate Peace**.
+- Content concerning political leadership may receive **Sovereign Peace** as a contextual label.
+- Political or presidential discussion is **not exempt from safety review**, and the system must remain viewpoint-neutral. The seal does not suppress criticism, protect a political figure from factual scrutiny, or automatically classify a claim as true or false.
+- The gateway moderates content submitted by connected applications/integrations. It does not claim to control Facebook or the public internet without an authorized integration.
+
+## 10. Security Rule
 
 - Never commit secrets, API keys, passwords, recovery phrases, access tokens, or private credentials.
 - Administrative endpoints require authentication.
@@ -75,13 +96,13 @@ Safety checks must happen before creative execution, not after generation.
 - Validate and rate-limit public inputs.
 - Do not expose private administrative data through public endpoints.
 
-## 10. Data Rule
+## 11. Data Rule
 
 Collect the minimum data needed to perform the requested operation.
 
 Do not expose internal identifiers, private event data, or administrative records to unauthenticated users.
 
-## 11. Code Change Rule
+## 12. Code Change Rule
 
 Before modifying production behavior:
 
@@ -92,7 +113,7 @@ Before modifying production behavior:
 - validate the changed path;
 - record the reason for the change.
 
-## 12. Deployment Rule
+## 13. Deployment Rule
 
 A successful code update is not the same as a successful deployment.
 
@@ -105,7 +126,7 @@ After deployment-related changes, verify:
 - critical API paths behave as expected;
 - deployment logs show no new startup failure.
 
-## 13. Alignment Rule
+## 14. Alignment Rule
 
 Every automated creation action must have:
 
@@ -117,7 +138,7 @@ Every automated creation action must have:
 
 If alignment fails, stop at the boundary and return a clear status instead of guessing.
 
-## 14. Logging Rule
+## 15. Logging Rule
 
 Meaningful system events should be recorded with:
 
@@ -128,7 +149,7 @@ Meaningful system events should be recorded with:
 
 Never place secrets or unnecessary personal data into logs.
 
-## 15. Upgrade Rule
+## 16. Upgrade Rule
 
 When a defect, repeated failure, or operational weakness is discovered:
 
@@ -138,12 +159,13 @@ When a defect, repeated failure, or operational weakness is discovered:
 4. document the change;
 5. avoid duplicating conflicting rules.
 
-## 16. MercySoul Standard
+## 17. MercySoul Standard
 
 **Truth before speed.**
 **Alignment before execution.**
 **Structure before creation.**
 **Verification before trust.**
 **Safety before automation.**
+**Peace without viewpoint suppression.**
 **Archive before forgetting.**
 **Upgrade instead of repeating failure.**
