@@ -9,15 +9,16 @@ function normalize(value) {
 }
 
 /**
- * Normalize arbitrary web/app content into the same moderation contract.
- * This does not crawl or control the public internet; integrations must
- * submit content here before displaying, publishing, or storing it.
+ * Normalize arbitrary web/app content into the same Dominion moderation contract.
+ * This gateway evaluates submitted content; it does not crawl, control, or
+ * silently alter the public internet. External integrations must submit content
+ * here before displaying, publishing, or storing it.
  */
 export function moderateWebContent(input = {}) {
   const content = normalize(input.content ?? input.text ?? input.title);
   const source = normalize(input.source || DEFAULT_SOURCE);
   const url = normalize(input.url);
-  const moderation = moderatePost({ title: input.title, text: content });
+  const moderation = moderatePost({ title: input.title, text: content, source, id: input.id });
 
   return {
     id: input.id || `WEB-${crypto.randomUUID()}`,
@@ -26,9 +27,13 @@ export function moderateWebContent(input = {}) {
     content,
     decision: moderation.decision,
     score: moderation.score,
+    riskScore: moderation.riskScore ?? moderation.score,
     confidence: moderation.confidence,
+    categoryWeight: moderation.categoryWeight ?? 0,
     categories: moderation.categories,
     reasons: moderation.reasons,
+    seals: moderation.seals || [],
+    leadershipDiscourse: moderation.leadershipDiscourse === true,
     moderatedAt: new Date().toISOString()
   };
 }
