@@ -1,12 +1,12 @@
 {
   "name": "mercysoul-os",
-  "version": "2.5.0",
+  "version": "2.7.0",
   "type": "module",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "test": "node --test src/*.test.js",
-    "check": "node --check server.js && node --check src/dominion-moderation.js && npm test",
+    "check": "node --check server.js && node --check src/dominion-moderation.js && node --check src/gaze.js && npm test",
     "health": "node scripts/health-check.js"
   },
   "dependencies": {
