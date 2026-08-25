@@ -18,7 +18,7 @@ app.use((req, res, next) => {
   next();
 });
 
-const ENGINE_VERSION = '3.1.1';
+const ENGINE_VERSION = '3.2.0';
 
 app.get('/', (_req, res) => res.json({
   service: 'MercySoul OS', status: 'LIVE', version: ENGINE_VERSION,
@@ -34,6 +34,7 @@ app.get('/health', (_req, res) => res.status(200).json({
 }));
 app.get('/api/status', (_req, res) => res.json({
   ...osStatus(), serverEngineVersion: ENGINE_VERSION,
+  moderationPolicyVersion: DOMINION_POLICY.version,
   governance: constitutionStatus(), relationshipContext: RELATIONSHIP_CONTEXT_POLICY,
   eyeLens: { status: 'ready', protocol: 'gaze', cameraFeed: 'external-client-signal', authentication: 'api-key' }
 }));
