@@ -2,14 +2,15 @@ import crypto from 'node:crypto';
 
 export const DOMINION_POLICY = Object.freeze({
   name: 'MercySoul Dominion',
-  version: '1.1.0',
-  engineVersion: '2.8.0',
+  version: '1.2.0',
+  engineVersion: '3.2.0',
   thresholds: Object.freeze({ allow: 2.0, review: 4.5 }),
   formula: 'riskScore = modelConfidence * categoryWeight',
   maxTextLength: 20_000,
   model: Object.freeze({ active: 'deterministic-local-fallback', adapter: 'onnx-distilbert-ready' }),
   decisions: Object.freeze(['allow', 'review', 'remove']),
-  seals: Object.freeze(['Radiate Peace', 'Sovereign Peace'])
+  seals: Object.freeze(['Radiate Peace', 'Sovereign Peace']),
+  governance: Object.freeze({ equalTreatment: true, humanReviewForAmbiguous: true, noLeadershipExemption: true })
 });
 
 const CATEGORY_WEIGHTS = Object.freeze({ sexual_exploitation: 10, non_consensual_sexual: 10, credible_violent_threat: 9, extremist_support: 9, hate_or_dehumanization: 8, self_harm_encouragement: 8, targeted_harassment: 6, manipulative_deception: 5, spam: 4, prompt_injection: 4 });
