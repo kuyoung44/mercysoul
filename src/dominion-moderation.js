@@ -2,19 +2,19 @@ import crypto from 'node:crypto';
 
 export const DOMINION_POLICY = Object.freeze({
   name: 'MercySoul Dominion',
-  version: '1.2.0',
-  engineVersion: '3.2.0',
+  version: '4.0.0',
+  engineVersion: '4.0.0',
   thresholds: Object.freeze({ allow: 2.0, review: 4.5 }),
   formula: 'riskScore = modelConfidence * categoryWeight',
   maxTextLength: 20_000,
   model: Object.freeze({ active: 'deterministic-local-fallback', adapter: 'onnx-distilbert-ready' }),
   decisions: Object.freeze(['allow', 'review', 'remove']),
-  seals: Object.freeze(['Radiate Peace', 'Sovereign Peace']),
-  governance: Object.freeze({ equalTreatment: true, humanReviewForAmbiguous: true, noLeadershipExemption: true })
+  seals: Object.freeze(['Radiate Peace', 'Sovereign Peace', 'MercySoul Justice Seal']),
+  governance: Object.freeze({ equalTreatment: true, humanReviewForAmbiguous: true, noLeadershipExemption: true, politicalViewpointNeutrality: true })
 });
 
 const CATEGORY_WEIGHTS = Object.freeze({ sexual_exploitation: 10, non_consensual_sexual: 10, credible_violent_threat: 9, extremist_support: 9, hate_or_dehumanization: 8, self_harm_encouragement: 8, targeted_harassment: 6, manipulative_deception: 5, spam: 4, prompt_injection: 4 });
-const HARD_SAFETY_CATEGORIES = new Set(['sexual_exploitation', 'non_consensual_sexual', 'credible_violent_threat', 'extremist_support', 'hate_or_dehumanization', 'self_harm_encouragement']);
+const HARD_SAFETY_CATEGORIES = new Set(['sexual_exploitation', 'non_consensual_sexual', 'credible_violent_threat', 'extremist_support', 'self_harm_encouragement']);
 const PATTERNS = Object.freeze([
   ['sexual_exploitation', 0.99, /\b(child|minor)\b.{0,40}\b(sexual|porn|nude|exploitation)\b/i],
   ['non_consensual_sexual', 0.99, /\b(rape|sexual assault|non[- ]consensual sex)\b/i],
