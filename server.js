@@ -17,13 +17,29 @@ app.use((req, res, next) => {
   req.requestId = requestId;
   next();
 });
-const ENGINE_VERSION = '3.1.0';
-app.get('/', (req, res) => res.json({ service: 'MercySoul OS', status: 'LIVE', version: ENGINE_VERSION, dominion: 'MercySoul Dominion Auto Metric', governance: MERCYSOUL_CONSTITUTION.name, governanceVersion: MERCYSOUL_CONSTITUTION.version, rulerAccountability: true, relationshipContext: RELATIONSHIP_CONTEXT_POLICY.version, eyeLens: 'gaze protocol ready' }));
-app.get('/health', (req, res) => res.status(200).json({ ok: true, service: 'MercySoul OS', version: ENGINE_VERSION, dominion: true, governance: true, governanceVersion: MERCYSOUL_CONSTITUTION.version, relationshipContext: true, eyeLens: true }));
-app.get('/api/status', (req, res) => res.json({ ...osStatus(), serverEngineVersion: ENGINE_VERSION, governance: constitutionStatus(), relationshipContext: RELATIONSHIP_CONTEXT_POLICY, eyeLens: { status: 'ready', protocol: 'gaze', cameraFeed: 'external-client-signal' } }));
-app.get('/api/moderation/policy', (req, res) => res.json(DOMINION_POLICY));
-app.get('/api/governance/constitution', (req, res) => res.json(MERCYSOUL_CONSTITUTION));
-app.get('/api/governance/relationship-policy', (req, res) => res.json(RELATIONSHIP_CONTEXT_POLICY));
+
+const ENGINE_VERSION = '3.1.1';
+
+app.get('/', (_req, res) => res.json({
+  service: 'MercySoul OS', status: 'LIVE', version: ENGINE_VERSION,
+  dominion: 'MercySoul Dominion Auto Metric', governance: MERCYSOUL_CONSTITUTION.name,
+  governanceVersion: MERCYSOUL_CONSTITUTION.version, rulerAccountability: true,
+  relationshipContext: RELATIONSHIP_CONTEXT_POLICY.version, eyeLens: 'gaze protocol ready',
+  production: 'render'
+}));
+app.get('/health', (_req, res) => res.status(200).json({
+  ok: true, service: 'MercySoul OS', version: ENGINE_VERSION, dominion: true,
+  governance: true, governanceVersion: MERCYSOUL_CONSTITUTION.version,
+  relationshipContext: true, eyeLens: true
+}));
+app.get('/api/status', (_req, res) => res.json({
+  ...osStatus(), serverEngineVersion: ENGINE_VERSION,
+  governance: constitutionStatus(), relationshipContext: RELATIONSHIP_CONTEXT_POLICY,
+  eyeLens: { status: 'ready', protocol: 'gaze', cameraFeed: 'external-client-signal', authentication: 'api-key' }
+}));
+app.get('/api/moderation/policy', (_req, res) => res.json(DOMINION_POLICY));
+app.get('/api/governance/constitution', (_req, res) => res.json(MERCYSOUL_CONSTITUTION));
+app.get('/api/governance/relationship-policy', (_req, res) => res.json(RELATIONSHIP_CONTEXT_POLICY));
 app.post('/api/governance/evaluate-relationship', (req, res) => res.json({ ok: true, requestId: req.requestId, ...evaluateRelationshipContext(req.body || {}) }));
 app.post('/api/governance/evaluate-constitution', (req, res) => res.json({ ok: true, ...evaluateConstitution(req.body || {}) }));
 app.use('/api', gazeRouter);
@@ -31,5 +47,6 @@ app.post('/api/moderate', (req, res) => { try { const result = processInput({ ..
 app.post('/api/moderate/web', (req, res) => { try { const result = processInput({ ...req.body, requestId: req.requestId, type: 'web' }); res.status(200).json({ ok: true, ...result }); } catch { res.status(400).json({ ok: false, error: 'Unable to moderate web content', requestId: req.requestId }); } });
 app.post('/api/governance/evaluate', (req, res) => { try { const actor = req.body?.actor || 'citizen'; const result = processInput({ ...req.body, requestId: req.requestId, type: req.body?.type === 'web' ? 'web' : 'post', source: `governance:${actor}` }); res.status(200).json({ ok: true, governance: MERCYSOUL_CONSTITUTION.name, equalTreatment: true, actor, ...result }); } catch { res.status(400).json({ ok: false, error: 'Unable to evaluate governance content', requestId: req.requestId }); } });
 app.post('/api/verify', async (req, res) => res.json({ success: true, governanceBound: true, constitutionVersion: MERCYSOUL_CONSTITUTION.version, relationshipContextVersion: RELATIONSHIP_CONTEXT_POLICY.version, text: 'MercySoul verification ready - test: ' + (req.body.prompt || '') }));
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`MercySoul OS LIVE on ${PORT} — engine ${ENGINE_VERSION}`));
+
+const PORT = Number(process.env.PORT) || 10000;
+app.listen(PORT, '0.0.0.0', () => console.log(`MercySoul OS LIVE on ${PORT} — engine ${ENGINE_VERSION}`));
