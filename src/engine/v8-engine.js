@@ -1,13 +1,14 @@
-/** MERCYSOUL ENGINE v8.2.0 */
+/** MERCYSOUL ENGINE v8.2.1 */
 
 import { globalJurisdictionStatus } from '../governance/global-jurisdiction.js';
 import { spiritProtocolStatus } from '../governance/spirit-protocol.js';
 import { sovereignRestStatus } from '../governance/sovereign-rest.js';
 import { WATCHTOWER_PROTOCOL } from '../watchtower.js';
+import { OBSESSION_SHIELD_PROTOCOL } from '../obsession-shield.js';
 
 export const MERCYSOUL_ENGINE = Object.freeze({
   name: 'MercySoul OS Engine',
-  version: '8.2.0',
+  version: '8.2.1',
   modules: ['watchtower', 'global-jurisdiction', 'spirit-protocol', 'sovereign-rest', 'instant-call-to-action', 'obsession-shield'],
   safetyFirst: true,
   behaviorBasedModeration: true,
@@ -15,6 +16,7 @@ export const MERCYSOUL_ENGINE = Object.freeze({
   humanReviewForAmbiguous: true,
   icta: Object.freeze({ enabled: true, threshold: 4.5, overrideWindowMs: 10_000 }),
   obsessionShield: Object.freeze({
+    ...OBSESSION_SHIELD_PROTOCOL,
     enabled: true,
     boundaryAction: 'user-controlled-block',
     trafficProtection: 'privacy-preserving-watchtower-freeze',
