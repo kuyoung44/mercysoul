@@ -6,8 +6,9 @@ import { constitutionStatus, evaluateConstitution, MERCYSOUL_CONSTITUTION } from
 import { RELATIONSHIP_CONTEXT_POLICY, evaluateRelationshipContext } from './src/relationship-context.js';
 import { globalJurisdictionStatus, GLOBAL_JURISDICTION_PROTOCOL } from './src/governance/global-jurisdiction.js';
 import { WATCHTOWER_PROTOCOL, getWatchtowerAudit, watchtowerMiddleware, watchtowerStatus } from './src/watchtower.js';
-import gazeRouter from './src/gaze.js';
 import { INSTANT_JUSTICE_PROTOCOL, instantJusticeMiddleware } from './src/instant-justice.js';
+import { MERCYSOUL_ENGINE, engineStatus } from './src/engine/v8-engine.js';
+import gazeRouter from './src/gaze.js';
 
 const app = express();
 app.disable('x-powered-by');
@@ -23,10 +24,11 @@ app.use((req, res, next) => {
 app.use(watchtowerMiddleware);
 app.use(instantJusticeMiddleware);
 
-const ENGINE_VERSION = '7.0.0';
+const ENGINE_VERSION = MERCYSOUL_ENGINE.version;
 
 app.get('/', (_req, res) => res.json({
   service: 'MercySoul OS', status: 'LIVE', version: ENGINE_VERSION,
+  engine: MERCYSOUL_ENGINE.name,
   dominion: 'MercySoul Dominion Auto Metric', governance: MERCYSOUL_CONSTITUTION.name,
   governanceVersion: MERCYSOUL_CONSTITUTION.version, rulerAccountability: true,
   relationshipContext: RELATIONSHIP_CONTEXT_POLICY.version, eyeLens: 'gaze protocol ready',
@@ -34,7 +36,8 @@ app.get('/', (_req, res) => res.json({
   watchtower: WATCHTOWER_PROTOCOL.version, production: 'render'
 }));
 app.get('/health', (_req, res) => res.status(200).json({
-  ok: true, service: 'MercySoul OS', version: ENGINE_VERSION, dominion: true,
+  ok: true, service: 'MercySoul OS', version: ENGINE_VERSION,
+  engine: MERCYSOUL_ENGINE.name, dominion: true,
   governance: true, governanceVersion: MERCYSOUL_CONSTITUTION.version,
   relationshipContext: true, eyeLens: true,
   instantJustice: INSTANT_JUSTICE_PROTOCOL.version, globalJurisdiction: GLOBAL_JURISDICTION_PROTOCOL.version,
@@ -42,10 +45,9 @@ app.get('/health', (_req, res) => res.status(200).json({
 }));
 app.get('/api/status', (_req, res) => res.json({
   ...osStatus(), serverEngineVersion: ENGINE_VERSION,
-  moderationPolicyVersion: DOMINION_POLICY.version,
+  engine: engineStatus(), moderationPolicyVersion: DOMINION_POLICY.version,
   instantJustice: INSTANT_JUSTICE_PROTOCOL,
-  globalJurisdiction: globalJurisdictionStatus(),
-  watchtower: watchtowerStatus(),
+  globalJurisdiction: globalJurisdictionStatus(), watchtower: watchtowerStatus(),
   governance: constitutionStatus(), relationshipContext: RELATIONSHIP_CONTEXT_POLICY,
   eyeLens: { status: 'ready', protocol: 'gaze', cameraFeed: 'external-client-signal', authentication: 'api-key' }
 }));
@@ -61,7 +63,7 @@ app.use('/api', gazeRouter);
 app.post('/api/moderate', (req, res) => { try { const result = processInput({ ...req.body, requestId: req.requestId, type: req.body?.type || 'post', watchtowerIdentity: req.watchtower?.identity }); res.status(200).json({ ok: true, ...result, instantJustice: req.instantJustice, globalJurisdiction: globalJurisdictionStatus(), watchtower: watchtowerStatus() }); } catch { res.status(400).json({ ok: false, error: 'Unable to moderate content', requestId: req.requestId }); } });
 app.post('/api/moderate/web', (req, res) => { try { const result = processInput({ ...req.body, requestId: req.requestId, type: 'web', watchtowerIdentity: req.watchtower?.identity }); res.status(200).json({ ok: true, ...result, instantJustice: req.instantJustice, globalJurisdiction: globalJurisdictionStatus(), watchtower: watchtowerStatus() }); } catch { res.status(400).json({ ok: false, error: 'Unable to moderate web content', requestId: req.requestId }); } });
 app.post('/api/governance/evaluate', (req, res) => { try { const actor = req.body?.actor || 'citizen'; const result = processInput({ ...req.body, requestId: req.requestId, type: req.body?.type === 'web' ? 'web' : 'post', source: `governance:${actor}`, watchtowerIdentity: req.watchtower?.identity }); res.status(200).json({ ok: true, governance: MERCYSOUL_CONSTITUTION.name, equalTreatment: true, actor, ...result, instantJustice: req.instantJustice, globalJurisdiction: globalJurisdictionStatus(), watchtower: watchtowerStatus() }); } catch { res.status(400).json({ ok: false, error: 'Unable to evaluate governance content', requestId: req.requestId }); } });
-app.post('/api/verify', async (req, res) => res.json({ success: true, governanceBound: true, constitutionVersion: MERCYSOUL_CONSTITUTION.version, relationshipContextVersion: RELATIONSHIP_CONTEXT_POLICY.version, instantJustice: INSTANT_JUSTICE_PROTOCOL.version, globalJurisdiction: GLOBAL_JURISDICTION_PROTOCOL.version, watchtower: WATCHTOWER_PROTOCOL.version, text: 'MercySoul verification ready - test: ' + (req.body.prompt || '') }));
+app.post('/api/verify', async (req, res) => res.json({ success: true, governanceBound: true, engineVersion: ENGINE_VERSION, constitutionVersion: MERCYSOUL_CONSTITUTION.version, relationshipContextVersion: RELATIONSHIP_CONTEXT_POLICY.version, instantJustice: INSTANT_JUSTICE_PROTOCOL.version, globalJurisdiction: GLOBAL_JURISDICTION_PROTOCOL.version, watchtower: WATCHTOWER_PROTOCOL.version, text: 'MercySoul verification ready - test: ' + (req.body.prompt || '') }));
 
 const PORT = Number(process.env.PORT) || 10000;
 app.listen(PORT, '0.0.0.0', () => console.log(`MercySoul OS LIVE on ${PORT} — engine ${ENGINE_VERSION}`));
