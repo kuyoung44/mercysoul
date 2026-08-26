@@ -1,4 +1,4 @@
-/** MERCYSOUL ENGINE v8.0.0 */
+/** MERCYSOUL ENGINE v8.1.0 */
 
 import { globalJurisdictionStatus } from '../governance/global-jurisdiction.js';
 import { spiritProtocolStatus } from '../governance/spirit-protocol.js';
@@ -7,12 +7,13 @@ import { WATCHTOWER_PROTOCOL } from '../watchtower.js';
 
 export const MERCYSOUL_ENGINE = Object.freeze({
   name: 'MercySoul OS Engine',
-  version: '8.0.0',
-  modules: ['watchtower', 'global-jurisdiction', 'spirit-protocol', 'sovereign-rest'],
+  version: '8.1.0',
+  modules: ['watchtower', 'global-jurisdiction', 'spirit-protocol', 'sovereign-rest', 'instant-call-to-action'],
   safetyFirst: true,
   behaviorBasedModeration: true,
   reversibleEnforcement: true,
-  humanReviewForAmbiguous: true
+  humanReviewForAmbiguous: true,
+  icta: Object.freeze({ enabled: true, threshold: 4.5, overrideWindowMs: 10_000 })
 });
 
 export function engineStatus() {
