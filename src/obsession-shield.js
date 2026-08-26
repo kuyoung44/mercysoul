@@ -1,19 +1,21 @@
-/** MERCYSOUL OBSESSION SHIELD v8.2.1 */
+/** MERCYSOUL OBSESSION SHIELD v9.0.0 */
 
 export const OBSESSION_SHIELD_PROTOCOL = Object.freeze({
   name: 'MercySoul Obsession Shield',
-  version: '8.2.1',
+  version: '9.0.0',
   principles: [
     'user-controlled-boundaries',
     'behavior-based-risk',
     'privacy-minimization',
     'reversible-enforcement',
-    'no-retaliation'
+    'no-retaliation',
+    'impartial-treatment'
   ],
   externalPlatformControl: false,
   rawIpRetention: false,
   spiritualClaimEnforcement: false,
-  actions: ['allow', 'review', 'freeze', 'user-block', 'pause-and-redirect']
+  actions: ['allow', 'review', 'freeze', 'user-block', 'pause-and-redirect'],
+  jurisdiction: 'mercySoul-ecosystem-only'
 });
 
 function count(value) {
@@ -36,10 +38,11 @@ export function evaluateObsessionShield(input = {}) {
     protocol: OBSESSION_SHIELD_PROTOCOL.version,
     action,
     riskScore: Number(riskScore.toFixed(2)),
+    jurisdiction: OBSESSION_SHIELD_PROTOCOL.jurisdiction,
     userBoundary: 'block-or-mute-at-source',
     selfRedirect: 'pause-device-and-redirect-attention',
     retaliation: false,
-    note: 'The shield evaluates observable application behavior only; it does not infer spiritual causes or control external platforms.'
+    note: 'The shield evaluates observable application behavior only; it does not infer spiritual causes, identify people beyond permitted signals, or control external platforms.'
   };
 }
 
