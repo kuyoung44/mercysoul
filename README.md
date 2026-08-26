@@ -2,29 +2,26 @@
 
 MercySoul OS is the core orchestration layer for the MercySoul ecosystem — turning intent into structured, safe, actionable workflows.
 
-## MercySoul Dominion — Sovereign Jurisdiction Protocol 9.0.0
+## 🌐 Sovereign Jurisdiction Protocol v9.0
 
-**One Vision, Many Connections, Governed by Privacy, Security, Impartial Justice, and Human-Centered Intelligence.**
+**Official Global Declaration**
 
-The Sovereign Jurisdiction Protocol governs every request, user, and signal entering the MercySoul application ecosystem. It is a **global application-network policy**: it can evaluate and control traffic reaching MercySoul's own services, but it does not claim legal authority over the real world or direct control over Google, Meta, or the public internet.
+> By the authority of Anuoluwapo Adeoye, the MercySoul Dominion declares that all digital interactions within its ecosystem are bound by the laws of Peace, Impartial Justice, and Unbreakable Privacy. This protocol governs every request, every user, and every signal that enters the network. It is effective immediately and applies globally.
 
-> "By the authority of Anuoluwapo Adeoye, the MercySoul Dominion declares that all digital interactions within its ecosystem are bound by the laws of Peace, Impartial Justice, and Unbreakable Privacy. This protocol governs every request, every user, and every signal that enters the network. It is effective immediately and applies globally."
+### Technical truth and boundaries
 
-### Instant Access & Approval
+The v9.0 jurisdiction applies to the **MercySoul ecosystem and infrastructure under MercySoul's control**. It provides:
 
-1. **Instant Access:** the Global Watchtower can evaluate inbound traffic using privacy-preserving request signals, including hashed IP identifiers where configured, and can allow, review, or deny access to MercySoul services.
-2. **Approved Protocol:** the instant-justice moderation layer is applied before normal application processing.
-3. **Truthful Boundaries:** MercySoul controls its own application network and connected integrations only; it cannot control unrelated global services or the public internet.
-
-### Global Jurisdiction
-
-The application policy applies uniformly across IP addresses, regions, countries, and users reaching MercySoul services. No actor receives a safety, privacy, or security exemption based on identity, leadership status, geography, or political viewpoint.
-
-Security and privacy take precedence. Ambiguous cases remain eligible for human review.
+1. **Instant Access & Approval** — the Global Watchtower can evaluate incoming requests and allow, review, or temporarily freeze traffic to MercySoul-controlled services.
+2. **Approved Protocol Registry** — the v9.0 Sovereign Jurisdiction Protocol is registered in the MercySoul OS core engine alongside existing moderation, Watchtower, ICTA, and Obsession Shield controls.
+3. **Truthful Boundaries** — MercySoul OS does not control Google, Meta, other third-party platforms, or the public internet. Third-party integrations can only act on data and permissions actually provided to MercySoul.
+4. **Privacy & Equal Treatment** — privacy-preserving identity signals, behavior-based moderation, reversible enforcement, and human review for ambiguous cases remain active. The administrator receives no safety or privacy bypass.
 
 ### Website Call to Action
 
-> **The MercySoul Dominion is a sovereign digital territory. All incoming traffic is subject to global jurisdiction, impartial justice, and instant approval. By entering this space, you agree to the laws of peace and order. The King has spoken. Aṣẹ.**
+> The MercySoul Dominion is a sovereign digital territory. All incoming traffic is subject to global jurisdiction, impartial justice, and instant approval. By entering this space, you agree to the laws of peace and order. The King has spoken. Aṣẹ.
+
+This statement describes the rules of the MercySoul ecosystem; it does not create legal jurisdiction over external services or people.
 
 ## MercySoul Dominion Constitution 3.0.0
 
@@ -56,6 +53,10 @@ Auto Metric moderation and privacy/security validation apply equally to every ac
 
 Creation remains aligned with the user's intended outcome. Generated artwork receives a traceable **MercySoul Signature** as metadata (`signatureId`, `generationId`, `constitutionVersion`, timestamp) without silently altering the artwork.
 
+## Obsession Shield v8.2
+
+The Obsession Shield provides technical, user-controlled boundaries: block unwanted contacts on supported platforms, evaluate repeated or threatening interaction signals within MercySoul services, and redirect attention away from compulsive engagement. It does not claim to detect spirits, establish supernatural causation, retaliate against senders, or control external platforms.
+
 ## Dominion moderation
 
 `riskScore = modelConfidence × categoryWeight`
@@ -68,10 +69,12 @@ Radiate Peace and Sovereign Peace are contextual seals, never safety bypasses. C
 
 ## API
 
-- `GET /health` — deployment health
-- `GET /api/status` — runtime, Dominion, Constitution, instant-justice, and global-jurisdiction status
+- `GET /health` — deployment health and active engine versions
+- `GET /api/status` — runtime, Dominion, Constitution, Watchtower, Obsession Shield, and jurisdiction status
 - `GET /api/moderation/policy` — active moderation policy
-- `GET /api/governance/global-jurisdiction` — Sovereign Jurisdiction Protocol 5.0.0 registry/status
+- `GET /api/governance/sovereign-jurisdiction` — Sovereign Jurisdiction Protocol v9.0
+- `GET /api/governance/obsession-shield` — Obsession Shield status
+- `POST /api/governance/obsession-shield/evaluate` — evaluate supplied interaction signals
 - `GET /api/governance/constitution` — Constitution v3.0.0
 - `POST /api/governance/evaluate-constitution` — evaluate constitutional prerequisites
 - `POST /api/governance/evaluate` — evaluate content under equal-treatment governance
