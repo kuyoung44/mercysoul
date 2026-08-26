@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+<title id="title">MercySoul Divine Magnetic Pull Talisman</title>
+<desc id="desc">A radiant golden ankh-like magnetic talisman surrounded by emerald and royal-purple cosmic energy, sacred geometry and aligned golden orbs.</desc>
+<defs>
+  <radialGradient id="bg"><stop stop-color="#201040"/><stop offset=".5" stop-color="#071b18"/><stop offset="1" stop-color="#010207"/></radialGradient>
+  <radialGradient id="gold"><stop stop-color="#fff9b0"/><stop offset=".28" stop-color="#ffd84a"/><stop offset=".7" stop-color="#e39b12"/><stop offset="1" stop-color="#7a4300"/></radialGradient>
+  <linearGradient id="emerald" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#00c978" stop-opacity=".8"/><stop offset="1" stop-color="#003b2a" stop-opacity="0"/></linearGradient>
+  <linearGradient id="violet" x1="1" y1="0" x2="0" y2="1"><stop stop-color="#8d35ff" stop-opacity=".7"/><stop offset="1" stop-color="#18003d" stop-opacity="0"/></linearGradient>
+  <filter id="glow"><feGaussianBlur stdDeviation="9" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <filter id="soft"><feGaussianBlur stdDeviation="28"/></filter>
+  <pattern id="stars" width="83" height="83" patternUnits="userSpaceOnUse"><circle cx="9" cy="17" r="1.5" fill="#fff"/><circle cx="53" cy="32" r="1" fill="#ffd85a"/><circle cx="71" cy="66" r="1.4" fill="#fff"/><circle cx="27" cy="72" r=".8" fill="#b9ffe8"/></pattern>
+</defs>
+<rect width="1024" height="1024" fill="url(#bg)"/>
+<ellipse cx="250" cy="500" rx="300" ry="430" fill="url(#emerald)" filter="url(#soft)"/>
+<ellipse cx="790" cy="480" rx="300" ry="430" fill="url(#violet)" filter="url(#soft)"/>
+<rect width="1024" height="1024" fill="url(#stars)" opacity=".8"/>
+<!-- cosmic ribbons -->
+<g fill="none" stroke-linecap="round" opacity=".55" filter="url(#glow)">
+ <path d="M-50 180 C210 80 250 390 470 240 S830 70 1080 180" stroke="#00b979" stroke-width="18"/>
+ <path d="M-50 820 C190 650 300 890 510 690 S850 600 1080 770" stroke="#8b36ff" stroke-width="16"/>
+ <path d="M-40 650 C170 470 250 600 430 500 S780 420 1060 560" stroke="#12a979" stroke-width="10"/>
+</g>
+<!-- sacred geometry -->
+<g fill="none" stroke="#e9ad25" opacity=".5">
+ <circle cx="512" cy="500" r="410" stroke-width="2"/><circle cx="512" cy="500" r="350" stroke-width="2"/>
+ <circle cx="512" cy="500" r="270" stroke-width="1"/>
+ <path d="M512 72 L886 716 L138 716 Z M138 284 L886 284 L512 930 Z" stroke-width="1.5"/>
+ <path d="M190 500 Q512 210 834 500 Q512 790 190 500Z" stroke-width="1.5"/>
+</g>
+<!-- aligned orbs -->
+<g fill="url(#gold)" stroke="#fff1a0" stroke-width="2" filter="url(#glow)">
+ <circle cx="115" cy="220" r="28"/><circle cx="890" cy="170" r="30"/><circle cx="82" cy="720" r="31"/><circle cx="930" cy="740" r="34"/>
+ <circle cx="190" cy="850" r="22"/><circle cx="835" cy="875" r="25"/><circle cx="180" cy="410" r="15"/><circle cx="850" cy="410" r="18"/>
+</g>
+<g fill="#fff6bf" opacity=".9"><circle cx="115" cy="220" r="5"/><circle cx="890" cy="170" r="5"/><circle cx="82" cy="720" r="5"/><circle cx="930" cy="740" r="5"/></g>
+<!-- magnetic rays -->
+<g stroke="#f6c83c" opacity=".65" stroke-linecap="round">
+ <path d="M512 450 L115 220 M512 450 L890 170 M512 650 L82 720 M512 650 L930 740" stroke-width="4"/>
+ <path d="M512 440 L512 40 M512 650 L512 990" stroke-width="3"/>
+</g>
+<!-- central ankh / magnetic talisman -->
+<g fill="url(#gold)" stroke="#fff1a0" stroke-width="6" filter="url(#glow)">
+ <path d="M512 122 C408 122 350 193 350 278 C350 360 408 410 456 427 L456 480 L330 480 L330 550 L456 550 L456 815 L410 900 L480 900 L512 836 L544 900 L614 900 L568 815 L568 550 L694 550 L694 480 L568 480 L568 427 C616 410 674 360 674 278 C674 193 616 122 512 122 Z M512 185 C568 185 610 226 610 280 C610 333 568 370 512 390 C456 370 414 333 414 280 C414 226 456 185 512 185 Z"/>
+</g>
+<g fill="none" stroke="#fff6b8" opacity=".85">
+ <ellipse cx="512" cy="280" rx="97" ry="105" stroke-width="4"/>
+ <path d="M512 420 V820 M380 515 H644" stroke-width="3"/>
+</g>
+<!-- golden attraction streams -->
+<g fill="none" stroke="#ffd34d" stroke-width="5" opacity=".75" stroke-linecap="round">
+ <path d="M80 950 C230 820 340 780 430 820"/><path d="M944 950 C794 820 684 780 594 820"/>
+ <path d="M110 140 C270 230 320 330 410 390"/><path d="M914 140 C754 230 704 330 614 390"/>
+</g>
+<text x="512" y="970" text-anchor="middle" fill="#f8d86b" font-family="serif" font-size="22" letter-spacing="6">DIVINE MAGNETIC PULL</text>
+</svg>
