@@ -2,15 +2,16 @@ import crypto from 'node:crypto';
 
 export const DOMINION_POLICY = Object.freeze({
   name: 'MercySoul Dominion',
-  version: '4.0.0',
-  engineVersion: '4.0.0',
-  thresholds: Object.freeze({ allow: 2.0, review: 4.5 }),
+  version: '8.1.0',
+  engineVersion: '8.1.0',
+  thresholds: Object.freeze({ allow: 2.0, review: 4.5, icta: 4.5 }),
   formula: 'riskScore = modelConfidence * categoryWeight',
   maxTextLength: 20_000,
   model: Object.freeze({ active: 'deterministic-local-fallback', adapter: 'onnx-distilbert-ready' }),
   decisions: Object.freeze(['allow', 'review', 'remove']),
   seals: Object.freeze(['Radiate Peace', 'Sovereign Peace', 'MercySoul Justice Seal']),
-  governance: Object.freeze({ equalTreatment: true, humanReviewForAmbiguous: true, noLeadershipExemption: true, politicalViewpointNeutrality: true })
+  governance: Object.freeze({ equalTreatment: true, humanReviewForAmbiguous: true, noLeadershipExemption: true, politicalViewpointNeutrality: true }),
+  icta: Object.freeze({ enabled: true, alertThreshold: 4.5, alertBell: true, evidenceLog: true, warRoomNotification: true, autoEnforcement: true, humanOverrideWindowMs: 10_000, automaticAccountSuspension: false, suspensionRequiresAuthorizedPolicyAction: true })
 });
 
 const CATEGORY_WEIGHTS = Object.freeze({ sexual_exploitation: 10, non_consensual_sexual: 10, credible_violent_threat: 9, extremist_support: 9, hate_or_dehumanization: 8, self_harm_encouragement: 8, targeted_harassment: 6, manipulative_deception: 5, spam: 4, prompt_injection: 4 });
@@ -40,7 +41,7 @@ export function assessDominionContent(input = {}, classifier = classifyWithFallb
   const id = input.id || `DOM-${crypto.randomUUID()}`;
   const requestId = normalize(input.requestId || input.request_id || id);
   const modelId = normalize(input.modelId || DOMINION_POLICY.model.active);
-  if (!content) return { id, requestId, source, decision: 'review', riskScore: 10, modelConfidence: 1, categoryWeight: 10, categories: ['invalid'], reasons: ['Content is empty'], seals: [], leadershipDiscourse: false, policy: DOMINION_POLICY.name, policyVersion: DOMINION_POLICY.version, modelId, reviewRequired: true, hardSafety: true, processedAt: new Date().toISOString() };
+  if (!content) return { id, requestId, source, decision: 'review', riskScore: 10, modelConfidence: 1, categoryWeight: 10, categories: ['invalid'], reasons: ['Content is empty'], seals: [], leadershipDiscourse: false, policy: DOMINION_POLICY.name, policyVersion: DOMINION_POLICY.version, modelId, reviewRequired: true, hardSafety: true, icta: { triggered: true, radeCode: 'RADE-10.0', enforcement: 'review' }, processedAt: new Date().toISOString() };
   const matches = classifier(content) || [];
   const valid = matches.map(m => ({ ...m, weight: Number(m.weight ?? CATEGORY_WEIGHTS[m.category] ?? 0), confidence: Number(m.confidence ?? 0) })).filter(m => Number.isFinite(m.confidence) && m.confidence >= 0 && m.confidence <= 1 && m.weight >= 0);
   const top = valid.sort((a, b) => (b.confidence * b.weight) - (a.confidence * a.weight))[0];
@@ -51,8 +52,10 @@ export function assessDominionContent(input = {}, classifier = classifyWithFallb
   const decision = decisionFor(riskScore, top);
   const categories = [...new Set(matches.map(m => m.category))];
   const reasons = top ? [`${top.category}: confidence ${top.confidence.toFixed(2)} × weight ${top.weight} = risk ${riskScore.toFixed(3)}`] : ['No configured harm signal detected'];
-  return { id, requestId, source, decision, riskScore, modelConfidence: top?.confidence ?? 0, categoryWeight: top?.weight ?? 0, categories, reasons, seals, leadershipDiscourse, policy: DOMINION_POLICY.name, policyVersion: DOMINION_POLICY.version, modelId, reviewRequired: decision === 'review', hardSafety: Boolean(top && HARD_SAFETY_CATEGORIES.has(top.category)), processedAt: new Date().toISOString() };
+  const ictaTriggered = riskScore >= DOMINION_POLICY.thresholds.icta;
+  const radeCode = ictaTriggered ? `RADE-${Math.min(9.9, Math.max(4.5, riskScore)).toFixed(1)}` : null;
+  return { id, requestId, source, decision, riskScore, modelConfidence: top?.confidence ?? 0, categoryWeight: top?.weight ?? 0, categories, reasons, seals, leadershipDiscourse, policy: DOMINION_POLICY.name, policyVersion: DOMINION_POLICY.version, modelId, reviewRequired: decision === 'review', hardSafety: Boolean(top && HARD_SAFETY_CATEGORIES.has(top.category)), icta: { triggered: ictaTriggered, radeCode, alertBell: ictaTriggered, evidenceLog: ictaTriggered, warRoomNotification: ictaTriggered, humanOverrideWindowMs: ictaTriggered ? 10_000 : 0, enforcement: ictaTriggered ? 'authorized-policy-action' : 'none' }, processedAt: new Date().toISOString() };
 }
 export function buildDominionModerationRecord(input = {}, assessment) {
-  return { id: assessment.id, requestId: assessment.requestId, source: assessment.source, content: normalize(input.content ?? input.text ?? input.caption ?? input.title), decision: assessment.decision, riskScore: assessment.riskScore, modelConfidence: assessment.modelConfidence, categoryWeight: assessment.categoryWeight, categories: assessment.categories, reasons: assessment.reasons, seals: assessment.seals, leadershipDiscourse: assessment.leadershipDiscourse, policyVersion: assessment.policyVersion, modelId: assessment.modelId, reviewRequired: assessment.reviewRequired, hardSafety: assessment.hardSafety, moderatedAt: assessment.processedAt };
+  return { id: assessment.id, requestId: assessment.requestId, source: assessment.source, content: normalize(input.content ?? input.text ?? input.caption ?? input.title), decision: assessment.decision, riskScore: assessment.riskScore, modelConfidence: assessment.modelConfidence, categoryWeight: assessment.categoryWeight, categories: assessment.categories, reasons: assessment.reasons, seals: assessment.seals, leadershipDiscourse: assessment.leadershipDiscourse, policyVersion: assessment.policyVersion, modelId: assessment.modelId, reviewRequired: assessment.reviewRequired, hardSafety: assessment.hardSafety, icta: assessment.icta, moderatedAt: assessment.processedAt };
 }
