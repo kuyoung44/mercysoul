@@ -1,6 +1,7 @@
 /** MERCYSOUL ENGINE v8.0.0 */
 
 import { globalJurisdictionStatus } from '../governance/global-jurisdiction.js';
+import { spiritProtocolStatus } from '../governance/spirit-protocol.js';
 import { sovereignRestStatus } from '../governance/sovereign-rest.js';
 import { WATCHTOWER_PROTOCOL } from '../watchtower.js';
 
@@ -19,6 +20,7 @@ export function engineStatus() {
     engine: MERCYSOUL_ENGINE,
     watchtower: WATCHTOWER_PROTOCOL,
     jurisdiction: globalJurisdictionStatus(),
+    spirit: spiritProtocolStatus(),
     sovereignRest: sovereignRestStatus()
   };
 }
