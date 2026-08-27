@@ -1,4 +1,5 @@
 const DEFAULT_REFRESH_HOURS = 6;
+const DEFAULT_SOURCE = 'https://raw.githubusercontent.com/kuyoung44/mercysoul/main/protocol-feed.json';
 const MAX_SOURCES = 20;
 const MAX_PROTOCOLS = 100;
 const sources = new Map();
@@ -21,8 +22,10 @@ function validateProtocol(item, sourceUrl) {
   const version = clean(item.version, 60);
   const title = clean(item.title, 200);
   const rules = Array.isArray(item.rules) ? item.rules.map((r) => clean(r, 1000)).filter(Boolean).slice(0, 50) : [];
+  const reviewTerms = Array.isArray(item.reviewTerms) ? item.reviewTerms.map((r) => clean(r, 120).toLowerCase()).filter(Boolean).slice(0, 100) : [];
+  const blockedTerms = Array.isArray(item.blockedTerms) ? item.blockedTerms.map((r) => clean(r, 120).toLowerCase()).filter(Boolean).slice(0, 100) : [];
   if (!id || !version || !title || !rules.length) throw new Error('Protocol requires id, version, title and at least one rule');
-  return Object.freeze({ id, version, title, rules, source: sourceUrl, fetchedAt: new Date().toISOString() });
+  return Object.freeze({ id, version, title, rules, reviewTerms, blockedTerms, source: sourceUrl, fetchedAt: new Date().toISOString() });
 }
 
 function normalizePayload(payload, sourceUrl) {
@@ -42,6 +45,7 @@ export function listProtocolSources() { return [...sources.values()].map((source
 export async function syncInternetProtocols({ urls = [], timeoutMs = 8000 } = {}) {
   if (syncInProgress) return { ok: false, skipped: true, reason: 'sync already in progress' };
   for (const url of urls) registerProtocolSource(url);
+  if (!sources.size) registerProtocolSource(process.env.PROTOCOL_SOURCE_URL || DEFAULT_SOURCE);
   syncInProgress = true;
   const results = [];
   try {
@@ -84,13 +88,25 @@ export function protocolGatewayStatus() {
 
 export function listProtocols() { return [...protocols.values()].map((protocol) => ({ ...protocol })); }
 
+export function evaluateInternetProtocols(text = '') {
+  const normalized = clean(text, 20000).toLowerCase();
+  const matches = [];
+  let blocked = false;
+  let review = false;
+  for (const protocol of protocols.values()) {
+    const blockedMatches = protocol.blockedTerms.filter((term) => normalized.includes(term));
+    const reviewMatches = protocol.reviewTerms.filter((term) => normalized.includes(term));
+    if (blockedMatches.length) blocked = true;
+    if (reviewMatches.length) review = true;
+    if (blockedMatches.length || reviewMatches.length) matches.push({ id: protocol.id, version: protocol.version, blockedMatches, reviewMatches });
+  }
+  return { blocked, review, matches, protocolCount: protocols.size };
+}
+
 export function startProtocolRefresh() {
   const hours = Math.max(Number(process.env.PROTOCOL_REFRESH_HOURS) || DEFAULT_REFRESH_HOURS, 1);
-  if (process.env.PROTOCOL_SOURCE_URLS) {
-    for (const url of process.env.PROTOCOL_SOURCE_URLS.split(',').map((v) => v.trim()).filter(Boolean)) {
-      try { registerProtocolSource(url); } catch { /* invalid sources are ignored */ }
-    }
-    syncInternetProtocols().catch(() => {});
-  }
+  const configured = (process.env.PROTOCOL_SOURCE_URLS || '').split(',').map((v) => v.trim()).filter(Boolean);
+  for (const url of configured) { try { registerProtocolSource(url); } catch { /* invalid sources are ignored */ } }
+  syncInternetProtocols().catch(() => {});
   return setInterval(() => syncInternetProtocols().catch(() => {}), hours * 60 * 60 * 1000);
 }
