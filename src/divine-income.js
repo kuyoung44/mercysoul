@@ -32,6 +32,12 @@ function rememberClient(client) {
   return client;
 }
 
+export function isClientListAuthorized(authorization) {
+  const configuredToken = String(process.env.DIVINE_INCOME_ADMIN_TOKEN || '');
+  if (!configuredToken) return true;
+  return String(authorization || '') === `Bearer ${configuredToken}`;
+}
+
 export async function createTalismanOrder({ name, email, vision, requestId } = {}) {
   const client = {
     id: crypto.randomUUID(),
@@ -57,7 +63,7 @@ export async function createTalismanOrder({ name, email, vision, requestId } = {
   const db = supabaseStatus();
   if (db.configured) {
     try {
-      const response = await fetch(supabaseRestUrl(`${encodeURIComponent(process.env.SUPABASE_EVENTS_TABLE || 'mercysoul_events')}`), {
+      const response = await fetch(supabaseRestUrl(encodeURIComponent(process.env.SUPABASE_EVENTS_TABLE || 'mercysoul_events')), {
         method: 'POST',
         headers: { ...supabaseHeaders(), Prefer: 'return=minimal' },
         body: JSON.stringify({
@@ -92,9 +98,7 @@ export async function listTalismanClients() {
     try {
       const table = encodeURIComponent(process.env.SUPABASE_EVENTS_TABLE || 'mercysoul_events');
       const query = `${table}?event_type=eq.${encodeURIComponent(TALISMAN_EVENT_TYPE)}&select=payload,created_at&order=created_at.desc`;
-      const response = await fetch(supabaseRestUrl(query), {
-        headers: supabaseHeaders()
-      });
+      const response = await fetch(supabaseRestUrl(query), { headers: supabaseHeaders() });
       if (!response.ok) throw new Error(`Supabase request failed (${response.status})`);
       const rows = await response.json();
       return {
@@ -120,11 +124,12 @@ export function divineIncomeStatus() {
   const db = supabaseStatus();
   return {
     protocol: 'DIVINE INCOME',
-    version: '1.0.0',
+    version: '1.1.0',
     orderEndpoint: '/api/order/talisman',
     clientListEndpoint: '/api/order/clients',
     talismanEndpoint: '/api/magnetic/talisman',
     inMemoryClients: clients.length,
-    persistence: db.configured ? 'supabase' : 'memory'
+    persistence: db.configured ? 'supabase' : 'memory',
+    clientListAuth: Boolean(process.env.DIVINE_INCOME_ADMIN_TOKEN)
   };
 }
