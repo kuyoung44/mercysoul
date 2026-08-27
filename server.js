@@ -23,7 +23,7 @@ app.use(express.static('public', { extensions: ['svg'] }));
 app.use((req,res,next)=>{const requestId=req.get('x-request-id')||crypto.randomUUID();res.setHeader('x-request-id',requestId);res.setHeader('x-content-type-options','nosniff');res.setHeader('referrer-policy','no-referrer');req.requestId=requestId;next();});
 app.use(watchtowerMiddleware); app.use(instantJusticeMiddleware);
 const ENGINE_VERSION=MERCYSOUL_ENGINE.version;
-const SERVER_RELEASE='10.1.2';
+const SERVER_RELEASE='10.1.3';
 const HERCULES_WEBHOOK_PATH='/webhooks/hercules';
 const smartThingsOAuthStates=new Set();
 let smartThingsTokens=null;
@@ -41,7 +41,7 @@ app.post('/api/magnetic/interaction',(req,res)=>{const result=trackMagneticInter
 app.post('/api/order/talisman',async(req,res)=>{try{const result=await createTalismanOrder({...req.body,requestId:req.requestId});res.status(result.status||201).json({ok:result.ok,message:result.message,error:result.error,orderId:result.orderId,persistence:result.persistence,source:result.source,requestId:req.requestId});}catch{res.status(500).json({ok:false,error:'Unable to create talisman order',requestId:req.requestId});}});
 app.get('/api/order/clients',async(req,res)=>{if(!isClientListAuthorized(req.get('authorization')))return res.status(401).json({ok:false,error:'Unauthorized',message:'Provide a valid Bearer token.'});try{const result=await listTalismanClients();res.status(200).json(result);}catch{res.status(500).json({ok:false,error:'Unable to load talisman clients'});}});
 app.get('/api/deployment/order',(_req,res)=>res.json(deploymentDirectiveStatus()));
-app.get('/api/deployment/reports',(req,res)=>res.json({ok:true,directiveRef:deploymentDirectiveStatus().directive.ref,reports:listDeploymentReports(req.query.limit)});
+app.get('/api/deployment/reports',(req,res)=>res.json({ok:true,directiveRef:deploymentDirectiveStatus().directive.ref,reports:listDeploymentReports(req.query.limit)}));
 app.post('/api/deployment/report',(req,res)=>{const description=String(req.body?.description||'').trim();if(!description)return res.status(400).json({ok:false,error:'description is required',requestId:req.requestId});const report=recordDeploymentReport({category:req.body?.category,description,reporter:req.body?.reporter,requestId:req.requestId});persistEventBestEffort({eventType:'deployment_report',requestId:req.requestId,payload:report});res.status(201).json({ok:true,report});});
 app.get('/api/governance/emotional-shield',(_req,res)=>res.json(emotionalShieldStatus())); app.post('/api/governance/emotional-shield/evaluate',(req,res)=>res.json({ok:true,requestId:req.requestId,...evaluateEmotionalShield(req.body||{})}));
 app.get('/api/governance/sovereign-jurisdiction',(_req,res)=>res.json(MERCYSOUL_ENGINE.jurisdiction));
