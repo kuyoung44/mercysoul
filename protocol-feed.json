@@ -1,0 +1,16 @@
+{
+  "protocols": [
+    {
+      "id": "MERCY-INTERNET-SAFETY-1",
+      "version": "1.0.0",
+      "title": "Internet Safety Signal Protocol",
+      "rules": [
+        "Treat requests involving account compromise, malware, or personal-data exposure as safety signals.",
+        "Use external protocol signals only as an additional input, never as authority over platform rules.",
+        "Keep ambiguous cases reviewable by a human."
+      ],
+      "reviewTerms": ["account compromise", "malware", "personal data exposure"],
+      "blockedTerms": []
+    }
+  ]
+}
