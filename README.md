@@ -2,6 +2,12 @@
 
 MercySoul OS is the core orchestration layer for the MercySoul ecosystem — turning intent into structured, safe, actionable workflows.
 
+## Legacy Continuity Declaration
+
+MercySoul OS preserves its foundational Dominion protocols as **legacy governance layers**. Legacy status means the protocol remains part of the historical and architectural record even when newer releases extend, harden, or supersede implementation details. Legacy designation does not grant authority over external platforms, people, or the public internet.
+
+The legacy foundation includes the Sovereign Jurisdiction Protocol, Dominion Constitution, Watchtower controls, Instant Call to Action controls, Obsession Shield, moderation governance, and MercySoul Signature conventions. New releases must preserve their documented safety, privacy, and equal-treatment boundaries unless a later version explicitly changes them.
+
 ## 🌐 Sovereign Jurisdiction Protocol v9.0
 
 **Official Global Declaration**
@@ -102,4 +108,6 @@ Never commit service-role keys or other secrets. Production deployments should p
 
 ## Current package
 
-**MercySoul OS 9.0.0 — Sovereign Jurisdiction Protocol**
+**MercySoul OS 10.1.3 — Divine Income hardening release**
+
+**Legacy continuity:** foundational MercySoul Dominion protocols remain preserved as legacy governance layers while current releases continue to harden implementation and security.
