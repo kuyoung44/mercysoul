@@ -6,8 +6,9 @@ import { constitutionStatus } from './governance/constitution.js';
 import { RELATIONSHIP_CONTEXT_POLICY } from './relationship-context.js';
 import { evaluateInternetProtocols, protocolGatewayStatus, startProtocolRefresh } from './internet-protocol-gateway.js';
 import { legacyStatus } from './legacy-engine.js';
+import { legacyGroundingStatus, evaluateLegacySignal } from './legacy-grounding.js';
 
-const VERSION = '3.3.0';
+const VERSION = '3.4.0';
 const startedAt = new Date().toISOString();
 startProtocolRefresh();
 const modules = {
@@ -22,10 +23,11 @@ const modules = {
   creation: { status: 'ready', responsibilities: ['creative-pipeline', 'mercy-soul-signature'] },
   persistence: { status: 'ready', responsibilities: ['durable-store', 'audit'] },
   internetProtocolGateway: { status: 'ready', responsibilities: ['approved-https-sources', 'validation', 'periodic-refresh', 'human-review-boundary'] },
-  legacy: { status: 'ready', responsibilities: ['milestone-records', 'provenance', 'continuity', 'human-readable-legacy'] }
+  legacy: { status: 'ready', responsibilities: ['milestone-records', 'provenance', 'continuity', 'human-readable-legacy'] },
+  legacyGrounding: { status: 'ready', responsibilities: ['daily-grounding', 'red-signal-to-work-order', 'legacy-reminder'] }
 };
 export function osStatus() {
-  return { id: 'MERCYSOUL-OS', coreVersion: VERSION, runtime: 'node', startedAt, modules, constitution: constitutionStatus(), relationshipContext: RELATIONSHIP_CONTEXT_POLICY, internetProtocolGateway: protocolGatewayStatus(), dominion: DOMINION_POLICY, legacy: legacyStatus(), policy: { moderationDecisions: ['allow', 'review', 'remove'], publicInternetControl: false, connectedSourceControl: true, humanReviewForAmbiguous: true, politicalViewpointNeutrality: true, securityAndPrivacyPrecedence: true } };
+  return { id: 'MERCYSOUL-OS', coreVersion: VERSION, runtime: 'node', startedAt, modules, constitution: constitutionStatus(), relationshipContext: RELATIONSHIP_CONTEXT_POLICY, internetProtocolGateway: protocolGatewayStatus(), dominion: DOMINION_POLICY, legacy: legacyStatus(), legacyGrounding: legacyGroundingStatus(), policy: { moderationDecisions: ['allow', 'review', 'remove'], publicInternetControl: false, connectedSourceControl: true, humanReviewForAmbiguous: true, politicalViewpointNeutrality: true, securityAndPrivacyPrecedence: true } };
 }
 export function processInput(input = {}) {
   const type = input.type || 'post';
@@ -33,6 +35,7 @@ export function processInput(input = {}) {
   const requestId = input.requestId || input.request_id || id;
   const result = type === 'web' ? moderateWebContent({ ...input, id, requestId }) : moderatePost({ ...input, id, requestId });
   const protocolSignals = evaluateInternetProtocols(input.content || input.text || input.body || '');
+  const legacySignal = evaluateLegacySignal({ text: input.content || input.text || input.body || '' });
   const reviewRequired = Boolean(result.reviewRequired ?? (result.decision === 'review')) || protocolSignals.review;
-  return { id, requestId, type, decision: result.decision, score: result.score, riskScore: result.riskScore ?? result.score, confidence: result.confidence, modelConfidence: result.modelConfidence ?? result.confidence, categoryWeight: result.categoryWeight ?? 0, categories: result.categories, reasons: [...(result.reasons || []), ...protocolSignals.matches.map((m) => `internet-protocol:${m.id}@${m.version}`)], seals: result.seals || [], leadershipDiscourse: result.leadershipDiscourse === true, policyVersion: result.policyVersion ?? DOMINION_POLICY.version, modelId: result.modelId ?? DOMINION_POLICY.model.active, reviewRequired, hardSafety: result.hardSafety === true, internetProtocolSignals: protocolSignals, processedAt: new Date().toISOString() };
+  return { id, requestId, type, decision: result.decision, score: result.score, riskScore: result.riskScore ?? result.score, confidence: result.confidence, modelConfidence: result.modelConfidence ?? result.confidence, categoryWeight: result.categoryWeight ?? 0, categories: result.categories, reasons: [...(result.reasons || []), ...protocolSignals.matches.map((m) => `internet-protocol:${m.id}@${m.version}`)], seals: result.seals || [], leadershipDiscourse: result.leadershipDiscourse === true, policyVersion: result.policyVersion ?? DOMINION_POLICY.version, modelId: result.modelId ?? DOMINION_POLICY.model.active, reviewRequired, hardSafety: result.hardSafety === true, internetProtocolSignals: protocolSignals, legacySignal, processedAt: new Date().toISOString() };
 }
