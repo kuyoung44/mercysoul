@@ -5,8 +5,9 @@ import { DOMINION_POLICY } from './dominion-moderation.js';
 import { constitutionStatus } from './governance/constitution.js';
 import { RELATIONSHIP_CONTEXT_POLICY } from './relationship-context.js';
 import { evaluateInternetProtocols, protocolGatewayStatus, startProtocolRefresh } from './internet-protocol-gateway.js';
+import { legacyStatus } from './legacy-engine.js';
 
-const VERSION = '3.2.0';
+const VERSION = '3.3.0';
 const startedAt = new Date().toISOString();
 startProtocolRefresh();
 const modules = {
@@ -20,10 +21,11 @@ const modules = {
   alignment: { status: 'ready', responsibilities: ['authorization', 'intent'] },
   creation: { status: 'ready', responsibilities: ['creative-pipeline', 'mercy-soul-signature'] },
   persistence: { status: 'ready', responsibilities: ['durable-store', 'audit'] },
-  internetProtocolGateway: { status: 'ready', responsibilities: ['approved-https-sources', 'validation', 'periodic-refresh', 'human-review-boundary'] }
+  internetProtocolGateway: { status: 'ready', responsibilities: ['approved-https-sources', 'validation', 'periodic-refresh', 'human-review-boundary'] },
+  legacy: { status: 'ready', responsibilities: ['milestone-records', 'provenance', 'continuity', 'human-readable-legacy'] }
 };
 export function osStatus() {
-  return { id: 'MERCYSOUL-OS', coreVersion: VERSION, runtime: 'node', startedAt, modules, constitution: constitutionStatus(), relationshipContext: RELATIONSHIP_CONTEXT_POLICY, internetProtocolGateway: protocolGatewayStatus(), dominion: DOMINION_POLICY, policy: { moderationDecisions: ['allow', 'review', 'remove'], publicInternetControl: false, connectedSourceControl: true, humanReviewForAmbiguous: true, politicalViewpointNeutrality: true, securityAndPrivacyPrecedence: true } };
+  return { id: 'MERCYSOUL-OS', coreVersion: VERSION, runtime: 'node', startedAt, modules, constitution: constitutionStatus(), relationshipContext: RELATIONSHIP_CONTEXT_POLICY, internetProtocolGateway: protocolGatewayStatus(), dominion: DOMINION_POLICY, legacy: legacyStatus(), policy: { moderationDecisions: ['allow', 'review', 'remove'], publicInternetControl: false, connectedSourceControl: true, humanReviewForAmbiguous: true, politicalViewpointNeutrality: true, securityAndPrivacyPrecedence: true } };
 }
 export function processInput(input = {}) {
   const type = input.type || 'post';
