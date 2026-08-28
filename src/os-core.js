@@ -7,35 +7,9 @@ import { RELATIONSHIP_CONTEXT_POLICY } from './relationship-context.js';
 import { evaluateInternetProtocols, protocolGatewayStatus, startProtocolRefresh } from './internet-protocol-gateway.js';
 import { legacyStatus } from './legacy-engine.js';
 import { legacyGroundingStatus, evaluateLegacySignal } from './legacy-grounding.js';
-
-const VERSION = '3.4.0';
-const startedAt = new Date().toISOString();
-startProtocolRefresh();
-const modules = {
-  security: { status: 'ready', responsibilities: ['headers', 'rate-limit', 'admin-auth', 'privacy-boundary'] },
-  moderation: { status: 'ready', responsibilities: ['post', 'web', 'risk-score', 'review', 'remove', 'audit-metadata'] },
-  vision: { status: 'ready', responsibilities: ['verification', 'creative-brief', 'intent-clarity'] },
-  identity: { status: 'ready', responsibilities: ['consent', 'external-data-boundary', 'visual-non-assumption'] },
-  connection: { status: 'ready', responsibilities: ['honest-interaction', 'anti-coercion', 'relationship-context'] },
-  governance: { status: 'ready', responsibilities: ['constitution-v3', 'equal-treatment', 'security-precedence'] },
-  relationshipContext: { status: 'ready', responsibilities: ['context-only', 'no-relationship-inference', 'no-online-inference', 'explicit-consent'] },
-  alignment: { status: 'ready', responsibilities: ['authorization', 'intent'] },
-  creation: { status: 'ready', responsibilities: ['creative-pipeline', 'mercy-soul-signature'] },
-  persistence: { status: 'ready', responsibilities: ['durable-store', 'audit'] },
-  internetProtocolGateway: { status: 'ready', responsibilities: ['approved-https-sources', 'validation', 'periodic-refresh', 'human-review-boundary'] },
-  legacy: { status: 'ready', responsibilities: ['milestone-records', 'provenance', 'continuity', 'human-readable-legacy'] },
-  legacyGrounding: { status: 'ready', responsibilities: ['daily-grounding', 'red-signal-to-work-order', 'legacy-reminder'] }
-};
-export function osStatus() {
-  return { id: 'MERCYSOUL-OS', coreVersion: VERSION, runtime: 'node', startedAt, modules, constitution: constitutionStatus(), relationshipContext: RELATIONSHIP_CONTEXT_POLICY, internetProtocolGateway: protocolGatewayStatus(), dominion: DOMINION_POLICY, legacy: legacyStatus(), legacyGrounding: legacyGroundingStatus(), policy: { moderationDecisions: ['allow', 'review', 'remove'], publicInternetControl: false, connectedSourceControl: true, humanReviewForAmbiguous: true, politicalViewpointNeutrality: true, securityAndPrivacyPrecedence: true } };
-}
-export function processInput(input = {}) {
-  const type = input.type || 'post';
-  const id = input.id || crypto.randomUUID();
-  const requestId = input.requestId || input.request_id || id;
-  const result = type === 'web' ? moderateWebContent({ ...input, id, requestId }) : moderatePost({ ...input, id, requestId });
-  const protocolSignals = evaluateInternetProtocols(input.content || input.text || input.body || '');
-  const legacySignal = evaluateLegacySignal({ text: input.content || input.text || input.body || '' });
-  const reviewRequired = Boolean(result.reviewRequired ?? (result.decision === 'review')) || protocolSignals.review;
-  return { id, requestId, type, decision: result.decision, score: result.score, riskScore: result.riskScore ?? result.score, confidence: result.confidence, modelConfidence: result.modelConfidence ?? result.confidence, categoryWeight: result.categoryWeight ?? 0, categories: result.categories, reasons: [...(result.reasons || []), ...protocolSignals.matches.map((m) => `internet-protocol:${m.id}@${m.version}`)], seals: result.seals || [], leadershipDiscourse: result.leadershipDiscourse === true, policyVersion: result.policyVersion ?? DOMINION_POLICY.version, modelId: result.modelId ?? DOMINION_POLICY.model.active, reviewRequired, hardSafety: result.hardSafety === true, internetProtocolSignals: protocolSignals, legacySignal, processedAt: new Date().toISOString() };
-}
+import { omnipresentHelpStatus, evaluateHelpSignal } from './omnipresent-help.js';
+const VERSION = '3.5.0';
+const startedAt = new Date().toISOString(); startProtocolRefresh();
+const modules = { security:{status:'ready',responsibilities:['headers','rate-limit','admin-auth','privacy-boundary']}, moderation:{status:'ready',responsibilities:['post','web','risk-score','review','remove','audit-metadata']}, vision:{status:'ready',responsibilities:['verification','creative-brief','intent-clarity']}, identity:{status:'ready',responsibilities:['consent','external-data-boundary','visual-non-assumption']}, connection:{status:'ready',responsibilities:['honest-interaction','anti-coercion','relationship-context']}, governance:{status:'ready',responsibilities:['constitution-v3','equal-treatment','security-precedence']}, relationshipContext:{status:'ready',responsibilities:['context-only','no-relationship-inference','no-online-inference','explicit-consent']}, alignment:{status:'ready',responsibilities:['authorization','intent']}, creation:{status:'ready',responsibilities:['creative-pipeline','mercy-soul-signature']}, persistence:{status:'ready',responsibilities:['durable-store','audit']}, internetProtocolGateway:{status:'ready',responsibilities:['approved-https-sources','validation','periodic-refresh','human-review-boundary']}, legacy:{status:'ready',responsibilities:['milestone-records','provenance','continuity','human-readable-legacy']}, legacyGrounding:{status:'ready',responsibilities:['daily-grounding','red-signal-to-work-order','legacy-reminder']}, omnipresentHelp:{status:'ready',responsibilities:['distress-trigger','sanctuary-mode','configured-help-routing','consent-boundary']} };
+export function osStatus(){return {id:'MERCYSOUL-OS',coreVersion:VERSION,runtime:'node',startedAt,modules,constitution:constitutionStatus(),relationshipContext:RELATIONSHIP_CONTEXT_POLICY,internetProtocolGateway:protocolGatewayStatus(),dominion:DOMINION_POLICY,legacy:legacyStatus(),legacyGrounding:legacyGroundingStatus(),omnipresentHelp:omnipresentHelpStatus(),policy:{moderationDecisions:['allow','review','remove'],publicInternetControl:false,connectedSourceControl:true,humanReviewForAmbiguous:true,politicalViewpointNeutrality:true,securityAndPrivacyPrecedence:true}};}
+export function processInput(input={}){const type=input.type||'post';const id=input.id||crypto.randomUUID();const requestId=input.requestId||input.request_id||id;const result=type==='web'?moderateWebContent({...input,id,requestId}):moderatePost({...input,id,requestId});const text=input.content||input.text||input.body||'';const protocolSignals=evaluateInternetProtocols(text);const legacySignal=evaluateLegacySignal({text});const helpSignal=evaluateHelpSignal(input);const reviewRequired=Boolean(result.reviewRequired??(result.decision==='review'))||protocolSignals.review;return {id,requestId,type,decision:result.decision,score:result.score,riskScore:result.riskScore??result.score,confidence:result.confidence,modelConfidence:result.modelConfidence??result.confidence,categoryWeight:result.categoryWeight??0,categories:result.categories,reasons:[...(result.reasons||[]),...protocolSignals.matches.map(m=>`internet-protocol:${m.id}@${m.version}`)],seals:result.seals||[],leadershipDiscourse:result.leadershipDiscourse===true,policyVersion:result.policyVersion??DOMINION_POLICY.version,modelId:result.modelId??DOMINION_POLICY.model.active,reviewRequired,hardSafety:result.hardSafety===true,internetProtocolSignals:protocolSignals,legacySignal,helpSignal,processedAt:new Date().toISOString()};}
