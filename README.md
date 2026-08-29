@@ -2,21 +2,6 @@
 
 MercySoul OS is the core orchestration layer for the MercySoul ecosystem — turning intent into structured, safe, actionable workflows.
 
-## MercySoul Global Map
-
-The Global Map is a privacy-preserving country-level visitor map.
-
-- `POST /api/map/locate` accepts browser-provided coordinates only after the visitor grants geolocation permission.
-- Exact coordinates are discarded after being rounded to a coarse 0.1° bucket (~11 km at the equator).
-- Supabase stores only the coarse bucket, country code, and a country-level display centroid.
-- Direct public table access is disabled with Row Level Security; the service role remains server-side.
-- `GET /api/map/stats` returns country codes and country-level display points, never visitor coordinates.
-- `/global-map.html` provides the MercySoul map UI and refreshes automatically every 60 seconds.
-- The UI displays a glowing Golden Dot per represented country and reports `MercySoul has been seen in [Number] countries.`
-- The in-memory locate endpoint is rate-limited to reduce abuse.
-
-The map is an aggregate representation, not an identity or tracking system. Participation is voluntary through the browser geolocation permission prompt.
-
 ## Legacy Continuity Declaration
 
 MercySoul OS preserves its foundational Dominion protocols as **legacy governance layers**. Legacy status means the protocol remains part of the historical and architectural record even when newer releases extend, harden, or supersede implementation details. Legacy designation does not grant authority over external platforms, people, or the public internet.
@@ -54,6 +39,30 @@ The Constitution governs VisionBrain, connections, moderation, and creation. Its
 
 Security and privacy always win when constitutional layers conflict. The ruler/administrator receives no privileged safety, privacy, or security bypass.
 
+### Vision
+
+VisionBrain must determine whether intent is sufficiently clear and safe. If ambiguity materially affects safety, privacy, or the requested outcome, it asks for clarification.
+
+### Identity
+
+No external data, location, or social profile is accessed, stored, or shared without explicit consent. Visual similarity is not treated as evidence of identity or connection.
+
+### Connection
+
+MercySoul facilitates honest and respectful interaction. It does not force, manipulate, or exploit relationships.
+
+### Security
+
+Auto Metric moderation and privacy/security validation apply equally to every actor, including the ruler. Political and leadership content receives no special moderation immunity.
+
+### Creation
+
+Creation remains aligned with the user's intended outcome. Generated artwork receives a traceable **MercySoul Signature** as metadata (`signatureId`, `generationId`, `constitutionVersion`, timestamp) without silently altering the artwork.
+
+## Obsession Shield v8.2
+
+The Obsession Shield provides technical, user-controlled boundaries: block unwanted contacts on supported platforms, evaluate repeated or threatening interaction signals within MercySoul services, and redirect attention away from compulsive engagement. It does not claim to detect spirits, establish supernatural causation, retaliate against senders, or control external platforms.
+
 ## Dominion moderation
 
 `riskScore = modelConfidence × categoryWeight`
@@ -63,6 +72,20 @@ Security and privacy always win when constitutional layers conflict. The ruler/a
 - **Risk > 4.5:** remove only for high-confidence hard-safety categories; otherwise human review
 
 Radiate Peace and Sovereign Peace are contextual seals, never safety bypasses. Connected integrations moderate submitted content only; MercySoul does not claim direct control of Facebook or the public internet.
+
+## API
+
+- `GET /health` — deployment health and active engine versions
+- `GET /api/status` — runtime, Dominion, Constitution, Watchtower, Obsession Shield, and jurisdiction status
+- `GET /api/moderation/policy` — active moderation policy
+- `GET /api/governance/sovereign-jurisdiction` — Sovereign Jurisdiction Protocol v9.0
+- `GET /api/governance/obsession-shield` — Obsession Shield status
+- `POST /api/governance/obsession-shield/evaluate` — evaluate supplied interaction signals
+- `GET /api/governance/constitution` — Constitution v3.0.0
+- `POST /api/governance/evaluate-constitution` — evaluate constitutional prerequisites
+- `POST /api/governance/evaluate` — evaluate content under equal-treatment governance
+- `POST /api/moderate` — moderate submitted app/post content
+- `POST /api/moderate/web` — moderate submitted web-integration content
 
 ## Runtime
 
@@ -85,6 +108,6 @@ Never commit service-role keys or other secrets. Production deployments should p
 
 ## Current package
 
-**MercySoul OS 10.1.7 — Global Map release**
+**MercySoul OS 10.1.3 — Divine Income hardening release**
 
 **Legacy continuity:** foundational MercySoul Dominion protocols remain preserved as legacy governance layers while current releases continue to harden implementation and security.
