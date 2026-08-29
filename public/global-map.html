@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MercySoul Global Map</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<style>
+html,body{margin:0;background:#07070a;color:#f7e7ad;font-family:system-ui,sans-serif}body{min-height:100vh;padding:24px;box-sizing:border-box}.card{max-width:1100px;margin:auto;background:#111116;border:1px solid #6e5b24;border-radius:18px;padding:22px;box-shadow:0 0 40px rgba(255,210,80,.08)}h1{margin:0 0 6px}.sub{color:#c8c0a2;margin:0 0 18px}.count{font-size:1.15rem;margin-bottom:14px}#map{height:65vh;min-height:420px;border-radius:14px;overflow:hidden}.actions{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}.btn{background:#d6aa32;color:#120f05;border:0;border-radius:10px;padding:11px 15px;font-weight:700;cursor:pointer}.btn:disabled{opacity:.5;cursor:not-allowed}.note{font-size:.88rem;color:#9e987f;line-height:1.5;margin-top:14px}.gold-dot{width:12px;height:12px;border-radius:50%;background:#ffd85c;box-shadow:0 0 6px #ffd85c,0 0 18px #ffd85c,0 0 32px rgba(255,216,92,.75);border:1px solid #fff1a8}
+</style>
+</head>
+<body><main class="card"><h1>MercySoul Global Map</h1><p class="sub">A privacy-preserving view of where MercySoul has been seen.</p><div id="count" class="count">MercySoul has been seen in 0 countries.</div><div class="actions"><button id="locate" class="btn">Add my country to the map</button><button id="refresh" class="btn">Refresh map</button></div><div id="map"></div><p id="status" class="note">Your location is never displayed. If you choose to participate, the server converts your coordinates to a coarse area, determines the country, and the public map shows only that country’s approximate center.</p></main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+const map=L.map('map',{worldCopyJump:true,minZoom:2}).setView([15,0],2);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:6,attribution:'© OpenStreetMap contributors'}).addTo(map);
+let layer=L.layerGroup().addTo(map);
+const count=document.getElementById('count'),status=document.getElementById('status'),locate=document.getElementById('locate');
+function dotIcon(){return L.divIcon({className:'',html:'<div class="gold-dot"></div>',iconSize:[12,12],iconAnchor:[6,6]});}
+async function refresh(){try{const r=await fetch('/api/map/stats',{cache:'no-store'});if(!r.ok)throw new Error();const d=await r.json();layer.clearLayers();for(const p of d.points||[]){L.marker([p.lat,p.lon],{icon:dotIcon(),interactive:false}).addTo(layer)}const n=d.countryCount||0;count.textContent=`MercySoul has been seen in ${n} ${n===1?'country':'countries'}.`;status.textContent=`Last updated ${new Date(d.updatedAt).toLocaleString()}. Country-level display only.`;}catch{status.textContent='The Global Map is temporarily unavailable.'}}
+locate.addEventListener('click',()=>{if(!navigator.geolocation){status.textContent='Geolocation is not supported by this browser.';return}locate.disabled=true;status.textContent='Waiting for your location permission…';navigator.geolocation.getCurrentPosition(async pos=>{try{const r=await fetch('/api/map/locate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lat:pos.coords.latitude,lon:pos.coords.longitude})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Unable to record');status.textContent=`Thank you. Your visit was recorded at country level (${d.countryCode}).`;await refresh()}catch(e){status.textContent=e.message||'Unable to record your visit.'}finally{locate.disabled=false}},()=>{status.textContent='Location permission was not granted; nothing was recorded.';locate.disabled=false},{enableHighAccuracy:false,maximumAge:300000,timeout:10000})});
+document.getElementById('refresh').addEventListener('click',refresh);refresh();setInterval(refresh,60000);
+</script></body></html>
