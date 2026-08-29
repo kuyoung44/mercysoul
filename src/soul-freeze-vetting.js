@@ -1,70 +1,20 @@
-/** MERCYSOUL SOUL-FREEZE VETTING PROTOCOL v16.0
- * A structured interaction-safety filter. It evaluates observable evidence,
- * not a person's unknowable "energy" or character.
- */
-
+/** MERCYSOUL SOUL-FREEZE VETTING PROTOCOL v17.0 */
 export const SOUL_FREEZE_VETTING_PROTOCOL = Object.freeze({
-  name: 'Soul-Freeze Vetting Protocol',
-  version: '16.0',
-  scale: Object.freeze([
-    'presentation',
-    'energy',
-    'context',
-    'values',
-    'intention'
-  ]),
-  decisions: Object.freeze({
-    curatedShell: 'observe-no-engage',
-    emotionalBait: 'freeze-and-review',
-    trueAlignment: 'patient-engagement'
-  }),
-  boundaries: Object.freeze({
-    observableEvidenceOnly: true,
-    noMindReading: true,
-    noAppearanceBasedJudgment: true,
-    noAutomaticBlocking: true,
-    userAgency: true
-  })
+  name: 'Soul-Freeze Vetting Protocol', version: '17.0',
+  decisions: Object.freeze({ curatedShell: 'observe-no-engage', emotionalBait: 'freeze-and-review', trueAlignment: 'patient-engagement', protectedTrap: 'freeze-zero-drain' }),
+  automaticSafeguards: Object.freeze({ financialTraps: 'freeze-zero-drain', chaoticDatingBots: 'freeze-zero-drain', credentialRequests: 'freeze-zero-drain' }),
+  boundaries: Object.freeze({ observableEvidenceOnly: true, noMindReading: true, noAppearanceBasedJudgment: true, userAgency: true })
 });
-
 const normalize = (value) => String(value || '').trim().toLowerCase();
-
-export function soulFreezeStatus() {
-  return { ok: true, active: true, protocol: SOUL_FREEZE_VETTING_PROTOCOL };
-}
-
+export function soulFreezeStatus() { return { ok: true, active: true, protocol: SOUL_FREEZE_VETTING_PROTOCOL }; }
 export function evaluateSoulFreeze(input = {}) {
-  const message = normalize(input.message || input.content || '');
-  const profile = normalize(input.profile || input.context || '');
-  const combined = `${message} ${profile}`;
-  const manipulationSignals = [
-    'send money', 'pay me', 'urgent transfer', 'prove your love',
-    'give me your password', 'send code', 'crypto', 'gift card'
-  ];
-  const matchedManipulationSignals = manipulationSignals.filter((s) => combined.includes(s));
-  const explicitBait = matchedManipulationSignals.length > 0;
-
-  const evidence = {
-    presentation: input.presentationEvidence || null,
-    energy: input.energyEvidence || null,
-    context: input.contextEvidence || null,
-    values: input.valuesEvidence || null,
-    intention: input.intentionEvidence || null
-  };
-
-  let decision = 'review';
-  if (explicitBait) decision = 'freeze-and-review';
-  else if (input.authenticityConfirmed === true) decision = 'patient-engagement';
-  else decision = 'observe-no-engage';
-
-  return {
-    ok: true,
-    decision,
-    matchedManipulationSignals,
-    evidence,
-    reason: explicitBait
-      ? 'Potential manipulation or financial/security bait detected; pause before responding.'
-      : 'Insufficient evidence for a definitive judgment; observe and preserve user agency.',
-    reminder: 'Do not pay for attention, surrender credentials, or chase validation. Verify before engaging.'
-  };
+  const combined = `${normalize(input.message || input.content || '')} ${normalize(input.profile || input.context || '')}`;
+  const financialSignals = ['send money','pay me','urgent transfer','gift card','crypto payment','investment opportunity','wire transfer','cash app'];
+  const datingBotSignals = ['telegram me','whatsapp me urgently','verification code','send a code','prove your love','crypto romance','sugar daddy','sugar baby','dating bot'];
+  const credentialSignals = ['give me your password','send password','login code','one-time code','otp'];
+  const matchedFinancialSignals = financialSignals.filter((s) => combined.includes(s));
+  const matchedDatingBotSignals = datingBotSignals.filter((s) => combined.includes(s));
+  const matchedCredentialSignals = credentialSignals.filter((s) => combined.includes(s));
+  const freeze = matchedFinancialSignals.length > 0 || matchedCredentialSignals.length > 0 || matchedDatingBotSignals.length > 0;
+  return { ok: true, decision: freeze ? 'freeze-zero-drain' : (input.authenticityConfirmed === true ? 'patient-engagement' : 'observe-no-engage'), zeroEmotionalDrain: freeze, matchedFinancialSignals, matchedDatingBotSignals, matchedCredentialSignals, reminder: 'Pause, verify, and disengage from financial, credential, or chaotic dating-bot bait without emotional escalation.' };
 }
