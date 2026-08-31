@@ -9,5 +9,8 @@
     "check": "node --check server.js && node --check src/engine/v8-engine.js && node --check src/legacy-engine.js && node --check src/legacy-grounding.js && node --check src/os-core.js && node --check src/dominion-moderation.js && node --check src/gaze.js && node --check src/supabase.js && node --check src/governance/constitution.js && node --check src/governance/global-jurisdiction.js && node --check src/governance/spirit-protocol.js && node --check src/governance/sovereign-rest.js && node --check src/relationship-context.js && node --check src/instant-justice.js && node --check src/soul-freeze.js && node --check src/watchtower.js && node --check src/obsession-shield.js && node --check src/emotional-shield.js && node --check src/deployment-directive.js && node --check src/internet-protocol-gateway.js && node --check src/google-oauth.js && node --check src/divine-income.js && npm test",
     "health": "node scripts/health-check.js"
   },
-  "dependencies": { "express": "^4.18.2" }
+  "dependencies": {
+    "@langchain/langgraph": "1.4.13",
+    "express": "^4.18.2"
+  }
 }
