@@ -23,7 +23,7 @@ import { omnipresentHelpStatus, evaluateHelpSignal } from './src/omnipresent-hel
 const app=express(); app.disable('x-powered-by'); app.use(express.json({limit:'1mb'}));
 app.use(express.static('public', { extensions: ['svg'] }));
 const ROOT_INDEX=fileURLToPath(new URL('./index.html', import.meta.url));
-app.use((req,res,next)=>{const requestId=req.get('x-request-id')||crypto.randomUUID();res.setHeader('x-request-id',requestId);res.setHeader('x-content-type-options','nosniff');res.setHeader('referrer-policy','no-referrer');req.requestId=requestId;next();});
+app.use((req,res,next)=>{const requestId=req.get('x-request-id')||crypto.randomUUID();res.setHeader('x-request-id',requestId);res.setHeader('x-content-type-options','nosniff');res.setHeader('x-frame-options','DENY');res.setHeader('referrer-policy','no-referrer');res.setHeader('x-robots-tag','noindex, nofollow, noarchive');req.requestId=requestId;next();});
 app.use(watchtowerMiddleware); app.use(instantJusticeMiddleware);
 const ENGINE_VERSION=MERCYSOUL_ENGINE.version;
 const SERVER_RELEASE='10.1.6';
