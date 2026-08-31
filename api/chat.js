@@ -1,4 +1,4 @@
-const MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 
 export default async function handler(req, res) {
@@ -6,7 +6,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ reply: 'Method not allowed.' });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) {
     return res.status(500).json({ reply: 'MercySoul chat is not configured: GEMINI_API_KEY is missing.' });
   }
@@ -33,11 +33,26 @@ export default async function handler(req, res) {
       }),
     });
 
-    const data = await response.json();
+    const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      console.error('Gemini API error:', data);
-      return res.status(502).json({ reply: 'MercySoul could not reach Gemini right now. Please try again.' });
+      console.error('Gemini API error:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: data?.error?.message || data,
+      });
+
+      const apiMessage = data?.error?.message || '';
+      if (response.status === 401 || response.status === 403) {
+        return res.status(502).json({ reply: 'Gemini authentication failed. Check the GEMINI_API_KEY configured in Vercel.' });
+      }
+      if (response.status === 404) {
+        return res.status(502).json({ reply: `Gemini model '${MODEL}' is unavailable. Set GEMINI_MODEL to an active Gemini model in Vercel.` });
+      }
+      if (response.status === 429) {
+        return res.status(502).json({ reply: 'Gemini rate limit reached. Please try again shortly.' });
+      }
+      return res.status(502).json({ reply: apiMessage || 'MercySoul could not reach Gemini right now. Please try again.' });
     }
 
     const reply = data?.candidates?.[0]?.content?.parts
