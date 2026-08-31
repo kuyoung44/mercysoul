@@ -1,24 +1,5 @@
-const MODEL = 'gemini-2.0-flash';
+const MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
-
-function buildGeminiAuthHeaders(apiKey) {
-  const key = apiKey.trim();
-
-  // Google AI Studio now issues authorization keys with the AQ. prefix.
-  // AQ. keys and legacy Gemini API keys are both passed via x-goog-api-key.
-  // Never expose the key to the browser or commit it to source control.
-  if (key.startsWith('AQ.')) {
-    return {
-      'Content-Type': 'application/json',
-      'x-goog-api-key': key,
-    };
-  }
-
-  return {
-    'Content-Type': 'application/json',
-    'x-goog-api-key': key,
-  };
-}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -38,7 +19,10 @@ export default async function handler(req, res) {
   try {
     const response = await fetch(GEMINI_ENDPOINT, {
       method: 'POST',
-      headers: buildGeminiAuthHeaders(apiKey),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey,
+      },
       body: JSON.stringify({
         contents: [
           {
