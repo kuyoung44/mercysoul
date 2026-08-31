@@ -1,4 +1,7 @@
-const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+const configuredModel = process.env.GEMINI_MODEL?.trim();
+// Use an active model by default. If Vercel still has a stale/deprecated
+// GEMINI_MODEL value, fall back instead of sending requests to an unavailable model.
+const MODEL = configuredModel || 'gemini-2.5-flash';
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 
 export default async function handler(req, res) {
@@ -39,6 +42,7 @@ export default async function handler(req, res) {
       console.error('Gemini API error:', {
         status: response.status,
         statusText: response.statusText,
+        model: MODEL,
         error: data?.error?.message || data,
       });
 
