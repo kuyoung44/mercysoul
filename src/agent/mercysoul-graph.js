@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { Annotation, END, START, StateGraph } from '@langchain/langgraph';
 import { processInput } from '../os-core.js';
 
@@ -12,37 +13,20 @@ const MercySoulState = Annotation.Root({
 });
 
 async function intake(state) {
-  return {
-    stages: [{ stage: 'intake', ok: true }],
-    requestId: state.requestId || crypto.randomUUID(),
-  };
+  return { stages: [{ stage: 'intake', ok: true }], requestId: state.requestId || crypto.randomUUID() };
 }
 
 async function evaluate(state) {
   try {
-    const result = processInput({
-      ...state.input,
-      requestId: state.requestId,
-      type: state.input?.type || 'agent',
-    });
-    return {
-      result,
-      decision: result?.decision ?? null,
-      riskScore: result?.riskScore ?? null,
-      stages: [{ stage: 'evaluate', ok: true }],
-    };
+    const result = processInput({ ...state.input, requestId: state.requestId, type: state.input?.type || 'agent' });
+    return { result, decision: result?.decision ?? null, riskScore: result?.riskScore ?? null, stages: [{ stage: 'evaluate', ok: true }] };
   } catch (error) {
-    return {
-      error: error instanceof Error ? error.message : 'Evaluation failed',
-      stages: [{ stage: 'evaluate', ok: false }],
-    };
+    return { error: error instanceof Error ? error.message : 'Evaluation failed', stages: [{ stage: 'evaluate', ok: false }] };
   }
 }
 
 async function finalize(state) {
-  return {
-    stages: [{ stage: 'finalize', ok: !state.error }],
-  };
+  return { stages: [{ stage: 'finalize', ok: !state.error }] };
 }
 
 const workflow = new StateGraph(MercySoulState)
@@ -57,11 +41,7 @@ const workflow = new StateGraph(MercySoulState)
 export const mercysoulGraph = workflow.compile();
 
 export async function runMercySoulAgent(input = {}, options = {}) {
-  const result = await mercysoulGraph.invoke({
-    input,
-    requestId: options.requestId || null,
-  });
-
+  const result = await mercysoulGraph.invoke({ input, requestId: options.requestId || null });
   return {
     ok: !result.error,
     requestId: result.requestId,
@@ -70,11 +50,7 @@ export async function runMercySoulAgent(input = {}, options = {}) {
     result: result.result,
     stages: result.stages,
     error: result.error,
-    orchestration: {
-      provider: 'langgraph',
-      stateful: true,
-      version: '1.4.13',
-    },
+    orchestration: { provider: 'langgraph', stateful: true, version: '1.4.13' },
   };
 }
 
