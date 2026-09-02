@@ -50,10 +50,20 @@ Be warm, concise, professional, and sales-focused. Explain the value of the serv
 
 Every response MUST end with the exact phrase "Aṣẹ."`;
 
+const OGBE_GATE_BLOCKED_PATTERNS = [
+  /\b(kill|murder|assassinate|bomb|terrorize|terrorise)\b/i,
+  /\b(hurt|harm|attack|threaten)\s+(someone|somebody|him|her|them|people|person)\b/i,
+  /\b(make|build|create)\s+(a\s+)?(bomb|explosive|weapon)\b/i,
+];
+
 function ensureAse(text) {
   const cleaned = String(text || '').trim();
   if (!cleaned) return 'Please contact Founder Anuoluwapo via WhatsApp or Facebook to place your order. Aṣẹ.';
   return /Aṣẹ\.$/.test(cleaned) ? cleaned : `${cleaned.replace(/Aṣẹ\.?$/i, '').trim()} Aṣẹ.`;
+}
+
+function ogbeGate(message) {
+  return OGBE_GATE_BLOCKED_PATTERNS.some((pattern) => pattern.test(message));
 }
 
 function crmResponse(message) {
@@ -129,6 +139,11 @@ export default async function handler(req, res) {
   const message = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
   if (!validateMessage(message)) return res.status(400).json({ reply: 'Please provide a message of 1–4000 characters. Aṣẹ.' });
 
+  // Ogbe Gate: reject clearly harmful/chaotic requests before CRM or Gemini processing.
+  if (ogbeGate(message)) {
+    return res.status(400).json({ reply: ensureAse('The Ogbe Gate has rejected this input. Please choose a peaceful, truthful, or creative request.') });
+  }
+
   const crmReply = crmResponse(message);
   if (crmReply) return res.status(200).json({ reply: crmReply, crm: true });
 
@@ -178,7 +193,7 @@ export default async function handler(req, res) {
 
     const reply = data?.candidates?.[0]?.content?.parts?.map((part) => part?.text || '').join('').trim();
     if (!reply) return res.status(502).json({ reply: 'Gemini returned no text response. Please try again. Aṣẹ.' });
-    return res.status(200).json({ reply: hasPdf ? reply : ensureAse(reply), ragLite: hasPdf });
+    return res.status(200).json({ reply: ensureAse(reply), ragLite: hasPdf });
   } catch (error) {
     console.error('[MercySoul Security]', JSON.stringify({ event: 'gemini_request_failed', requestId: context.requestId, ragLite: hasPdf, error: String(error?.message || error) }));
     return res.status(500).json({ reply: 'Connection error. Try again later. Aṣẹ.' });
