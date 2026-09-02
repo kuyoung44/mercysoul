@@ -9,15 +9,20 @@
         .header { background: linear-gradient(90deg, #4b0082, #1a1a2e); padding: 20px; text-align: center; border-bottom: 2px solid #d4af37; }
         .header h1 { color: #d4af37; margin: 0; font-size: 1.5rem; }
         .header p { color: #ccc; margin: 5px 0 0; font-size: 0.8rem; }
+        .document-bar { padding: 12px 20px; background: #0d0d1a; border-bottom: 1px solid #333; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .upload-label { display: inline-block; padding: 10px 16px; border-radius: 25px; border: 1px solid #d4af37; background: #d4af37; color: black; font-weight: bold; cursor: pointer; }
+        .upload-label:hover { background: #b8860b; }
+        #pdfInput { display: none; }
+        #fileName { color: #ccc; font-size: 0.85rem; }
+        .loading { font-size: 0.8rem; color: #d4af37; font-style: italic; }
         .chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
         .message { max-width: 80%; padding: 12px 15px; border-radius: 15px; font-size: 1rem; line-height: 1.5; }
         .user { align-self: flex-end; background: linear-gradient(90deg, #d4af37, #b8860b); color: black; border-bottom-right-radius: 2px; }
         .bot { align-self: flex-start; background: #1a1a2e; border: 1px solid #444; border-bottom-left-radius: 2px; }
         .input-area { padding: 20px; background: #0d0d1a; display: flex; gap: 10px; border-top: 1px solid #333; }
-        input { flex: 1; padding: 12px; border-radius: 25px; border: 1px solid #d4af37; background: #111; color: white; outline: none; font-size: 1rem; user-select: text; -webkit-user-select: text; }
+        input[type="text"] { flex: 1; padding: 12px; border-radius: 25px; border: 1px solid #d4af37; background: #111; color: white; outline: none; font-size: 1rem; user-select: text; -webkit-user-select: text; }
         button { padding: 12px 20px; border-radius: 25px; border: none; background: #d4af37; color: black; font-weight: bold; cursor: pointer; font-size: 1rem; }
         button:hover { background: #b8860b; }
-        .loading { font-size: 0.8rem; color: #888; font-style: italic; }
     </style>
 </head>
 <body>
@@ -25,21 +30,54 @@
         <h1>👑 MercySoul Vision Brain</h1>
         <p>Where Imagination Becomes Sacred Art</p>
     </div>
+    <div class="document-bar">
+        <label class="upload-label" for="pdfInput">Upload Document</label>
+        <input id="pdfInput" type="file" accept="application/pdf,.pdf">
+        <span id="fileName">No PDF selected</span>
+        <span id="documentLoading" class="loading" hidden>Processing Document...</span>
+    </div>
     <div class="chat-container" id="chatBox">
-        <div class="message bot">Welcome, Aṣẹ. How can I assist you today?</div>
+        <div class="message bot">Welcome, Aṣẹ. Upload a PDF, then ask a question about its contents.</div>
     </div>
     <div class="input-area">
         <input type="text" id="userInput" placeholder="Type your message here...">
-        <button onclick="sendMessage()">Send</button>
+        <button id="sendButton" onclick="sendMessage()">Send</button>
     </div>
 
     <script>
-        // Copy-protection for rendered chat content. The input remains editable/selectable.
+        let selectedPdf = null;
+
         ['contextmenu', 'copy', 'cut', 'dragstart'].forEach(function (eventName) {
             document.addEventListener(eventName, function (event) {
                 if (event.target.id !== 'userInput') event.preventDefault();
             });
         });
+
+        const pdfInput = document.getElementById('pdfInput');
+        const fileName = document.getElementById('fileName');
+        const documentLoading = document.getElementById('documentLoading');
+        const sendButton = document.getElementById('sendButton');
+
+        pdfInput.addEventListener('change', function () {
+            const file = pdfInput.files?.[0];
+            if (!file) return;
+            if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+                pdfInput.value = '';
+                selectedPdf = null;
+                fileName.textContent = 'Please select a PDF file';
+                return;
+            }
+            selectedPdf = file;
+            fileName.textContent = file.name;
+        });
+
+        function appendMessage(type, text) {
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            div.textContent = text;
+            document.getElementById('chatBox').appendChild(div);
+            return div;
+        }
 
         async function sendMessage() {
             const input = document.getElementById('userInput');
@@ -47,28 +85,42 @@
             if (!message) return;
 
             const chatBox = document.getElementById('chatBox');
-            chatBox.innerHTML += `<div class="message user">${message}</div>`;
+            appendMessage('user', message);
             input.value = '';
-            
+            sendButton.disabled = true;
+
             const loading = document.createElement('div');
             loading.className = 'loading';
-            loading.innerText = 'MercySoul is thinking...';
+            loading.innerText = selectedPdf ? 'Processing Document...' : 'MercySoul is thinking...';
             chatBox.appendChild(loading);
             chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
-                // Use the endpoint you have in your server.js (e.g., /chat, /api/chat)
-                const response = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: message })
-                });
-                const data = await response.json();
+                let response;
+                if (selectedPdf) {
+                    const formData = new FormData();
+                    formData.append('file', selectedPdf, selectedPdf.name);
+                    formData.append('message', message);
+                    response = await fetch('/api/chat', {
+                        method: 'POST',
+                        body: formData
+                    });
+                } else {
+                    response = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: message })
+                    });
+                }
+
+                const data = await response.json().catch(() => ({}));
                 loading.remove();
-                chatBox.innerHTML += `<div class="message bot">${data.reply}</div>`;
+                appendMessage('bot', data.reply || data.error || 'Please try again.');
             } catch (error) {
                 loading.remove();
-                chatBox.innerHTML += `<div class="message bot">Connection error. Try again later.</div>`;
+                appendMessage('bot', 'Connection error. Try again later.');
+            } finally {
+                sendButton.disabled = false;
             }
             chatBox.scrollTop = chatBox.scrollHeight;
         }
