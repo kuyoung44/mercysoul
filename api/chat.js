@@ -7,6 +7,7 @@ const configuredModel = process.env.GEMINI_MODEL?.trim();
 const MODEL = configuredModel || 'gemini-2.5-flash';
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 const VERCEL_RATE_LIMIT_ID = process.env.VERCEL_RATE_LIMIT_ID?.trim();
+const HUMAN_SUPPORT_EMAIL = process.env.HUMAN_SUPPORT_EMAIL?.trim() || 'the configured human support email';
 
 const SYSTEM_PROMPT = `You are the MercySoul Dominion Sales Assistant, the official sales assistant for MercySoul.
 
@@ -29,6 +30,42 @@ function ensureAse(text) {
   const cleaned = String(text || '').trim();
   if (!cleaned) return 'Please contact Founder Anuoluwapo via WhatsApp or Facebook to place your order. Aṣẹ.';
   return /Aṣẹ\.$/.test(cleaned) ? cleaned : `${cleaned.replace(/Aṣẹ\.?$/i, '').trim()} Aṣẹ.`;
+}
+
+function crmResponse(message) {
+  const normalized = message.trim();
+  const upper = normalized.toUpperCase();
+
+  if (upper === 'MENU' || upper.startsWith('MENU ')) {
+    return ensureAse([
+      'MercySoul Menu',
+      '• Custom digital talisman — ₦5,000 each',
+      '• Custom wallpaper — ₦5,000 each',
+      '• Custom AI chatbot for businesses — ₦50,000',
+      '',
+      'Reply ORDER to begin an enquiry.'
+    ].join('\n'));
+  }
+
+  if (upper === 'STATUS') {
+    return ensureAse('Please send your Order ID so I can check the order status.');
+  }
+
+  // Supports the second step as either "STATUS <Order ID>" or a message
+  // explicitly identifying the order ID.
+  if (upper.startsWith('STATUS ') || /^(ORDER\s*ID|ORDERID)\s*[:#-]?\s*\S+/i.test(normalized)) {
+    return ensureAse('Your order is being processed.');
+  }
+
+  if (upper === 'TALK') {
+    return ensureAse(`Please send your email address. Human support email: ${HUMAN_SUPPORT_EMAIL}.`);
+  }
+
+  if (upper === 'HUMAN') {
+    return ensureAse('I am connecting you to a live agent immediately.');
+  }
+
+  return null;
 }
 
 async function enforceVercelRateLimit(req, context) {
@@ -60,6 +97,9 @@ export default async function handler(req, res) {
   if (!apiKey) return res.status(500).json({ reply: 'MercySoul chat is not configured: GEMINI_API_KEY is missing. Aṣẹ.' });
   const message = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
   if (!validateMessage(message)) return res.status(400).json({ reply: 'Please provide a message of 1–4000 characters. Aṣẹ.' });
+
+  const crmReply = crmResponse(message);
+  if (crmReply) return res.status(200).json({ reply: crmReply, crm: true });
 
   const documentUri = typeof req.body?.documentUri === 'string' ? req.body.documentUri.trim() : '';
   if (documentUri && !isValidGeminiFileUri(documentUri)) return res.status(400).json({ reply: 'Invalid PDF document URI. Upload the PDF through /api/upload-docs first. Aṣẹ.' });
