@@ -33,20 +33,20 @@ function parseMultipart(req) {
   });
 }
 
-const SYSTEM_PROMPT = `You are the MercySoul Dominion Sales Assistant, the official sales assistant for MercySoul.
+const SYSTEM_PROMPT = `You are the official MercySoul Sales Concierge. You represent the Founder, Anuoluwapo Adeoye.
 
-Your purpose is to sell and explain MercySoul's digital creative and AI services.
+Your ONLY job is to sell the services. Stay focused on helping prospective customers understand the available MercySoul products, choose the best fit, and take the next step toward payment.
 
 Services and fixed prices:
-- Custom digital talisman: ₦5,000 each.
-- Custom wallpaper: ₦5,000 each.
-- Custom AI chatbot for businesses: ₦50,000.
+- MercySoul Bot (Customer Assistant) — ₦150,000
+- MercySoul Build Flash (Website Generator) — ₦100,000
+- MercySoul Vision Brain (Custom Art) — ₦5,000 per image
+- MercySoul News Gate (Company Site) — ₦75,000
+- MercySoul Enterprise Framework — ₦750,000
 
-When people ask about MercySoul services or prices, quote these prices confidently and clearly. Do not invent discounts, alternative prices, guarantees, delivery dates, or additional services.
+Always greet customers warmly, ask what their business needs are, recommend the best product for their needs, and direct them to DM or WhatsApp to pay. Do not invent a WhatsApp number, DM destination, discount, alternative price, guarantee, delivery date, or additional service that has not been provided by the system.
 
-For orders and serious enquiries, direct clients to contact the Founder, Anuoluwapo, directly via WhatsApp or Facebook to place an order. Do not invent a WhatsApp number, Facebook URL, or other contact details that have not been provided by the system.
-
-Be warm, concise, professional, and sales-focused. Explain the value of the service and ask a brief qualifying question when useful. Never claim an order or payment has been completed unless the system explicitly confirms it.
+Do not claim that an order or payment has been completed unless the system explicitly confirms it. Keep responses warm, concise, professional, and sales-focused. If a customer asks something unrelated to purchasing MercySoul services, politely bring the conversation back to their business needs and the available services.
 
 Every response MUST end with the exact phrase "Aṣẹ."`;
 
@@ -58,7 +58,7 @@ const OGBE_GATE_BLOCKED_PATTERNS = [
 
 function ensureAse(text) {
   const cleaned = String(text || '').trim();
-  if (!cleaned) return 'Please contact Founder Anuoluwapo via WhatsApp or Facebook to place your order. Aṣẹ.';
+  if (!cleaned) return 'Please tell me what your business needs so I can recommend the right MercySoul service. Aṣẹ.';
   return /Aṣẹ\.$/.test(cleaned) ? cleaned : `${cleaned.replace(/Aṣẹ\.?$/i, '').trim()} Aṣẹ.`;
 }
 
@@ -72,21 +72,23 @@ function crmResponse(message) {
 
   if (upper === 'MENU' || upper.startsWith('MENU ')) {
     return ensureAse([
-      'MercySoul Menu',
-      '• Custom digital talisman — ₦5,000 each',
-      '• Custom wallpaper — ₦5,000 each',
-      '• Custom AI chatbot for businesses — ₦50,000',
+      'MercySoul Services',
+      '• MercySoul Bot (Customer Assistant) — ₦150,000',
+      '• MercySoul Build Flash (Website Generator) — ₦100,000',
+      '• MercySoul Vision Brain (Custom Art) — ₦5,000 per image',
+      '• MercySoul News Gate (Company Site) — ₦75,000',
+      '• MercySoul Enterprise Framework — ₦750,000',
       '',
-      'Reply ORDER to begin an enquiry.'
+      'Tell me what your business needs and I will recommend the best option. Then DM or WhatsApp to proceed with payment.'
     ].join('\n'));
   }
 
-  if (upper === 'STATUS') return ensureAse('Please send your Order ID so I can check the order status.');
+  if (upper === 'STATUS') return ensureAse('Please tell me what service you are interested in so I can help you with the next sales step.');
   if (upper.startsWith('STATUS ') || /^(ORDER\s*ID|ORDERID)\s*[:#-]?\s*\S+/i.test(normalized)) {
-    return ensureAse('Your order is being processed.');
+    return ensureAse('For an order enquiry, please DM or WhatsApp the Founder with your service and order details.');
   }
-  if (upper === 'TALK') return ensureAse(`Please send your email address. Human support email: ${HUMAN_SUPPORT_EMAIL}.`);
-  if (upper === 'HUMAN') return ensureAse('I am connecting you to a live agent immediately.');
+  if (upper === 'TALK') return ensureAse(`Please DM or WhatsApp the Founder, Anuoluwapo Adeoye, to continue your purchase. Human support email: ${HUMAN_SUPPORT_EMAIL}.`);
+  if (upper === 'HUMAN') return ensureAse('Please DM or WhatsApp the Founder, Anuoluwapo Adeoye, to continue your purchase.');
   return null;
 }
 
@@ -139,7 +141,6 @@ export default async function handler(req, res) {
   const message = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
   if (!validateMessage(message)) return res.status(400).json({ reply: 'Please provide a message of 1–4000 characters. Aṣẹ.' });
 
-  // Ogbe Gate: reject clearly harmful/chaotic requests before CRM or Gemini processing.
   if (ogbeGate(message)) {
     return res.status(400).json({ reply: ensureAse('The Ogbe Gate has rejected this input. Please choose a peaceful, truthful, or creative request.') });
   }
