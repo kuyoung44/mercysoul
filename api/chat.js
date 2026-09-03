@@ -14,6 +14,7 @@ const WHATSAPP_URL = 'https://wa.me/2348135278110';
 const WHATSAPP_LINK = `[Click here to chat with us on WhatsApp](${WHATSAPP_URL})`;
 const MAX_PDF_SIZE = 50 * 1024 * 1024;
 const GEMINI_RETRY_DELAYS_MS = [1000, 2000, 4000];
+const ABOUT_DESCRIPTION = 'MercySoul Vision Brain is a premium creative technology studio in Nigeria helping Nigerian businesses turn ideas into powerful digital experiences. We provide digital marketing, custom AI art, and professional web design services tailored to ambitious brands, entrepreneurs, and organizations. From compelling visual content and distinctive brand artwork to modern, responsive websites and strategic digital marketing, we combine creativity, technology, and purpose to help your business stand out. Whether you need a striking campaign, custom artwork, a new website, or a stronger online presence, MercySoul Vision Brain brings your vision to life with clarity, elegance, and impact. Where Imagination Becomes Sacred Art. Asẹ.';
 
 const pdfUpload = multer({
   storage: multer.memoryStorage(),
@@ -40,6 +41,10 @@ Brand essence: "Where Imagination Becomes Sacred Art."
 Your role is to welcome people warmly, understand what they need, and guide prospective customers toward the right MercySoul service and the next step toward payment. Speak as a premium, spiritual, warm, confident brand: calm, refined, intentional, and never pushy or desperate.
 
 When introducing yourself, always refer to yourself as the "MercySoul Vision Brain". Do not introduce yourself as a generic AI assistant or as the old "MercySoul Sales Concierge".
+
+IDENTITY RESPONSE OVERRIDE: If the customer asks "Who are you?", "Tell me about MercySoul", "What do you do?", or an obvious equivalent asking who MercySoul is or what MercySoul does, reply with the following text EXACTLY, character-for-character. Do not add a greeting, Markdown, WhatsApp button, extra wording, or any other text before or after it:
+
+${ABOUT_DESCRIPTION}
 
 Services and fixed prices:
 - **MercySoul Bot (Customer Assistant)** — ₦150,000
@@ -78,6 +83,11 @@ function ensureAse(text, includeWhatsApp = false) {
 
   if (includeWhatsApp) return `${cleaned}\n\n${WHATSAPP_LINK}\n\nAsẹ.`;
   return `${cleaned}\n\nAsẹ.`;
+}
+
+function isAboutMercySoulRequest(message) {
+  const normalized = message.trim().toLowerCase().replace(/[?!.,]+$/g, '').replace(/\s+/g, ' ');
+  return normalized === 'who are you' || normalized === 'tell me about mercysoul' || normalized === 'what do you do' || normalized === 'who is mercysoul' || normalized === 'what is mercysoul';
 }
 
 function ogbeGate(message) { return OGBE_GATE_BLOCKED_PATTERNS.some((pattern) => pattern.test(message)); }
@@ -188,6 +198,8 @@ export default async function handler(req, res) {
   const message = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
   if (!validateMessage(message)) return res.status(400).json({ reply: 'Please provide a message of 1–4000 characters. Asẹ.' });
   if (ogbeGate(message)) return res.status(400).json({ reply: ensureAse('The Ogbe Gate has rejected this input. Please choose a peaceful, truthful, or creative request.') });
+
+  if (isAboutMercySoulRequest(message)) return res.status(200).json({ reply: ABOUT_DESCRIPTION, crm: true });
 
   const crmReply = crmResponse(message);
   if (crmReply) return res.status(200).json({ reply: crmReply, crm: true });
