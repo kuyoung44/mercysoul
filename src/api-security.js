@@ -98,8 +98,16 @@ export function validateChatRequest(req) {
 export function validateOrigin(req) {
   const origin = String(req.headers?.origin || '').trim();
   if (!origin) return true;
-  const configured = String(process.env.ALLOWED_ORIGINS || 'https://mercysoul.vercel.app').split(',').map((value) => value.trim()).filter(Boolean);
-  return configured.includes(origin);
+
+  const configuredOrigins = String(process.env.ALLOWED_ORIGINS || 'https://mercysoul.vercel.app')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  // Explicit wildcard: allow every origin and skip the authorization check.
+  if (configuredOrigins.includes('*')) return true;
+
+  return configuredOrigins.includes(origin);
 }
 
 export function validateMessage(message) {
