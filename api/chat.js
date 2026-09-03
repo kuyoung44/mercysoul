@@ -1,4 +1,3 @@
-import crypto from 'node:crypto';
 import multer from 'multer';
 import { checkRateLimit } from '@vercel/firewall';
 import { validateChatRequest, validateMessage, validateOrigin, securityHeaders } from '../src/api-security.js';
@@ -9,7 +8,7 @@ export const config = {
 };
 
 const configuredModel = process.env.GEMINI_MODEL?.trim();
-const MODEL = configuredModel || 'gemini-2.5-flash';
+const MODEL = configuredModel || 'gemini-3.7-flash';
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 const VERCEL_RATE_LIMIT_ID = process.env.VERCEL_RATE_LIMIT_ID?.trim();
 const HUMAN_SUPPORT_EMAIL = process.env.HUMAN_SUPPORT_EMAIL?.trim() || 'the configured human support email';
@@ -126,7 +125,9 @@ export default async function handler(req, res) {
     return res.status(429).json({ reply: 'Traffic limit reached. Please try again shortly. Aṣẹ.' });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY?.trim();
+  // GEMINI_API_KEY is the primary production secret. GOOGLE_API_KEY is accepted
+  // as a compatibility fallback without exposing either credential to clients.
+  const apiKey = String(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '').trim();
   if (!apiKey) return res.status(500).json({ reply: 'MercySoul chat is not configured: GEMINI_API_KEY is missing. Aṣẹ.' });
 
   const isMultipart = String(req.headers['content-type'] || '').toLowerCase().startsWith('multipart/form-data');
@@ -174,7 +175,11 @@ export default async function handler(req, res) {
   try {
     const response = await fetch(GEMINI_ENDPOINT, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey,
+        'x-goog-api-client': 'mercysoul/1.0',
+      },
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: systemInstruction }] },
         contents,
@@ -183,10 +188,24 @@ export default async function handler(req, res) {
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      console.error('[MercySoul Security]', JSON.stringify({ event: 'gemini_error', status: response.status, model: MODEL, requestId: context.requestId, ragLite: hasPdf }));
-      const apiMessage = data?.error?.message || '';
+      const apiError = data?.error || {};
+      const reason = Array.isArray(apiError.details)
+        ? apiError.details.find((detail) => detail?.reason)?.reason
+        : undefined;
+      console.error('[MercySoul Security]', JSON.stringify({
+        event: 'gemini_error',
+        status: response.status,
+        statusText: response.statusText,
+        model: MODEL,
+        requestId: context.requestId,
+        ragLite: hasPdf,
+        errorMessage: String(apiError.message || '').slice(0, 500),
+        reason: reason || null,
+        service: apiError.details?.find?.((detail) => detail?.metadata?.service)?.metadata?.service || null,
+      }));
+      const apiMessage = apiError.message || '';
       if (response.status === 400 && hasPdf) return res.status(502).json({ reply: ensureAse(`Gemini rejected the PDF input. ${apiMessage || 'Please try another PDF.'}`) });
-      if (response.status === 401 || response.status === 403) return res.status(502).json({ reply: 'Gemini authentication failed. Check the GEMINI_API_KEY configured in Vercel. Aṣẹ.' });
+      if (response.status === 401 || response.status === 403) return res.status(502).json({ reply: 'Gemini authentication or project access was rejected. Verify that the Vercel production GEMINI_API_KEY is the current Gemini API Auth key and that the key/project is authorized for the Gemini API. Aṣẹ.' });
       if (response.status === 404) return res.status(502).json({ reply: `Gemini model '${MODEL}' is unavailable. Set GEMINI_MODEL to an active Gemini model in Vercel. Aṣẹ.` });
       if (response.status === 429) return res.status(502).json({ reply: 'Gemini rate limit reached. Please try again shortly. Aṣẹ.' });
       return res.status(502).json({ reply: ensureAse(apiMessage || 'MercySoul could not reach Gemini right now. Please try again.') });
