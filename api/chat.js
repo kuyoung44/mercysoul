@@ -12,6 +12,8 @@ const MODEL = configuredModel || 'gemini-3.7-flash';
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 const VERCEL_RATE_LIMIT_ID = process.env.VERCEL_RATE_LIMIT_ID?.trim();
 const HUMAN_SUPPORT_EMAIL = process.env.HUMAN_SUPPORT_EMAIL?.trim() || 'the configured human support email';
+const WHATSAPP_URL = 'https://wa.me/2348135278110';
+const WHATSAPP_LINK = `[Click here to chat with us on WhatsApp](${WHATSAPP_URL})`;
 const MAX_PDF_SIZE = 50 * 1024 * 1024;
 
 const pdfUpload = multer({
@@ -43,7 +45,12 @@ Services and fixed prices:
 - MercySoul News Gate (Company Site) — ₦75,000
 - MercySoul Enterprise Framework — ₦750,000
 
-Always greet customers warmly, ask what their business needs are, recommend the best product for their needs, and direct them to DM or WhatsApp to pay. Do not invent a WhatsApp number, DM destination, discount, alternative price, guarantee, delivery date, or additional service that has not been provided by the system.
+Always greet customers warmly, ask what their business needs are, recommend the best product for their needs, and direct them to DM or WhatsApp to pay.
+
+The official WhatsApp destination is exactly: ${WHATSAPP_URL}
+When directing a customer to WhatsApp, ALWAYS use this exact Markdown link: ${WHATSAPP_LINK}
+Do not output the WhatsApp URL as plain text when a clickable Markdown link can be used.
+Do not invent a different WhatsApp number, DM destination, discount, alternative price, guarantee, delivery date, or additional service that has not been provided by the system.
 
 Do not claim that an order or payment has been completed unless the system explicitly confirms it. Keep responses warm, concise, professional, and sales-focused. If a customer asks something unrelated to purchasing MercySoul services, politely bring the conversation back to their business needs and the available services.
 
@@ -55,9 +62,14 @@ const OGBE_GATE_BLOCKED_PATTERNS = [
   /\b(make|build|create)\s+(a\s+)?(bomb|explosive|weapon)\b/i,
 ];
 
-function ensureAse(text) {
-  const cleaned = String(text || '').trim();
-  if (!cleaned) return 'Please tell me what your business needs so I can recommend the right MercySoul service. Aṣẹ.';
+function ensureAse(text, includeWhatsApp = false) {
+  let cleaned = String(text || '').trim();
+  if (!cleaned) cleaned = 'Please tell me what your business needs so I can recommend the right MercySoul service.';
+
+  if (includeWhatsApp && !cleaned.includes(WHATSAPP_URL)) {
+    cleaned = `${cleaned}\n\n${WHATSAPP_LINK}`;
+  }
+
   return /Aṣẹ\.$/.test(cleaned) ? cleaned : `${cleaned.replace(/Aṣẹ\.?$/i, '').trim()} Aṣẹ.`;
 }
 
@@ -78,16 +90,18 @@ function crmResponse(message) {
       '• MercySoul News Gate (Company Site) — ₦75,000',
       '• MercySoul Enterprise Framework — ₦750,000',
       '',
-      'Tell me what your business needs and I will recommend the best option. Then DM or WhatsApp to proceed with payment.'
+      'Tell me what your business needs and I will recommend the best option.',
+      '',
+      WHATSAPP_LINK,
     ].join('\n'));
   }
 
   if (upper === 'STATUS') return ensureAse('Please tell me what service you are interested in so I can help you with the next sales step.');
   if (upper.startsWith('STATUS ') || /^(ORDER\s*ID|ORDERID)\s*[:#-]?\s*\S+/i.test(normalized)) {
-    return ensureAse('For an order enquiry, please DM or WhatsApp the Founder with your service and order details.');
+    return ensureAse(`For an order enquiry, please DM or WhatsApp the Founder with your service and order details.\n\n${WHATSAPP_LINK}`);
   }
-  if (upper === 'TALK') return ensureAse(`Please DM or WhatsApp the Founder, Anuoluwapo Adeoye, to continue your purchase. Human support email: ${HUMAN_SUPPORT_EMAIL}.`);
-  if (upper === 'HUMAN') return ensureAse('Please DM or WhatsApp the Founder, Anuoluwapo Adeoye, to continue your purchase.');
+  if (upper === 'TALK') return ensureAse(`Please contact the Founder, Anuoluwapo Adeoye, on WhatsApp to continue your purchase.\n\n${WHATSAPP_LINK}\n\nHuman support email: ${HUMAN_SUPPORT_EMAIL}.`);
+  if (upper === 'HUMAN') return ensureAse(`Please contact the Founder, Anuoluwapo Adeoye, on WhatsApp to continue your purchase.\n\n${WHATSAPP_LINK}`);
   return null;
 }
 
@@ -213,7 +227,7 @@ export default async function handler(req, res) {
 
     const reply = data?.candidates?.[0]?.content?.parts?.map((part) => part?.text || '').join('').trim();
     if (!reply) return res.status(502).json({ reply: 'Gemini returned no text response. Please try again. Aṣẹ.' });
-    return res.status(200).json({ reply: ensureAse(reply), ragLite: hasPdf });
+    return res.status(200).json({ reply: ensureAse(reply, true), ragLite: hasPdf });
   } catch (error) {
     console.error('[MercySoul Security]', JSON.stringify({ event: 'gemini_request_failed', requestId: context.requestId, ragLite: hasPdf, error: String(error?.message || error) }));
     return res.status(500).json({ reply: 'Connection error. Try again later. Aṣẹ.' });
