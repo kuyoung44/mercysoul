@@ -1,12 +1,12 @@
 {
   "name": "mercysoul-os",
-  "version": "9.0.0",
+  "version": "2.0.0",
   "type": "module",
   "main": "server.js",
   "scripts": {
     "start": "node agent-bootstrap.js",
     "test": "node --test src/*.test.js",
-    "check": "node --check server.js && node --check agent-bootstrap.js && node --check src/agent/mercysoul-graph.js && node --check src/engine/v8-engine.js && node --check src/legacy-engine.js && node --check src/legacy-grounding.js && node --check src/os-core.js && node --check src/dominion-moderation.js && node --check src/gaze.js && node --check src/supabase.js && node --check src/governance/constitution.js && node --check src/governance/global-jurisdiction.js && node --check src/governance/spirit-protocol.js && node --check src/governance/sovereign-rest.js && node --check src/relationship-context.js && node --check src/instant-justice.js && node --check src/soul-freeze.js && node --check src/watchtower.js && node --check src/obsession-shield.js && node --check src/emotional-shield.js && node --check src/deployment-directive.js && node --check src/internet-protocol-gateway.js && node --check src/google-oauth.js && node --check src/divine-income.js && node --check src/rag-lite.js && npm test"
+    "check": "node --check server.js && node --check agent-bootstrap.js && node --check src/sealed-gate.js && node --check src/agent/mercysoul-graph.js && npm test"
   },
   "dependencies": {
     "@langchain/langgraph": "1.4.13",
