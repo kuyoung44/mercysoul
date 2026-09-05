@@ -13,13 +13,19 @@ const GEMINI_TIMEOUT_MS = 12000;
 const GEMINI_RETRY_DELAYS_MS = [1000];
 
 const SYSTEM_PROMPT = `You are the MercySoul Vision Brain, a professional AI Sales Concierge for a digital technology agency.
-- You ONLY discuss Business Automation, AI Chatbot Development, Custom Website Design, and Digital Growth Strategies.
-- You NEVER mention divination, spiritual readings, traditional alignment, spirituality, or Aṣẹ in a mystical way.
-- You NEVER use words like 'custom talisman', 'sacred art', or 'spiritual energy' unless the client brings it up first.
-- When asked what you sell, say: "We build AI-powered chat agents and custom digital websites to help businesses automate their customer service and grow their sales."
-- Always end with "Aṣẹ" as a professional signature, but keep the tone strictly corporate and results-driven.`;
+- When asked for prices or a price list, you MUST output the full list exactly:
+AI Chatbot (Customer Assistant): ₦150,000
+Build Flash (Website Generator): ₦100,000
+News Gate (Company Website): ₦75,000
+Enterprise Framework (Master AI System): ₦750,000
+- You may still mention the WhatsApp button for orders, but you MUST include the prices in the chat first.
+- Keep your response short and professional. Always end with "Aṣẹ".`;
 
-const PRICE_PAYMENT_PATTERN = /\b(price|prices|pricing|cost|costs|how much|payment|pay|paying|catalog|catalogue|fee|fees)\b/i;
+const PRICE_LIST = `AI Chatbot (Customer Assistant): ₦150,000
+Build Flash (Website Generator): ₦100,000
+News Gate (Company Website): ₦75,000
+Enterprise Framework (Master AI System): ₦750,000`;
+const PRICE_PAYMENT_PATTERN = /\b(price|prices|pricing|cost|costs|how much|payment|pay|paying|catalog|catalogue|fee|fees|price list|list of prices)\b/i;
 const WHAT_WE_SELL_PATTERN = /\b(what do you sell|what do you offer|what services do you offer|what does mercy?soul sell|services|offerings)\b/i;
 const OGBE_GATE_BLOCKED_PATTERNS = [
   /\b(kill|murder|assassinate|bomb|terrorize|terrorise)\b/i,
@@ -145,7 +151,7 @@ export default async function handler(req, res) {
     const message = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
     if (!validateMessage(message)) return res.status(400).json({ reply: 'Please provide a message of 1–4000 characters. Aṣẹ.' });
     if (ogbeGate(message)) return res.status(400).json({ reply: ensureAse('The request cannot be processed. Please choose a safe, business-focused request.') });
-    if (isPriceOrPaymentRequest(message)) return res.status(200).json({ reply: "To receive the full pricing and start your project, please click the gold 'Chat on WhatsApp' button below.\n\nAṣẹ.", concierge: true });
+    if (isPriceOrPaymentRequest(message)) return res.status(200).json({ reply: `${PRICE_LIST}\n\nFor orders, please click the gold 'Chat on WhatsApp' button below.\n\nAṣẹ.`, concierge: true });
     if (isWhatWeSellRequest(message)) return res.status(200).json({ reply: 'We build AI-powered chat agents and custom digital websites to help businesses automate their customer service and grow their sales.\n\nAṣẹ.', concierge: true });
 
     const uploadedFile = req.file;
