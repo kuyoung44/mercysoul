@@ -11,7 +11,7 @@
   "dependencies": {
     "@langchain/langgraph": "1.4.13",
     "@vercel/firewall": "latest",
-    "express": "^4.18.2",
+    "express": "^5.2.1",
     "multer": "^2.0.2"
   }
 }
