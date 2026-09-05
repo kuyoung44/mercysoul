@@ -31,8 +31,38 @@ whatsappLink.href=WHATSAPP_LINK||'#';
 ['contextmenu','copy','cut','dragstart','selectstart'].forEach(name=>document.addEventListener(name,e=>{if(e.target!==input)e.preventDefault();}));
 pdfInput.addEventListener('change',()=>{selectedPdf=pdfInput.files&&pdfInput.files[0]||null;fileName.textContent=selectedPdf?selectedPdf.name:'No PDF selected';});
 function append(type,text){const el=document.createElement('div');el.className='message '+type;el.textContent=text;chatBox.appendChild(el);chatBox.scrollTop=chatBox.scrollHeight;return el;}
-async function sendMessage(){const message=input.value.trim();if(!message)return;append('user',message);input.value='';sendButton.disabled=true;const loading=append('bot','MercySoul is thinking...');try{let response;if(selectedPdf){const form=new FormData();form.append('file',selectedPdf,selectedPdf.name);form.append('message',message);response=await fetch('/api/chat',{method:'POST',body:form});}else{response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message})});}const data=await response.json().catch(()=>({}));loading.remove();append('bot',response.status===403?DENIAL:(data.reply||data.error||'Please try again.'));}catch(error){loading.remove();append('bot','Connection error. Try again later. Asẹ.');}finally{sendButton.disabled=false;}}
-sendButton.addEventListener('click',sendMessage);input.addEventListener('keydown',e=>{if(e.key==='Enter')sendMessage();});
+async function sendMessage(){
+  const message=input.value.trim();
+  if(!message)return;
+  append('user',message);
+  input.value='';
+  sendButton.disabled=true;
+  const loading=append('bot','MercySoul is thinking...');
+  try{
+    // /api/chat uses bodyParser:false so send all chat requests as multipart.
+    // Multer then populates req.body consistently, with or without a PDF.
+    const form=new FormData();
+    form.append('message',message);
+    if(selectedPdf) form.append('file',selectedPdf,selectedPdf.name);
+    const response=await fetch('/api/chat',{method:'POST',body:form});
+    const data=await response.json().catch(()=>({}));
+    loading.remove();
+    if(!response.ok){
+      append('bot',data.reply||data.error||`Chat request failed (${response.status}). Please try again. Asẹ.`);
+      return;
+    }
+    append('bot',data.reply||data.error||'MercySoul did not return a response. Please try again. Asẹ.');
+  }catch(error){
+    loading.remove();
+    append('bot','Unable to reach MercySoul chat right now. Please try again in a moment. Asẹ.');
+    console.error('MercySoul chat error:',error);
+  }finally{
+    sendButton.disabled=false;
+    input.focus();
+  }
+}
+sendButton.addEventListener('click',sendMessage);
+input.addEventListener('keydown',e=>{if(e.key==='Enter')sendMessage();});
 })();
 </script>
 </body>
