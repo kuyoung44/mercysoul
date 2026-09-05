@@ -13,6 +13,8 @@ input,button,.upload-label,.whatsapp-btn{user-select:text;-webkit-user-select:te
 .header h1{margin:0;font-size:1.5rem}.header p{margin:5px 0 0;font-size:.8rem}
 .document-bar,.input-area{padding:12px 20px;background:#0d0d1a;border-bottom:1px solid #333;display:flex;align-items:center;gap:12px;flex-wrap:wrap}.upload-label,button{padding:10px 16px;border-radius:25px;border:1px solid #d4af37;background:#d4af37;color:#111;font-weight:bold;cursor:pointer}
 .chat-container{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:15px}.message{max-width:80%;padding:12px 15px;border-radius:15px;line-height:1.55}.message.bot{color:#FFD700!important}.user{align-self:flex-end;background:#d4af37;color:#111}.bot{align-self:flex-start;background:#1a1a2e;border:1px solid #444}.bot strong,.signature{color:#FFD700}
+.catalog-blink{animation:catalogBlink 1.15s ease-in-out infinite;text-shadow:0 0 8px rgba(255,215,0,.65),0 0 16px rgba(255,215,0,.35)}
+@keyframes catalogBlink{0%,100%{opacity:1}50%{opacity:.28}}
 .input-area{border-top:1px solid #333;border-bottom:0}.input-area input[type=text]{flex:1;padding:12px;border-radius:25px;border:1px solid #d4af37;background:#111;color:#fff;outline:none;font-size:1rem}
 .whatsapp-wrap{text-align:center;padding:16px 20px;background:#0d0d1a;border-top:1px solid #333}.whatsapp-btn{display:inline-block;color:#FFD700!important;text-decoration:underline;font-size:18px;font-weight:bold;text-shadow:0 0 10px rgba(255,215,0,.8),0 0 20px rgba(255,215,0,.45);transition:all .2s ease}.whatsapp-btn:hover,.whatsapp-btn:focus{color:#fff!important;text-shadow:0 0 14px rgba(255,215,0,1),0 0 28px rgba(255,215,0,.65)}
 </style>
@@ -27,12 +29,13 @@ input,button,.upload-label,.whatsapp-btn{user-select:text;-webkit-user-select:te
 (function(){
 'use strict';
 const WHATSAPP_LINK = window.WHATSAPP_LINK || 'https://wa.me/2348135278110';
+const CATALOG_LINE_PATTERN=/^(?:💎|💻|🌐|🏰)\s.+→\s₦[\d,]+$/;
 let selectedPdf=null;
 const pdfInput=document.getElementById('pdfInput'),fileName=document.getElementById('fileName'),chatBox=document.getElementById('chatBox'),input=document.getElementById('userInput'),sendButton=document.getElementById('sendButton'),whatsappLink=document.getElementById('whatsappLink');
 whatsappLink.href=WHATSAPP_LINK||'#';
 ['contextmenu','copy','cut','dragstart','selectstart'].forEach(name=>document.addEventListener(name,e=>{if(e.target!==input)e.preventDefault();}));
 pdfInput.addEventListener('change',()=>{selectedPdf=pdfInput.files&&pdfInput.files[0]||null;fileName.textContent=selectedPdf?selectedPdf.name:'No PDF selected';});
-function append(type,text){const el=document.createElement('div');el.className='message '+type;if(type==='bot')el.classList.add('gold-text');el.textContent=text;chatBox.appendChild(el);chatBox.scrollTop=chatBox.scrollHeight;return el;}
+function append(type,text){const el=document.createElement('div');el.className='message '+type;if(type==='bot')el.classList.add('gold-text');if(type==='bot'&&String(text).split('\n').some(line=>CATALOG_LINE_PATTERN.test(line.trim())))el.classList.add('catalog-blink');el.textContent=text;chatBox.appendChild(el);chatBox.scrollTop=chatBox.scrollHeight;return el;}
 async function sendMessage(){const message=input.value.trim();if(!message)return;append('user',message);input.value='';sendButton.disabled=true;const loading=append('bot','MercySoul is thinking...');try{const form=new FormData();form.append('message',message);if(selectedPdf)form.append('file',selectedPdf,selectedPdf.name);const response=await fetch('/api/chat',{method:'POST',body:form});const data=await response.json().catch(()=>({}));loading.remove();if(!response.ok){append('bot',data.reply||data.error||`Chat request failed (${response.status}). Please try again. Aṣẹ.`);return;}append('bot',data.reply||data.error||'MercySoul did not return a response. Please try again. Aṣẹ.');}catch(error){loading.remove();append('bot','Unable to reach MercySoul chat right now. Please try again in a moment. Aṣẹ.');console.error('MercySoul chat error:',error);}finally{sendButton.disabled=false;input.focus();}}
 sendButton.addEventListener('click',sendMessage);input.addEventListener('keydown',e=>{if(e.key==='Enter')sendMessage();});
 })();
