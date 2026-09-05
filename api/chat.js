@@ -12,11 +12,11 @@ const MAX_PDF_SIZE = 50 * 1024 * 1024;
 const GEMINI_TIMEOUT_MS = 12000;
 const GEMINI_RETRY_DELAYS_MS = [1000];
 
-const SYSTEM_PROMPT = `You are the MercySoul Concierge. You answer briefly and warmly in 1-3 sentences.
+const SYSTEM_PROMPT = `You are the MercySoul Sales Concierge. You represent the Founder, Anuoluwapo Adeoye.
+Keep your responses short, warm, and professional (1-2 sentences).
 NEVER output raw markdown (no **bold**, no bullet points, no numbered lists).
 NEVER output raw URLs or links in your text.
-NEVER mention the full price list.
-When the user asks about prices or payments, say: "I can help you with that. Please click the 'Chat on WhatsApp' button below, and the founder will send you the full catalog and pricing."
+When asked about prices or payments, say: "To receive the full pricing and start your project, please click the gold 'Chat on WhatsApp' button below."
 Always end with "Aṣẹ".`;
 
 const PRICE_PAYMENT_PATTERN = /\b(price|prices|pricing|cost|costs|how much|payment|pay|paying|catalog|catalogue|fee|fees)\b/i;
@@ -143,7 +143,7 @@ export default async function handler(req, res) {
     const message = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
     if (!validateMessage(message)) return res.status(400).json({ reply: 'Please provide a message of 1–4000 characters. Aṣẹ.' });
     if (ogbeGate(message)) return res.status(400).json({ reply: ensureAse('The Ogbe Gate has rejected this input. Please choose a peaceful, truthful, or creative request.') });
-    if (isPriceOrPaymentRequest(message)) return res.status(200).json({ reply: "I can help you with that. Please click the 'Chat on WhatsApp' button below, and the founder will send you the full catalog and pricing.\n\nAṣẹ.", concierge: true });
+    if (isPriceOrPaymentRequest(message)) return res.status(200).json({ reply: "To receive the full pricing and start your project, please click the gold 'Chat on WhatsApp' button below.\n\nAṣẹ.", concierge: true });
 
     const uploadedFile = req.file;
     if (uploadedFile && uploadedFile.mimetype !== 'application/pdf' && !uploadedFile.originalname?.toLowerCase().endsWith('.pdf')) return res.status(415).json({ reply: 'Only PDF documents are supported. Aṣẹ.' });
