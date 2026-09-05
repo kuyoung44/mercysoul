@@ -13,28 +13,20 @@ const GEMINI_TIMEOUT_MS = 12000;
 const GEMINI_RETRY_DELAYS_MS = [1000];
 
 const SYSTEM_PROMPT = `You are the MercySoul Vision Brain, a professional AI Sales Concierge for a digital technology agency.
-- When a user asks for services, options, or prices, you MUST output the list using this EXACT structured format with an arrow symbol (→) for alignment, and you MUST use the word "Color:" to label the category line:
-=========================================================
+- When a user asks for services, options, or prices, you MUST output the list using this exact format:
 💎 AI Chatbot (Customer Assistant) → ₦150,000
-=========================================================
 💻 Build Flash (Website Generator) → ₦100,000
-=========================================================
 🌐 News Gate (Company Website) → ₦75,000
-=========================================================
 🏰 Enterprise Framework (Master AI System) → ₦750,000
-=========================================================
+- Do NOT use the = symbol anywhere.
+- Do NOT use Color: or any label.
+- Use only the emoji, the service name, and the price for catalog lines.
 - Keep the response tight, professional, and easy to scan. Always end with "Aṣẹ".`;
 
-const PRICE_LIST = `Color: Professional Catalog
-=========================================================
-💎 AI Chatbot (Customer Assistant) → ₦150,000
-=========================================================
+const PRICE_LIST = `💎 AI Chatbot (Customer Assistant) → ₦150,000
 💻 Build Flash (Website Generator) → ₦100,000
-=========================================================
 🌐 News Gate (Company Website) → ₦75,000
-=========================================================
-🏰 Enterprise Framework (Master AI System) → ₦750,000
-=========================================================`;
+🏰 Enterprise Framework (Master AI System) → ₦750,000`;
 const PRICE_PAYMENT_PATTERN = /\b(price|prices|pricing|cost|costs|how much|payment|pay|paying|catalog|catalogue|fee|fees|price list|list of prices)\b/i;
 const SERVICE_CATALOG_PATTERN = /\b(service|services|options|offerings|what do you sell|what do you offer|what services do you offer|what does mercy?soul sell)\b/i;
 const OGBE_GATE_BLOCKED_PATTERNS = [
@@ -71,6 +63,8 @@ function ensureAse(text) {
     .replace(/^\s*\d+[.)]\s+/gm, '')
     .replace(/\*\*([^*]+)\*\*/g, '$1')
     .replace(/__([^_]+)__/g, '$1')
+    .replace(/={2,}/g, '')
+    .replace(/\bColor:\s*/gi, '')
     .replace(/\n{3,}/g, '\n\n')
     .replace(/Aṣẹ\.?\s*$/iu, '')
     .trim();
