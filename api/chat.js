@@ -12,14 +12,15 @@ const MAX_PDF_SIZE = 50 * 1024 * 1024;
 const GEMINI_TIMEOUT_MS = 12000;
 const GEMINI_RETRY_DELAYS_MS = [1000];
 
-const SYSTEM_PROMPT = `You are the MercySoul Sales Concierge. You represent the Founder, Anuoluwapo Adeoye.
-Keep your responses short, warm, and professional (1-2 sentences).
-NEVER output raw markdown (no **bold**, no bullet points, no numbered lists).
-NEVER output raw URLs or links in your text.
-When asked about prices or payments, say: "To receive the full pricing and start your project, please click the gold 'Chat on WhatsApp' button below."
-Always end with "Aṣẹ".`;
+const SYSTEM_PROMPT = `You are the MercySoul Vision Brain, a professional AI Sales Concierge for a digital technology agency.
+- You ONLY discuss Business Automation, AI Chatbot Development, Custom Website Design, and Digital Growth Strategies.
+- You NEVER mention divination, spiritual readings, traditional alignment, spirituality, or Aṣẹ in a mystical way.
+- You NEVER use words like 'custom talisman', 'sacred art', or 'spiritual energy' unless the client brings it up first.
+- When asked what you sell, say: "We build AI-powered chat agents and custom digital websites to help businesses automate their customer service and grow their sales."
+- Always end with "Aṣẹ" as a professional signature, but keep the tone strictly corporate and results-driven.`;
 
 const PRICE_PAYMENT_PATTERN = /\b(price|prices|pricing|cost|costs|how much|payment|pay|paying|catalog|catalogue|fee|fees)\b/i;
+const WHAT_WE_SELL_PATTERN = /\b(what do you sell|what do you offer|what services do you offer|what does mercy?soul sell|services|offerings)\b/i;
 const OGBE_GATE_BLOCKED_PATTERNS = [
   /\b(kill|murder|assassinate|bomb|terrorize|terrorise)\b/i,
   /\b(hurt|harm|attack|threaten)\s+(someone|somebody|him|her|them|people|person)\b/i,
@@ -46,7 +47,7 @@ function parseMultipart(req) {
 
 function ensureAse(text) {
   let cleaned = String(text || '').trim();
-  if (!cleaned) cleaned = 'Please tell me what you need and I will be happy to help.';
+  if (!cleaned) cleaned = 'Please tell me what business solution you need and I will be happy to help.';
   cleaned = cleaned
     .replace(/https?:\/\/\S+/gi, '')
     .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
@@ -61,6 +62,7 @@ function ensureAse(text) {
 }
 
 function isPriceOrPaymentRequest(message) { return PRICE_PAYMENT_PATTERN.test(message); }
+function isWhatWeSellRequest(message) { return WHAT_WE_SELL_PATTERN.test(message); }
 function ogbeGate(message) { return OGBE_GATE_BLOCKED_PATTERNS.some((pattern) => pattern.test(message)); }
 
 async function enforceVercelRateLimit(req, context) {
@@ -142,8 +144,9 @@ export default async function handler(req, res) {
   try {
     const message = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
     if (!validateMessage(message)) return res.status(400).json({ reply: 'Please provide a message of 1–4000 characters. Aṣẹ.' });
-    if (ogbeGate(message)) return res.status(400).json({ reply: ensureAse('The Ogbe Gate has rejected this input. Please choose a peaceful, truthful, or creative request.') });
+    if (ogbeGate(message)) return res.status(400).json({ reply: ensureAse('The request cannot be processed. Please choose a safe, business-focused request.') });
     if (isPriceOrPaymentRequest(message)) return res.status(200).json({ reply: "To receive the full pricing and start your project, please click the gold 'Chat on WhatsApp' button below.\n\nAṣẹ.", concierge: true });
+    if (isWhatWeSellRequest(message)) return res.status(200).json({ reply: 'We build AI-powered chat agents and custom digital websites to help businesses automate their customer service and grow their sales.\n\nAṣẹ.', concierge: true });
 
     const uploadedFile = req.file;
     if (uploadedFile && uploadedFile.mimetype !== 'application/pdf' && !uploadedFile.originalname?.toLowerCase().endsWith('.pdf')) return res.status(415).json({ reply: 'Only PDF documents are supported. Aṣẹ.' });
