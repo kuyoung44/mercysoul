@@ -6,7 +6,7 @@
 <title>MercySoul Vision Brain</title>
 <style>
 body{background:#050510;color:#fff;font-family:Segoe UI,Tahoma,sans-serif;margin:0;display:flex;flex-direction:column;height:100vh;user-select:none;-webkit-user-select:none}
-input,button,.upload-label,.whatsapp-btn{user-select:text;-webkit-user-select:text}
+input,button,.upload-label,.whatsapp-btn,.demo-btn,.preview-close,.preview-open{user-select:text;-webkit-user-select:text}
 .gold-text{color:#FFD700!important}
 .major-title{color:#FFD700!important;text-shadow:0 0 10px rgba(255,215,0,.8),0 0 22px rgba(255,215,0,.45);font-weight:bold}
 .header{padding:20px;text-align:center;background:linear-gradient(90deg,#4b0082,#1a1a2e);border-bottom:2px solid #d4af37}
@@ -15,6 +15,8 @@ input,button,.upload-label,.whatsapp-btn{user-select:text;-webkit-user-select:te
 .chat-container{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:15px}.message{max-width:80%;padding:12px 15px;border-radius:15px;line-height:1.55}.message.bot{color:#FFD700!important}.user{align-self:flex-end;background:#d4af37;color:#111}.bot{align-self:flex-start;background:#1a1a2e;border:1px solid #444}.bot strong,.signature{color:#FFD700}
 .catalog-blink{animation:catalogBlink 1.15s ease-in-out infinite;text-shadow:0 0 8px rgba(255,215,0,.65),0 0 16px rgba(255,215,0,.35)}
 @keyframes catalogBlink{0%,100%{opacity:1}50%{opacity:.28}}
+.demo-wrap{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid #444}.demo-btn{display:inline-block;padding:7px 12px;border:1px solid #d4af37;border-radius:18px;color:#FFD700;text-decoration:none;background:#0d0d1a;font-size:13px;font-weight:bold;cursor:pointer}.demo-btn:hover,.demo-btn:focus{background:#d4af37;color:#111}
+.preview-overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:14px;z-index:9999}.preview-overlay.active{display:flex}.preview-panel{width:min(1100px,96vw);height:min(760px,94vh);background:#0d0d1a;border:1px solid #d4af37;border-radius:14px;box-shadow:0 0 30px rgba(212,175,55,.35);display:flex;flex-direction:column;overflow:hidden}.preview-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;color:#FFD700;border-bottom:1px solid #444;font-weight:bold}.preview-close{background:transparent;color:#FFD700;border:1px solid #d4af37;border-radius:18px;padding:5px 10px;cursor:pointer}.preview-frame{width:100%;flex:1;border:0;background:#fff}.preview-note{padding:8px 12px;font-size:12px;color:#aaa;text-align:center}.preview-open{color:#FFD700}
 .input-area{border-top:1px solid #333;border-bottom:0}.input-area input[type=text]{flex:1;padding:12px;border-radius:25px;border:1px solid #d4af37;background:#111;color:#fff;outline:none;font-size:1rem}
 .whatsapp-wrap{text-align:center;padding:16px 20px;background:#0d0d1a;border-top:1px solid #333}.whatsapp-btn{display:inline-block;color:#FFD700!important;text-decoration:underline;font-size:18px;font-weight:bold;text-shadow:0 0 10px rgba(255,215,0,.8),0 0 20px rgba(255,215,0,.45);transition:all .2s ease}.whatsapp-btn:hover,.whatsapp-btn:focus{color:#fff!important;text-shadow:0 0 14px rgba(255,215,0,1),0 0 28px rgba(255,215,0,.65)}
 </style>
@@ -25,17 +27,28 @@ input,button,.upload-label,.whatsapp-btn{user-select:text;-webkit-user-select:te
 <div class="chat-container" id="chatBox"><div class="message bot gold-text">Welcome. I am the MercySoul Vision Brain. How can I assist you today?</div></div>
 <div class="input-area"><input type="text" id="userInput" placeholder="Describe what you need..."><button id="sendButton" type="button">Send</button></div>
 <div class="whatsapp-wrap"><a id="whatsappLink" href="#" target="_blank" rel="noopener noreferrer" class="whatsapp-btn gold-text">Chat on WhatsApp</a></div>
+<div class="preview-overlay" id="previewOverlay" role="dialog" aria-modal="true" aria-label="Service demo preview"><div class="preview-panel"><div class="preview-head"><span id="previewTitle">Service Demo</span><button class="preview-close" id="previewClose" type="button">Close</button></div><iframe class="preview-frame" id="previewFrame" title="Service demo preview" loading="lazy"></iframe><div class="preview-note">If the demo does not allow embedded preview, use <a id="previewOpen" class="preview-open" target="_blank" rel="noopener noreferrer">Open demo in new tab</a>.</div></div></div>
 <script>
 (function(){
 'use strict';
 const WHATSAPP_LINK = window.WHATSAPP_LINK || 'https://wa.me/2348135278110';
 const CATALOG_LINE_PATTERN=/^(?:💎|💻|🌐|🏰)\s.+→\s₦[\d,]+$/;
+const DEMO_LINKS={
+  'AI Chatbot (Customer Assistant)':'https://mercysoul-git-main-mercy-soul.vercel.app',
+  'Build Flash (Website Generator)':'https://mercy-build-flash-git-main-mercy-soul.vercel.app',
+  'News Gate (Company Website)':'https://mercy-news-git-main-mercy-soul.vercel.app',
+  'Enterprise Framework (Master AI System)':'https://mercy-framework-git-main-mercy-soul.vercel.app'
+};
 let selectedPdf=null;
-const pdfInput=document.getElementById('pdfInput'),fileName=document.getElementById('fileName'),chatBox=document.getElementById('chatBox'),input=document.getElementById('userInput'),sendButton=document.getElementById('sendButton'),whatsappLink=document.getElementById('whatsappLink');
+const pdfInput=document.getElementById('pdfInput'),fileName=document.getElementById('fileName'),chatBox=document.getElementById('chatBox'),input=document.getElementById('userInput'),sendButton=document.getElementById('sendButton'),whatsappLink=document.getElementById('whatsappLink'),previewOverlay=document.getElementById('previewOverlay'),previewFrame=document.getElementById('previewFrame'),previewTitle=document.getElementById('previewTitle'),previewClose=document.getElementById('previewClose'),previewOpen=document.getElementById('previewOpen');
 whatsappLink.href=WHATSAPP_LINK||'#';
 ['contextmenu','copy','cut','dragstart','selectstart'].forEach(name=>document.addEventListener(name,e=>{if(e.target!==input)e.preventDefault();}));
 pdfInput.addEventListener('change',()=>{selectedPdf=pdfInput.files&&pdfInput.files[0]||null;fileName.textContent=selectedPdf?selectedPdf.name:'No PDF selected';});
-function append(type,text){const el=document.createElement('div');el.className='message '+type;if(type==='bot')el.classList.add('gold-text');if(type==='bot'&&String(text).split('\n').some(line=>CATALOG_LINE_PATTERN.test(line.trim())))el.classList.add('catalog-blink');el.textContent=text;chatBox.appendChild(el);chatBox.scrollTop=chatBox.scrollHeight;return el;}
+function openPreview(service,url){previewTitle.textContent=service+' — Demo';previewFrame.src=url;previewOpen.href=url;previewOverlay.classList.add('active');}
+function closePreview(){previewOverlay.classList.remove('active');previewFrame.src='about:blank';}
+previewClose.addEventListener('click',closePreview);previewOverlay.addEventListener('click',e=>{if(e.target===previewOverlay)closePreview();});document.addEventListener('keydown',e=>{if(e.key==='Escape')closePreview();});
+function addDemoButtons(el){const wrap=document.createElement('div');wrap.className='demo-wrap';Object.entries(DEMO_LINKS).forEach(([service,url])=>{const button=document.createElement('a');button.className='demo-btn';button.href=url;button.target='_blank';button.rel='noopener noreferrer';button.textContent='Preview '+service.split(' (')[0];button.addEventListener('click',e=>{e.preventDefault();openPreview(service,url);});wrap.appendChild(button);});el.appendChild(wrap);}
+function append(type,text){const el=document.createElement('div');el.className='message '+type;if(type==='bot')el.classList.add('gold-text');if(type==='bot'&&String(text).split('\n').some(line=>CATALOG_LINE_PATTERN.test(line.trim()))){el.classList.add('catalog-blink');addDemoButtons(el);}el.textContent=text;chatBox.appendChild(el);chatBox.scrollTop=chatBox.scrollHeight;return el;}
 async function sendMessage(){const message=input.value.trim();if(!message)return;append('user',message);input.value='';sendButton.disabled=true;const loading=append('bot','MercySoul is thinking...');try{const form=new FormData();form.append('message',message);if(selectedPdf)form.append('file',selectedPdf,selectedPdf.name);const response=await fetch('/api/chat',{method:'POST',body:form});const data=await response.json().catch(()=>({}));loading.remove();if(!response.ok){append('bot',data.reply||data.error||`Chat request failed (${response.status}). Please try again. Aṣẹ.`);return;}append('bot',data.reply||data.error||'MercySoul did not return a response. Please try again. Aṣẹ.');}catch(error){loading.remove();append('bot','Unable to reach MercySoul chat right now. Please try again in a moment. Aṣẹ.');console.error('MercySoul chat error:',error);}finally{sendButton.disabled=false;input.focus();}}
 sendButton.addEventListener('click',sendMessage);input.addEventListener('keydown',e=>{if(e.key==='Enter')sendMessage();});
 })();
