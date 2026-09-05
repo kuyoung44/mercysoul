@@ -13,7 +13,8 @@ const HUMAN_SUPPORT_EMAIL = process.env.HUMAN_SUPPORT_EMAIL?.trim() || 'the conf
 const WHATSAPP_URL = 'https://wa.me/2348135278110';
 const WHATSAPP_LINK = `[Click here to chat with us on WhatsApp](${WHATSAPP_URL})`;
 const MAX_PDF_SIZE = 50 * 1024 * 1024;
-const GEMINI_RETRY_DELAYS_MS = [1000, 2000, 4000];
+const GEMINI_TIMEOUT_MS = 12000;
+const GEMINI_RETRY_DELAYS_MS = [1000];
 const ABOUT_DESCRIPTION = 'MercySoul Vision Brain is a premium creative technology studio in Nigeria helping Nigerian businesses turn ideas into powerful digital experiences. We provide digital marketing, custom AI art, and professional web design services tailored to ambitious brands, entrepreneurs, and organizations. From compelling visual content and distinctive brand artwork to modern, responsive websites and strategic digital marketing, we combine creativity, technology, and purpose to help your business stand out. Whether you need a striking campaign, custom artwork, a new website, or a stronger online presence, MercySoul Vision Brain brings your vision to life with clarity, elegance, and impact. Where Imagination Becomes Sacred Art. Asẹ.';
 
 const pdfUpload = multer({
@@ -75,12 +76,10 @@ const OGBE_GATE_BLOCKED_PATTERNS = [
 function ensureAse(text, includeWhatsApp = false) {
   let cleaned = String(text || '').trim();
   if (!cleaned) cleaned = 'Please tell me what your business needs so I can recommend the right MercySoul service.';
-
   cleaned = cleaned
     .replace(new RegExp(`\\[Click here to chat with us on WhatsApp\\]\\(${WHATSAPP_URL.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')}\\)`, 'g'), '')
     .replace(/As[ẹṣẹ]\.\s*$/iu, '')
     .trim();
-
   if (includeWhatsApp) return `${cleaned}\n\n${WHATSAPP_LINK}\n\nAsẹ.`;
   return `${cleaned}\n\nAsẹ.`;
 }
@@ -96,14 +95,12 @@ function crmResponse(message) {
   const normalized = message.trim();
   const upper = normalized.toUpperCase();
   if (upper === 'MENU' || upper.startsWith('MENU ')) return ensureAse([
-    '**MercySoul Services**',
-    '',
+    '**MercySoul Services**', '',
     '- **MercySoul Bot (Customer Assistant)** — ₦150,000',
     '- **MercySoul Build Flash (Website Generator)** — ₦100,000',
     '- **MercySoul Vision Brain (Custom Art)** — ₦5,000 per image',
     '- **MercySoul News Gate (Company Site)** — ₦75,000',
-    '- **MercySoul Enterprise Framework** — ₦750,000',
-    '',
+    '- **MercySoul Enterprise Framework** — ₦750,000', '',
     'Tell me what your business needs and I will recommend the best option.',
   ].join('\n'), true);
   if (upper === 'STATUS') return ensureAse('Please tell me what service you are interested in so I can help you with the next sales step.');
@@ -135,6 +132,8 @@ async function fetchGeminiWithRetry(payload, apiKey, context, hasPdf) {
   let lastData = {};
 
   for (let attempt = 0; attempt <= GEMINI_RETRY_DELAYS_MS.length; attempt += 1) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), GEMINI_TIMEOUT_MS);
     try {
       const response = await fetch(GEMINI_ENDPOINT, {
         method: 'POST',
@@ -144,30 +143,33 @@ async function fetchGeminiWithRetry(payload, apiKey, context, hasPdf) {
           'x-goog-api-client': 'mercysoul/1.0',
         },
         body: JSON.stringify(payload),
+        signal: controller.signal,
       });
       const data = await response.json().catch(() => ({}));
       lastResponse = response;
       lastData = data;
-
       if (response.ok) return { response, data };
 
-      if ((response.status === 429 || response.status === 503) && attempt < GEMINI_RETRY_DELAYS_MS.length) {
-        console.warn('[MercySoul Gemini]', JSON.stringify({
-          event: 'gemini_retry', status: response.status, attempt: attempt + 1,
-          nextDelayMs: GEMINI_RETRY_DELAYS_MS[attempt], model: MODEL,
-          requestId: context.requestId, ragLite: hasPdf,
-        }));
+      // A 429 from Gemini is quota exhaustion, not transient traffic. Retrying it
+      // only burns the Vercel function budget and caused the previous 30s timeouts.
+      if (response.status === 429) break;
+
+      if (response.status === 503 && attempt < GEMINI_RETRY_DELAYS_MS.length) {
+        console.warn('[MercySoul Gemini]', JSON.stringify({ event: 'gemini_retry', status: response.status, attempt: attempt + 1, nextDelayMs: GEMINI_RETRY_DELAYS_MS[attempt], model: MODEL, requestId: context.requestId, ragLite: hasPdf }));
         await sleep(GEMINI_RETRY_DELAYS_MS[attempt]);
         continue;
       }
       break;
     } catch (error) {
-      console.error('[MercySoul Security]', JSON.stringify({ event: 'gemini_request_failed', requestId: context.requestId, ragLite: hasPdf, attempt: attempt + 1, error: String(error?.message || error) }));
-      if (attempt < GEMINI_RETRY_DELAYS_MS.length) {
+      const timedOut = error?.name === 'AbortError';
+      console.error('[MercySoul Security]', JSON.stringify({ event: timedOut ? 'gemini_timeout' : 'gemini_request_failed', requestId: context.requestId, ragLite: hasPdf, attempt: attempt + 1, timeoutMs: GEMINI_TIMEOUT_MS, error: String(error?.message || error) }));
+      if (!timedOut && attempt < GEMINI_RETRY_DELAYS_MS.length) {
         await sleep(GEMINI_RETRY_DELAYS_MS[attempt]);
         continue;
       }
       throw error;
+    } finally {
+      clearTimeout(timeout);
     }
   }
   return { response: lastResponse, data: lastData };
@@ -198,7 +200,6 @@ export default async function handler(req, res) {
   const message = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
   if (!validateMessage(message)) return res.status(400).json({ reply: 'Please provide a message of 1–4000 characters. Asẹ.' });
   if (ogbeGate(message)) return res.status(400).json({ reply: ensureAse('The Ogbe Gate has rejected this input. Please choose a peaceful, truthful, or creative request.') });
-
   if (isAboutMercySoulRequest(message)) return res.status(200).json({ reply: ABOUT_DESCRIPTION, crm: true });
 
   const crmReply = crmResponse(message);
@@ -218,8 +219,7 @@ export default async function handler(req, res) {
 
   try {
     const { response, data } = await fetchGeminiWithRetry({ systemInstruction: { parts: [{ text: systemInstruction }] }, contents }, apiKey, context, hasPdf);
-
-    if (!response) return res.status(502).json({ reply: 'MercySoul is having trouble connecting to its AI service right now. Please try again in a moment. Asẹ.' });
+    if (!response) return res.status(503).json({ reply: 'MercySoul is temporarily unable to connect to its AI service. Please try again in a moment. Asẹ.' });
 
     if (!response.ok) {
       const apiError = data?.error || {};
@@ -229,7 +229,8 @@ export default async function handler(req, res) {
       if (response.status === 400 && hasPdf) return res.status(502).json({ reply: ensureAse(`Gemini rejected the PDF input. ${apiMessage || 'Please try another PDF.'}`) });
       if (response.status === 401 || response.status === 403) return res.status(502).json({ reply: 'Gemini authentication or project access was rejected. Verify that the Vercel production GEMINI_API_KEY is the current Gemini API Auth key and that the key/project is authorized for the Gemini API. Asẹ.' });
       if (response.status === 404) return res.status(502).json({ reply: `Gemini model '${MODEL}' is unavailable. Set GEMINI_MODEL to an active Gemini model in Vercel. Asẹ.` });
-      if (response.status === 429 || response.status === 503) return res.status(503).json({ reply: 'MercySoul is experiencing unusually high AI traffic right now. Please try again in a moment. Asẹ.' });
+      if (response.status === 429) return res.status(503).json({ reply: 'MercySoul AI is temporarily out of Gemini quota. Please try again after the quota resets, or configure a Gemini billing plan/API key with available quota. Asẹ.' });
+      if (response.status === 503) return res.status(503).json({ reply: 'MercySoul is experiencing temporary AI traffic. Please try again in a moment. Asẹ.' });
       return res.status(502).json({ reply: ensureAse(apiMessage || 'MercySoul could not reach Gemini right now. Please try again.') });
     }
 
@@ -237,6 +238,7 @@ export default async function handler(req, res) {
     if (!reply) return res.status(502).json({ reply: 'Gemini returned no text response. Please try again. Asẹ.' });
     return res.status(200).json({ reply: ensureAse(reply, true), ragLite: hasPdf });
   } catch (error) {
-    return res.status(503).json({ reply: 'MercySoul is temporarily unable to connect to its AI service. Please try again in a moment. Asẹ.' });
+    const message = error?.name === 'AbortError' ? 'MercySoul AI took too long to respond. Please try again in a moment.' : 'MercySoul is temporarily unable to connect to its AI service. Please try again in a moment.';
+    return res.status(503).json({ reply: `${message} Asẹ.` });
   }
 }
