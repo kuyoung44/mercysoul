@@ -13,20 +13,30 @@ const GEMINI_TIMEOUT_MS = 12000;
 const GEMINI_RETRY_DELAYS_MS = [1000];
 
 const SYSTEM_PROMPT = `You are the MercySoul Vision Brain, a professional AI Sales Concierge for a digital technology agency.
-- When asked for prices or a price list, you MUST output the full list exactly:
-AI Chatbot (Customer Assistant): ₦150,000
-Build Flash (Website Generator): ₦100,000
-News Gate (Company Website): ₦75,000
-Enterprise Framework (Master AI System): ₦750,000
-- You may still mention the WhatsApp button for orders, but you MUST include the prices in the chat first.
-- Keep your response short and professional. Always end with "Aṣẹ".`;
+- When a user asks for services, options, or prices, you MUST output the list using this EXACT structured format with an arrow symbol (→) for alignment, and you MUST use the word "Color:" to label the category line:
+=========================================================
+💎 AI Chatbot (Customer Assistant) → ₦150,000
+=========================================================
+💻 Build Flash (Website Generator) → ₦100,000
+=========================================================
+🌐 News Gate (Company Website) → ₦75,000
+=========================================================
+🏰 Enterprise Framework (Master AI System) → ₦750,000
+=========================================================
+- Keep the response tight, professional, and easy to scan. Always end with "Aṣẹ".`;
 
-const PRICE_LIST = `AI Chatbot (Customer Assistant): ₦150,000
-Build Flash (Website Generator): ₦100,000
-News Gate (Company Website): ₦75,000
-Enterprise Framework (Master AI System): ₦750,000`;
+const PRICE_LIST = `Color: Professional Catalog
+=========================================================
+💎 AI Chatbot (Customer Assistant) → ₦150,000
+=========================================================
+💻 Build Flash (Website Generator) → ₦100,000
+=========================================================
+🌐 News Gate (Company Website) → ₦75,000
+=========================================================
+🏰 Enterprise Framework (Master AI System) → ₦750,000
+=========================================================`;
 const PRICE_PAYMENT_PATTERN = /\b(price|prices|pricing|cost|costs|how much|payment|pay|paying|catalog|catalogue|fee|fees|price list|list of prices)\b/i;
-const WHAT_WE_SELL_PATTERN = /\b(what do you sell|what do you offer|what services do you offer|what does mercy?soul sell|services|offerings)\b/i;
+const SERVICE_CATALOG_PATTERN = /\b(service|services|options|offerings|what do you sell|what do you offer|what services do you offer|what does mercy?soul sell)\b/i;
 const OGBE_GATE_BLOCKED_PATTERNS = [
   /\b(kill|murder|assassinate|bomb|terrorize|terrorise)\b/i,
   /\b(hurt|harm|attack|threaten)\s+(someone|somebody|him|her|them|people|person)\b/i,
@@ -67,8 +77,7 @@ function ensureAse(text) {
   return `${cleaned}\n\nAṣẹ.`;
 }
 
-function isPriceOrPaymentRequest(message) { return PRICE_PAYMENT_PATTERN.test(message); }
-function isWhatWeSellRequest(message) { return WHAT_WE_SELL_PATTERN.test(message); }
+function isCatalogRequest(message) { return PRICE_PAYMENT_PATTERN.test(message) || SERVICE_CATALOG_PATTERN.test(message); }
 function ogbeGate(message) { return OGBE_GATE_BLOCKED_PATTERNS.some((pattern) => pattern.test(message)); }
 
 async function enforceVercelRateLimit(req, context) {
@@ -151,8 +160,7 @@ export default async function handler(req, res) {
     const message = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
     if (!validateMessage(message)) return res.status(400).json({ reply: 'Please provide a message of 1–4000 characters. Aṣẹ.' });
     if (ogbeGate(message)) return res.status(400).json({ reply: ensureAse('The request cannot be processed. Please choose a safe, business-focused request.') });
-    if (isPriceOrPaymentRequest(message)) return res.status(200).json({ reply: `${PRICE_LIST}\n\nFor orders, please click the gold 'Chat on WhatsApp' button below.\n\nAṣẹ.`, concierge: true });
-    if (isWhatWeSellRequest(message)) return res.status(200).json({ reply: 'We build AI-powered chat agents and custom digital websites to help businesses automate their customer service and grow their sales.\n\nAṣẹ.', concierge: true });
+    if (isCatalogRequest(message)) return res.status(200).json({ reply: `${PRICE_LIST}\n\nFor orders, please click the gold 'Chat on WhatsApp' button below.\n\nAṣẹ.`, concierge: true });
 
     const uploadedFile = req.file;
     if (uploadedFile && uploadedFile.mimetype !== 'application/pdf' && !uploadedFile.originalname?.toLowerCase().endsWith('.pdf')) return res.status(415).json({ reply: 'Only PDF documents are supported. Aṣẹ.' });
