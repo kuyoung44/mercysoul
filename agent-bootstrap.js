@@ -15,3 +15,6 @@ app.post('/api/agent/run', async (req, res) => {
     res.status(500).json({ ok: false, requestId, error: error instanceof Error ? error.message : 'Agent execution failed' });
   }
 });
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`MercySoul OS listening on ${PORT}`));
