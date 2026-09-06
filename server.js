@@ -53,11 +53,7 @@ let smartThingsTokens = null;
 
 app.get('/api/gate', (_req, res) => res.status(200).json({ ok: true, ...sealedGateStatus() }));
 app.post('/api/gate', (req, res) => {
-  const result = recordGateViolation(req, {
-    reason: req.body?.reason,
-    disrespectful: req.body?.disrespectful,
-    draining: req.body?.draining
-  });
+  const result = recordGateViolation(req, { reason: req.body?.reason, disrespectful: req.body?.disrespectful, draining: req.body?.draining });
   res.status(result.blocked ? 403 : 200).json(result.blocked ? gateResponse() : result);
 });
 
@@ -114,6 +110,4 @@ app.post('/api/webhooks/hercules', handleHerculesWebhook);
 app.post('/api/governance/evaluate', (req, res) => { try { const actor = req.body?.actor || 'citizen'; const result = processInput({ ...req.body, requestId: req.requestId, type: req.body?.type === 'web' ? 'web' : 'post', source: `governance:${actor}`, watchtowerIdentity: req.watchtower?.identity }); res.status(200).json({ ok: true, governance: MERCYSOUL_CONSTITUTION.name, equalTreatment: true, actor, ...result, instantJustice: req.instantJustice, globalJurisdiction: globalJurisdictionStatus(), watchtower: watchtowerStatus(), emotionalShield: emotionalShieldStatus() }); } catch { res.status(400).json({ ok: false, error: 'Unable to evaluate governance content', requestId: req.requestId }); } });
 app.post('/api/verify', async (_req, res) => res.json({ success: true, governanceBound: true, engineVersion: ENGINE_VERSION, serverRelease: SERVER_RELEASE, constitutionVersion: MERCYSOUL_CONSTITUTION.version, omnipresentHelp: omnipresentHelpStatus(), helpWebhook: HELP_WEBHOOK_PATH, instantJustice: INSTANT_JUSTICE_PROTOCOL.version, globalJurisdiction: GLOBAL_JURISDICTION_PROTOCOL.version, sovereignJurisdictionVersion: MERCYSOUL_ENGINE.jurisdiction.version, watchtower: WATCHTOWER_PROTOCOL.version, obsessionShield: OBSESSION_SHIELD_PROTOCOL.version, emotionalShield: EMOTIONAL_SHIELD_PROTOCOL.version, herculesWebhook: HERCULES_WEBHOOK_PATH, magneticAttraction: magneticStatus(), divineIncome: divineIncomeStatus(), deploymentDirective: deploymentDirectiveStatus(), smartThings: smartThingsStatus(), googleOAuth: googleOAuthStatus(), supabase: supabaseStatus(), sealedGate: sealedGateStatus(), magneticTalisman: '/magnetic-talisman.svg' }));
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`MercySoul OS listening on ${PORT}`));
 export default app;
