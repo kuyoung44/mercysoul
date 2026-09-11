@@ -1,0 +1,4 @@
+Lead Name,Lead ID,Created Time,Source,Phone,Email,Business Type,Need,Budget Range,Lead Quality,Status,Follow-up Date,Revenue,Product Sold,Notes
+Sample Founder,LEAD-001,2026-09-15 10:30,Facebook,+2348000000001,sample1@example.com,SME,AI Art,NGN10k-NG50k,Hot,New,2026-09-15,0,,"Wants branded artwork"
+Sample Creator,LEAD-002,2026-09-15 12:10,Instagram,+2348000000002,sample2@example.com,Creator,AI Art,<NGN10k,Warm,Contacted,2026-09-16,0,,"Interested in custom artwork"
+Sample Business,LEAD-003,2026-09-16 09:15,Facebook,+2348000000003,sample3@example.com,SME,Automation,NGN50k-NG150k,Qualified,Qualified,2026-09-16,0,MercySoul Bot,"Interested in business automation"
