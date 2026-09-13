@@ -1,0 +1,131 @@
+name: MercySoul OS — Security Hardening
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  schedule:
+    - cron: '31 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  security-hardening:
+    name: Security & Integrity Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          elif [ -f package.json ]; then
+            npm install --ignore-scripts
+          else
+            echo "No package.json found; skipping npm install."
+          fi
+
+      - name: Scan for secrets
+        run: |
+          docker run --rm \
+            -v "$PWD:/repo:ro" \
+            zricethezav/gitleaks:v8.28.0 \
+            detect --source=/repo --no-banner --redact
+
+      - name: Scan for prohibited content
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Scanning repository for high-confidence prohibited content..."
+
+          PATTERN='(fullz market|sell fullz|buy fullz|card dump|stolen cards|bank logs|rat builder|ransomware|keylogger|botnet|phishing kit|scampage|malware builder)'
+
+          if grep -RniE "$PATTERN" . \
+            --exclude-dir=.git \
+            --exclude-dir=node_modules \
+            --exclude-dir=.next \
+            --exclude-dir=dist \
+            --exclude-dir=build \
+            --exclude-dir=coverage \
+            --exclude='package-lock.json' \
+            --exclude='pnpm-lock.yaml' \
+            --exclude='yarn.lock' \
+            --binary-files=without-match; then
+            echo "❌ Prohibited content detected."
+            exit 1
+          fi
+
+          echo "✅ Prohibited-content scan passed."
+
+      - name: Detect dangerous repository files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if find . -type f \
+            \( -iname '*.exe' -o -iname '*.dll' -o -iname '*.scr' -o -iname '*.bat' -o -iname '*.cmd' -o -iname '*.ps1' \) \
+            -not -path './.git/*' \
+            -not -path './node_modules/*' | grep -q .; then
+            echo "❌ Potentially dangerous executable/script files detected."
+            find . -type f \
+              \( -iname '*.exe' -o -iname '*.dll' -o -iname '*.scr' -o -iname '*.bat' -o -iname '*.cmd' -o -iname '*.ps1' \) \
+              -not -path './.git/*' \
+              -not -path './node_modules/*'
+            exit 1
+          fi
+
+          echo "✅ Dangerous-file scan passed."
+
+      - name: Dependency vulnerability audit
+        if: hashFiles('package-lock.json') != ''
+        run: npm audit --audit-level=high
+
+      - name: Run project checks
+        if: hashFiles('package.json') != ''
+        run: npm run check --if-present
+
+      - name: Verify production build
+        if: hashFiles('package.json') != ''
+        run: npm run build --if-present
+
+      - name: Repository integrity summary
+        run: |
+          {
+            echo "# MercySoul OS Security Hardening"
+            echo
+            echo "- Commit: $GITHUB_SHA"
+            echo "- Trigger: $GITHUB_EVENT_NAME"
+            echo "- Node: $(node --version)"
+            echo "- npm: $(npm --version)"
+            echo "- Secret scan: passed"
+            echo "- Prohibited-content scan: passed"
+            echo "- Dangerous-file scan: passed"
+            echo "- Dependency audit: completed when package-lock.json exists"
+            echo "- Code check: completed when configured"
+            echo "- Production build: completed when configured"
+          } > security-hardening-report.md
+
+      - name: Upload security report
+        uses: actions/upload-artifact@v7
+        with:
+          name: mercysoul-security-hardening-report
+          path: security-hardening-report.md
