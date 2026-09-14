@@ -1,0 +1,91 @@
+name: Block Illegal Content
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scan-for-illegal:
+    name: Security Content Gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup scan environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "=========================================="
+          echo " MercySoul Security Content Gate"
+          echo "=========================================="
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo "Commit:     $GITHUB_SHA"
+          echo
+
+      - name: Scan repository for prohibited content
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "🔎 Scanning repository..."
+
+          PATTERN='(fullz|fullz[[:space:]]+market|sell[[:space:]]+fullz|buy[[:space:]]+fullz)|(carding|card[[:space:]]+dump|card[[:space:]]+dumps|stolen[[:space:]]+cards)|(bank[[:space:]]+logs|bank[[:space:]]+account[[:space:]]+logs|stolen[[:space:]]+bank)|(cvv[[:space:]]+shop|cvv[[:space:]]+dump|credit[[:space:]]+card[[:space:]]+dump)|(ssn[[:space:]]+dump|social[[:space:]]+security[[:space:]]+dump)|(keylogger|credential[[:space:]]+stealer|password[[:space:]]+stealer)|(ransomware[[:space:]]+builder|ransomware[[:space:]]+payload)|(botnet[[:space:]]+builder|botnet[[:space:]]+panel)|(ddos[[:space:]]+tool|ddos[[:space:]]+for[[:space:]]+hire)|(phishing[[:space:]]+kit|phishing[[:space:]]+page[[:space:]]+kit)|(scampage|credential[[:space:]]+harvester)|(rat[[:space:]]+builder|remote[[:space:]]+access[[:space:]]+trojan[[:space:]]+builder)|(crypter[[:space:]]+service|malware[[:space:]]+crypter)|(exploit[[:space:]]+kit|exploit[[:space:]]+framework[[:space:]]+for[[:space:]]+sale)|(zero[-[:space:]]?day[[:space:]]+for[[:space:]]+sale|0day[[:space:]]+for[[:space:]]+sale)'
+          FOUND=0
+
+          echo
+          echo "1/3 Content scan"
+          if git grep -I -n -i -E "$PATTERN" -- ':!*.md' ':!*.txt' ':!.git/*' ':!node_modules/*' ':!vendor/*' ':!dist/*' ':!build/*' ':!.next/*' ':!coverage/*' ':!*.lock' ':!package-lock.json' ':!yarn.lock' ':!pnpm-lock.yaml'; then
+            FOUND=1
+          fi
+
+          echo
+          echo "2/3 Suspicious filename scan"
+          FILE_MATCHES=$(find . -type f ! -path './.git/*' ! -path './node_modules/*' ! -path './vendor/*' ! -path './dist/*' ! -path './build/*' ! -path './.next/*' ! -path './coverage/*' -printf '%p\n' | grep -Eio '(fullz|carding|card[-_ ]?dump|bank[-_ ]?logs|stolen[-_ ]?cards|phishing[-_ ]?kit|keylogger|ransomware|botnet|rat[-_ ]?builder|scampage)' || true)
+          if [ -n "$FILE_MATCHES" ]; then
+            echo "$FILE_MATCHES"
+            FOUND=1
+          fi
+
+          echo
+          echo "3/3 Credential/payment-data pattern scan"
+          if git grep -I -n -E '(^|[^0-9])([0-9]{13,19})([^0-9]|$)|CVV[^A-Za-z0-9]*[=:][^A-Za-z0-9]*[0-9]{3,4}' -- ':!*.md' ':!*.txt' ':!.git/*' ':!node_modules/*' ':!vendor/*' ':!dist/*' ':!build/*' ':!.next/*' ':!coverage/*' ':!*.lock' ':!package-lock.json' ':!yarn.lock' ':!pnpm-lock.yaml'; then
+            FOUND=1
+          fi
+
+          echo
+          if [ "$FOUND" -eq 1 ]; then
+            echo "❌ SECURITY CONTENT GATE FAILED"
+            echo "Potentially prohibited or high-risk content was detected."
+            exit 1
+          fi
+          echo "✅ SECURITY CONTENT GATE PASSED"
+          echo "No high-confidence prohibited content detected."
+
+      - name: Verify repository does not contain obvious secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "🔐 Checking for obvious hard-coded secrets..."
+          if git grep -I -n -E '(AIza[0-9A-Za-z_-]{30,}|gh[pousr]_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9]{20,}|-----BEGIN (RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----)' -- ':!*.md' ':!*.txt' ':!.git/*' ':!node_modules/*' ':!vendor/*' ':!dist/*' ':!build/*' ':!.next/*'; then
+            echo "❌ Possible hard-coded secret detected."
+            exit 1
+          fi
+          echo "✅ No obvious hard-coded secrets detected."
+
+      - name: Security gate summary
+        if: always()
+        shell: bash
+        run: |
+          echo
+          echo "=========================================="
+          echo " MercySoul Security Gate Complete"
+          echo "=========================================="
