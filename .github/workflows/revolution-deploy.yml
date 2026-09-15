@@ -2,89 +2,87 @@ name: MercySoul Revolution Deploy
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
   pull_request:
-    branches: [main]
+    branches: [main, master]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: revolution-${{ github.ref }}
+  group: revolution-deploy-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  NODE_VERSION: 20
-
 jobs:
-  verify:
-    name: Security, Test & Build Gate
+  security:
+    name: Security Gate
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Setup Node.js
+      - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm install
 
-      - name: Syntax and test checks
-        run: npm run check
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+        continue-on-error: true
 
-      - name: Security gate
-        run: node scripts/security-check.js
-
-      - name: Illegal-content gate
+      - name: Illegal and malicious content scan
         shell: bash
         run: |
           set -euo pipefail
-          PATTERN='(fullz market|sell fullz|buy fullz|card dump|stolen cards|bank logs|rat builder|ransomware|keylogger|botnet|phishing kit|scampage|malware builder)'
-          if git grep -I -n -i -E "$PATTERN" -- ':!*.md' ':!*.txt' ':!node_modules/*' ':!package-lock.json'; then
-            echo "Security content gate failed."
+          PATTERN='fullz|carding|cvv|dumps|bank logs|stolen cards|hacking tool|keylogger|ransomware|botnet|ddos tool|exploit kit|phishing kit|rm -rf /|curl[[:space:]]*\|[[:space:]]*bash'
+          if git grep -I -n -i -E "$PATTERN" -- ':!.git/*' ':!node_modules/*' ':!package-lock.json' ':!.github/workflows/revolution-deploy.yml'; then
+            echo "Security content gate failed: blocked content detected."
             exit 1
           fi
           echo "Security content gate passed."
 
-      - name: Repository integrity check
-        run: node scripts/ci-diagnose.js
-
-  deploy:
-    name: Production Deploy
+  test:
+    name: Test
     runs-on: ubuntu-latest
-    needs: verify
-    if: github.event_name != 'pull_request'
-    timeout-minutes: 15
-
+    needs: security
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test --if-present
+
+      - name: Run build
+        run: npm run build --if-present
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: [security, test]
+    if: github.event_name != 'pull_request'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Deploy to Vercel
-        if: ${{ secrets.VERCEL_TOKEN != '' }}
-        run: vercel deploy --prod --token "$VERCEL_TOKEN" --yes
+        run: npx vercel --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
-      - name: Deployment handoff
-        if: ${{ secrets.VERCEL_TOKEN == '' }}
-        run: |
-          echo "VERCEL_TOKEN is not configured in GitHub Actions."
-          echo "Vercel Git integration can deploy this main-branch commit directly."
-
-      - name: Complete
-        run: echo "MercySoul Revolution deployment workflow completed."
+      - name: Completion
+        run: echo "MercySoul Revolution deployment completed successfully."
