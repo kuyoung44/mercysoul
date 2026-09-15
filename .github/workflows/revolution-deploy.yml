@@ -1,0 +1,90 @@
+name: MercySoul Revolution Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: revolution-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: 20
+
+jobs:
+  verify:
+    name: Security, Test & Build Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Syntax and test checks
+        run: npm run check
+
+      - name: Security gate
+        run: node scripts/security-check.js
+
+      - name: Illegal-content gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          PATTERN='(fullz market|sell fullz|buy fullz|card dump|stolen cards|bank logs|rat builder|ransomware|keylogger|botnet|phishing kit|scampage|malware builder)'
+          if git grep -I -n -i -E "$PATTERN" -- ':!*.md' ':!*.txt' ':!node_modules/*' ':!package-lock.json'; then
+            echo "Security content gate failed."
+            exit 1
+          fi
+          echo "Security content gate passed."
+
+      - name: Repository integrity check
+        run: node scripts/ci-diagnose.js
+
+  deploy:
+    name: Production Deploy
+    runs-on: ubuntu-latest
+    needs: verify
+    if: github.event_name != 'pull_request'
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Deploy to Vercel
+        if: ${{ secrets.VERCEL_TOKEN != '' }}
+        run: vercel deploy --prod --token "$VERCEL_TOKEN" --yes
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deployment handoff
+        if: ${{ secrets.VERCEL_TOKEN == '' }}
+        run: |
+          echo "VERCEL_TOKEN is not configured in GitHub Actions."
+          echo "Vercel Git integration can deploy this main-branch commit directly."
+
+      - name: Complete
+        run: echo "MercySoul Revolution deployment workflow completed."
