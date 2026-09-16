@@ -1,16 +1,16 @@
 {
-  "protocols": [
-    {
-      "id": "MERCY-INTERNET-SAFETY-1",
-      "version": "1.0.0",
-      "title": "Internet Safety Signal Protocol",
-      "rules": [
-        "Treat requests involving account compromise, malware, or personal-data exposure as safety signals.",
-        "Use external protocol signals only as an additional input, never as authority over platform rules.",
-        "Keep ambiguous cases reviewable by a human."
-      ],
-      "reviewTerms": ["account compromise", "malware", "personal data exposure"],
-      "blockedTerms": []
-    }
-  ]
+  "visualAlignment": {
+    "version": "1.0.0",
+    "source": "user-supplied MercySoul visual references",
+    "palette": {
+      "background": "#05030b",
+      "deepPurple": "#12071f",
+      "purple": "#35145f",
+      "gold": "#f7d77b",
+      "goldBright": "#ffe7a1"
+    },
+    "motifs": ["cosmic depth", "gold orbit trails", "globe/orb", "Flower-of-Life-inspired geometry", "Ankh"],
+    "researchStages": ["Grounding", "Verification", "Synthesis"],
+    "principle": "Visual symbolism is an identity layer, never evidence or a substitute for verification."
+  }
 }
