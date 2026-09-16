@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MercySoul Deep Research Engine</title>
+<meta name="description" content="MercySoul Deep Research Engine — web-grounded research, independent verification and knowledge synthesis.">
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#050510;color:#f7f3e8;font:15px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}.wrap{width:min(980px,94vw);margin:auto;padding:28px 0 60px}.hero{padding:26px;border:1px solid #5b4a16;border-radius:22px;background:linear-gradient(135deg,#160b27,#090918);box-shadow:0 20px 60px #0008}.eyebrow{color:#d7b85a;font-size:12px;letter-spacing:.18em;text-transform:uppercase}.hero h1{margin:8px 0;font-size:clamp(28px,6vw,52px);color:#f0c957}.hero p{color:#bcb6c9;max-width:720px}.panel{margin-top:18px;padding:18px;border:1px solid #292438;border-radius:18px;background:#0b0b17}.row{display:flex;gap:10px;flex-wrap:wrap}textarea,input,select{width:100%;border:1px solid #3a3150;border-radius:12px;background:#070710;color:#fff;padding:13px;font:inherit}textarea{min-height:130px;resize:vertical}.field{flex:1;min-width:220px}.label{display:block;margin:0 0 7px;color:#d7b85a;font-weight:700}.actions{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}button{border:1px solid #d7b85a;border-radius:999px;padding:11px 18px;background:#d7b85a;color:#17110a;font-weight:800;cursor:pointer}button.secondary{background:transparent;color:#d7b85a}.status{color:#8f8a9c;font-size:13px}.answer{white-space:pre-wrap;color:#eee}.sources a{color:#d7b85a}.source{padding:9px 0;border-bottom:1px solid #252234}.source:last-child{border-bottom:0}.badge{display:inline-block;padding:4px 8px;border:1px solid #493c16;border-radius:999px;color:#d7b85a;font-size:12px;margin:3px}.error{color:#ff9e9e}.footer{margin-top:18px;text-align:center;color:#777185;font-size:12px}@media(max-width:600px){.wrap{padding-top:14px}.hero{padding:20px}.panel{padding:14px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<section class="hero"><div class="eyebrow">MercySoul Intelligence Layer</div><h1>Deep Research Engine</h1><p>Ask one question. The engine reaches the public web through Google Search grounding, runs an independent verification pass, then synthesizes the evidence into one research brief.</p><span class="badge">Web-grounded</span><span class="badge">Verification</span><span class="badge">Knowledge synthesis</span><span class="badge">Source trail</span></section>
+<section class="panel">
+<label class="label" for="query">Research question</label><textarea id="query" placeholder="Example: Compare the current Nigerian CAC business-name registration process with company registration, including official requirements and fees."></textarea>
+<div class="row" style="margin-top:12px"><div class="field"><label class="label" for="context">Knowledge/context to mix in (optional)</label><textarea id="context" style="min-height:90px" placeholder="Paste notes, definitions, prior findings, or project context. The engine will treat this as user-provided input, not verified fact."></textarea></div><div style="width:180px"><label class="label" for="mode">Depth</label><select id="mode"><option value="deep">Deep — 3 passes</option><option value="quick">Quick — 1 pass</option></select></div></div>
+<div class="actions"><button id="run">Research</button><button id="clear" class="secondary">Clear</button><span id="status" class="status">Ready.</span></div>
+</section>
+<section class="panel" id="resultPanel" hidden><div class="eyebrow">Research result</div><h2 id="title">Synthesis</h2><div id="answer" class="answer"></div><h3>Sources</h3><div id="sources" class="sources"></div></section>
+<div class="footer">MercySoul Deep Research Engine · Current web evidence can change. Verify consequential decisions against primary sources.</div>
+</main>
+<script>
+const $=id=>document.getElementById(id);const run=$('run'),clear=$('clear'),status=$('status'),query=$('query'),context=$('context'),mode=$('mode'),resultPanel=$('resultPanel'),answer=$('answer'),sources=$('sources');
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+run.onclick=async()=>{const q=query.value.trim();if(!q){status.textContent='Enter a research question.';return}run.disabled=true;status.textContent=mode.value==='deep'?'Researching, verifying and synthesizing…':'Researching…';resultPanel.hidden=false;answer.textContent='';sources.textContent='';try{const r=await fetch('/api/research',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({query:q,context:context.value,mode:mode.value})});const data=await r.json();if(!r.ok||!data.ok)throw new Error(data.error||'Research failed');answer.textContent=data.answer||'No answer returned.';if(!data.sources?.length){sources.textContent='No source list was returned.'}else data.sources.forEach(s=>{const row=document.createElement('div');row.className='source';row.innerHTML='<a href="'+esc(s.url)+'" target="_blank" rel="noopener noreferrer">'+esc(s.title)+'</a><div class="status">'+esc(s.url)+'</div>';sources.appendChild(row)});status.textContent='Complete · '+(data.passes||1)+' research pass(es) · '+(data.sources?.length||0)+' source(s).'}catch(e){answer.textContent='';sources.textContent='';status.textContent='Error';const p=document.createElement('div');p.className='error';p.textContent=e.message;answer.appendChild(p)}finally{run.disabled=false}};
+clear.onclick=()=>{query.value='';context.value='';answer.textContent='';sources.textContent='';resultPanel.hidden=true;status.textContent='Ready.'};
+</script>
+</body>
+</html>
