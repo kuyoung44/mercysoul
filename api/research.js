@@ -1,9 +1,14 @@
 import { runDeepResearch } from '../src/deep-research.js';
+import { securityHeaders, validateOrigin } from '../src/api-security.js';
 
 export default async function handler(req, res) {
+  securityHeaders(res);
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
+  }
+  if (!validateOrigin(req)) {
+    return res.status(403).json({ ok: false, error: 'Request origin is not authorized.' });
   }
 
   try {
