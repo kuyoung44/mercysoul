@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import app from './server.js';
 import { runMercySoulAgent, mercysoulGraphStatus } from './src/agent/mercysoul-graph.js';
+import { runDeepResearch, deepResearchStatus } from './src/deep-research.js';
 import { facebookMessengerStatus, handleFacebookWebhook } from './src/facebook-messenger.js';
 
 app.get('/api/agent/status', (_req, res) => {
@@ -14,6 +15,21 @@ app.post('/api/agent/run', async (req, res) => {
     res.status(result.ok ? 200 : 422).json({ ok: result.ok, requestId, ...result });
   } catch (error) {
     res.status(500).json({ ok: false, requestId, error: error instanceof Error ? error.message : 'Agent execution failed' });
+  }
+});
+
+app.get('/api/research/status', (_req, res) => res.json({ ok: true, research: deepResearchStatus() }));
+app.post('/api/research', async (req, res) => {
+  const requestId = req.get('x-request-id') || crypto.randomUUID();
+  try {
+    const result = await runDeepResearch({
+      query: req.body?.query,
+      context: req.body?.context,
+      mode: req.body?.mode || 'deep',
+    });
+    res.status(200).json({ ...result, requestId });
+  } catch (error) {
+    res.status(400).json({ ok: false, requestId, error: error instanceof Error ? error.message : 'Research failed' });
   }
 });
 
