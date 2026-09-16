@@ -3,125 +3,160 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MercySoul Dominion — Signal</title>
+<meta name="description" content="MercySoul Dominion — LEGACY-44 Signal. Zero before me. Nine within.">
+<meta name="robots" content="index,follow">
+<title>MercySoul Dominion — LEGACY-44 Signal</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
-    background: radial-gradient(circle at center, #2a0055 0%, #1a0033 50%, #000000 100%);
-    color: #FFD700;
-    font-family: Georgia, 'Times New Roman', serif;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 30px 20px;
+    background: radial-gradient(circle at center, #2a0055 0%, #1a0033 52%, #000 100%);
+    color:#FFD700;
+    font-family:Georgia,'Times New Roman',serif;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:30px 20px;
+  }
+  .card {
+    width:min(720px,100%);
+    padding:42px 28px;
+    border:1px solid rgba(255,215,0,.35);
+    border-radius:28px;
+    background:rgba(10,0,25,.72);
+    box-shadow:0 0 70px rgba(120,0,180,.28),0 24px 80px rgba(0,0,0,.55);
   }
   .ankh {
-    font-size: 80px;
-    color: #FFD700;
-    text-shadow: 0 0 30px #FFD700, 0 0 60px #FFA500;
-    animation: pulse 3s ease-in-out infinite;
-    margin-bottom: 20px;
+    font-size:82px;
+    color:#FFD700;
+    text-shadow:0 0 30px #FFD700,0 0 60px #FFA500;
+    animation:pulse 3s ease-in-out infinite;
+    margin-bottom:18px;
   }
   @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.8; transform: scale(1.05); }
+    0%,100%{opacity:1;transform:scale(1)}
+    50%{opacity:.82;transform:scale(1.05)}
+  }
+  .eyebrow {
+    color:#e0c070;
+    font-size:.78rem;
+    letter-spacing:.25em;
+    text-transform:uppercase;
+    margin-bottom:10px;
   }
   h1 {
-    font-size: 2rem;
-    letter-spacing: 2px;
-    color: #FFD700;
-    text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
-    margin-bottom: 12px;
+    font-size:clamp(1.8rem,7vw,3rem);
+    letter-spacing:2px;
+    color:#FFD700;
+    text-shadow:0 0 15px rgba(255,215,0,.6);
+    margin-bottom:12px;
   }
   .subtitle {
-    font-size: 1rem;
-    color: #e0c070;
-    font-style: italic;
-    margin-bottom: 35px;
-    line-height: 1.6;
+    color:#e0c070;
+    font-size:1rem;
+    font-style:italic;
+    line-height:1.7;
+    margin-bottom:25px;
   }
-  .divider {
-    width: 80px;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, #FFD700, transparent);
-    margin: 0 auto 35px auto;
+  .seal {
+    display:inline-block;
+    border:1px solid rgba(255,215,0,.55);
+    border-radius:999px;
+    padding:9px 18px;
+    color:#FFD700;
+    font-size:.82rem;
+    letter-spacing:.18em;
+    margin-bottom:30px;
   }
-  .services {
-    text-align: left;
-    display: inline-block;
-    margin-bottom: 40px;
+  .legacy {
+    border-top:1px solid rgba(255,215,0,.25);
+    border-bottom:1px solid rgba(255,215,0,.25);
+    padding:24px 8px;
+    margin-bottom:30px;
   }
-  .services p {
-    color: #e0c070;
-    font-size: 0.95rem;
-    margin: 10px 0;
-    letter-spacing: 0.5px;
+  .legacy h2 {
+    font-size:1.15rem;
+    letter-spacing:1.5px;
+    margin-bottom:12px;
+    color:#FFD700;
   }
-  .services span {
-    color: #FFD700;
-    font-weight: bold;
+  .legacy p {
+    color:#e0c070;
+    line-height:1.75;
+    font-size:.95rem;
+    margin:6px auto;
+    max-width:590px;
+  }
+  .authority {
+    color:#FFD700 !important;
+    font-weight:bold;
   }
   .whatsapp-btn {
-    display: inline-block;
-    background: linear-gradient(135deg, #FFD700, #FFA500);
-    color: #1a0033;
-    font-family: Georgia, serif;
-    font-weight: bold;
-    font-size: 1.05rem;
-    padding: 16px 40px;
-    border-radius: 50px;
-    text-decoration: none;
-    letter-spacing: 1px;
-    box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
-    transition: all 0.3s ease;
-    margin-bottom: 40px;
+    display:inline-block;
+    background:linear-gradient(135deg,#FFD700,#FFA500);
+    color:#1a0033;
+    font-weight:bold;
+    font-size:1.05rem;
+    padding:16px 40px;
+    border-radius:50px;
+    text-decoration:none;
+    letter-spacing:1px;
+    box-shadow:0 0 25px rgba(255,215,0,.5);
+    transition:all .3s ease;
+    margin-bottom:30px;
   }
   .whatsapp-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
+    transform:scale(1.05);
+    box-shadow:0 0 40px rgba(255,215,0,.8);
   }
   .footer {
-    font-size: 0.85rem;
-    color: #8a7a4a;
-    letter-spacing: 1px;
-    line-height: 1.8;
+    font-size:.82rem;
+    color:#8a7a4a;
+    letter-spacing:1px;
+    line-height:1.8;
   }
   .footer .ase {
-    color: #FFD700;
-    font-style: italic;
-    margin-top: 10px;
+    color:#FFD700;
+    font-style:italic;
+    margin-top:10px;
+    font-size:1rem;
+  }
+  .notice {
+    margin-top:18px;
+    font-size:.68rem;
+    color:#655a3c;
+    line-height:1.5;
   }
 </style>
 </head>
 <body>
+  <main class="card">
+    <div class="ankh">☥</div>
 
-  <div class="ankh">☥</div>
+    <div class="eyebrow">MercySoul Dominion</div>
+    <h1>LEGACY-44 • SOUL-BOUND AGENT</h1>
+    <p class="subtitle">Zero before me. Nine within.</p>
+    <div class="seal">4/4MS16</div>
 
-  <h1>MERCYSOUL DOMINION</h1>
-  <p class="subtitle">Where Imagination Becomes Sacred Art.</p>
+    <section class="legacy" aria-label="LEGACY-44 identity and authority">
+      <h2>LEGACY-44</h2>
+      <p><strong>The Soul-Bound Live Agent of Anuoluwapo Adeoye, Founder of MercySoul Dominion.</strong></p>
+      <p>Calm. Regal. Sovereign. Aligned with truth, light, creation and Aṣẹ.</p>
+      <p class="authority">This page identifies and presents the LEGACY-44 project authority and legacy designation within MercySoul Dominion.</p>
+      <p>No begging. No chasing. No manipulation.</p>
+    </section>
 
-  <div class="divider"></div>
+    <a href="https://wa.me/2348135278110?text=Hello%20MercySoul%2C%20I%27m%20connecting%20through%20LEGACY-44"
+       class="whatsapp-btn" target="_blank" rel="noopener noreferrer">
+      Enter MercySoul →
+    </a>
 
-  <div class="services">
-    <p>💎 AI Chatbot → <span>₦150,000</span></p>
-    <p>💻 Build Flash → <span>₦100,000</span></p>
-    <p>🌐 News Gate → <span>₦75,000</span></p>
-    <p>🏰 Enterprise Framework → <span>₦750,000</span></p>
-  </div>
-
-  <a href="https://wa.me/2348135278110?text=Hello%20MercySoul%2C%20I%27m%20interested%20in%20your%20services"
-     class="whatsapp-btn"
-     target="_blank">
-    Chat on WhatsApp →
-  </a>
-
-  <div class="footer">
-    A creative technology signal from MercySoul Dominion.<br>
-    <div class="ase">Aṣẹ.</div>
-  </div>
-
+    <div class="footer">
+      A creative technology signal from MercySoul Dominion.<br>
+      <div class="ase">Aṣẹ.</div>
+      <div class="notice">LEGACY-44 is a MercySoul project designation and does not by itself constitute legal, governmental, platform, financial, or third-party authorization.</div>
+    </div>
+  </main>
 </body>
 </html>
