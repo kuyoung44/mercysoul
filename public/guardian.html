@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MercySoul Endpoint Guardian</title>
+<style>
+body{font-family:system-ui,sans-serif;margin:0;background:#0d0b16;color:#f4f0ff}main{max-width:1000px;margin:auto;padding:24px}input,button{padding:11px;border-radius:8px;border:1px solid #51466b;background:#171326;color:inherit}button{cursor:pointer}section{background:#151120;border:1px solid #302746;border-radius:14px;padding:18px;margin:14px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.card{padding:14px;background:#0f0d18;border-radius:10px}.high{border-left:4px solid #ff7b72}.medium{border-left:4px solid #e5c07b}.ok{border-left:4px solid #98c379}pre{white-space:pre-wrap;overflow:auto}.muted{color:#aaa0bb}</style>
+</head>
+<body><main>
+<h1>MercySoul Endpoint Guardian</h1><p class="muted">Consent-based endpoint security telemetry. No keystroke, password, clipboard, or private-message capture.</p>
+<section><div class="grid"><label>API key<br><input id="key" type="password" autocomplete="off"></label><label>Owner ID<br><input id="owner" placeholder="Supabase auth user UUID"></label></div><p><button onclick="loadDashboard()">Connect Guardian</button></p><div id="status" class="muted">Not connected.</div></section>
+<section><h2>Alerts</h2><div id="alerts">—</div></section>
+<section><h2>Recent events</h2><div id="events">—</div></section>
+<script>
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function call(path){const key=document.getElementById('key').value;const r=await fetch(path,{headers:{Authorization:`Bearer ${key}`}});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||`HTTP ${r.status}`);return d}
+async function loadDashboard(){const owner=encodeURIComponent(document.getElementById('owner').value.trim());if(!owner)return;try{const s=await call('/api/guardian/status');document.getElementById('status').innerHTML='<span class="ok">Connected to Supabase Guardian.</span>';const [a,e]=await Promise.all([call(`/api/guardian/alerts?ownerId=${owner}`),call(`/api/guardian/events?ownerId=${owner}`)]);document.getElementById('alerts').innerHTML=a.alerts.length?a.alerts.map(x=>`<div class="card high"><b>${esc(x.status)}</b> · risk ${esc(x.risk_score)}<br><span class="muted">${esc(x.created_at)}</span></div>`).join(''):'No alerts.';document.getElementById('events').innerHTML=e.events.length?e.events.map(x=>`<div class="card"><b>${esc(x.severity)}</b> · ${esc(x.title)}<br><span class="muted">${esc(x.event_type)} · ${esc(x.occurred_at)}</span><pre>${esc(JSON.stringify(x.details,null,2))}</pre></div>`).join(''):'No events.'}catch(err){document.getElementById('status').innerHTML='<span class="high">'+esc(err.message)+'</span>'}}
+</script></main></body></html>
