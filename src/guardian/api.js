@@ -16,7 +16,10 @@ function configured() {
 function authorized(req) {
   if (!GUARDIAN_API_KEY) return false;
   const header = String(req.get('authorization') || '');
-  return header.startsWith('Bearer ') && crypto.timingSafeEqual(Buffer.from(header.slice(7)), Buffer.from(GUARDIAN_API_KEY));
+  if (!header.startsWith('Bearer ')) return false;
+  const supplied = Buffer.from(header.slice(7));
+  const expected = Buffer.from(GUARDIAN_API_KEY);
+  return supplied.length === expected.length && crypto.timingSafeEqual(supplied, expected);
 }
 
 function guard(req, res, next) {
