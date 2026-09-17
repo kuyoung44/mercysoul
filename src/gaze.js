@@ -1,4 +1,5 @@
 import express from 'express';
+import guardianRouter from './guardian/api.js';
 
 const router = express.Router();
 let currentGazeState = 'idle';
@@ -92,5 +93,7 @@ router.get('/gaze/state', (req, res) => {
   if (!authorized(req)) return res.status(401).json({ ok:false, error:'Gaze authentication required' });
   res.json({ state:currentGazeState, active:serverGaze, deviceFocus:isDeviceFocusFresh(), rawDeviceFocus:deviceFocus, deviceScreenState, serverGaze, matched:matchState(), autoRespond:serverGaze, lastDeviceSignal, heartbeatTtlMs:DEVICE_FOCUS_TTL_MS, updatedAt });
 });
+
+router.use(guardianRouter);
 
 export default router;
