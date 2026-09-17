@@ -5,8 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node agent-bootstrap.js",
-    "test": "node --test src/*.test.js",
-    "check": "node --check server.js && node --check agent-bootstrap.js && node --check src/sealed-gate.js && node --check src/agent/mercysoul-graph.js && npm test"
+    "test": "node --test src/*.test.js src/guardian/*.test.js",
+    "check": "node --check server.js && node --check agent-bootstrap.js && node --check src/sealed-gate.js && node --check src/agent/mercysoul-graph.js && node --check src/guardian/api.js && node --check src/guardian/risk-engine.js && npm test"
   },
   "dependencies": {
     "@langchain/langgraph": "1.4.13",
