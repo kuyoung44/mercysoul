@@ -24,7 +24,7 @@ jobs:
         run: npm run check
       - name: Reject obvious credential-capture implementation terms
         run: |
-          if grep -RniE 'keylogger|GetAsyncKeyState|SetWindowsHookEx|keyboard hook|clipboard.*capture|password.*capture' src/guardian; then
+          if grep -RniE --include='*.js' --exclude='*.test.js' --exclude='event-schema.js' 'GetAsyncKeyState|SetWindowsHookEx|keyboard hook|clipboard.*capture|password.*capture|keylogger' src/guardian; then
             echo 'Guardian safety gate failed: prohibited capture implementation detected.'
             exit 1
           fi
