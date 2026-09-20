@@ -1,6 +1,10 @@
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
+import { config } from './config.js';
+import { requestLogging } from './middleware/requestLogging.js';
+import { healthRateLimit } from './middleware/rateLimit.js';
+import { errorHandler } from './middleware/errorHandler.js';
 import { osStatus, processInput } from './src/os-core.js';
 import { DOMINION_POLICY } from './src/dominion-moderation.js';
 import { constitutionStatus, evaluateConstitution, MERCYSOUL_CONSTITUTION } from './src/governance/constitution.js';
@@ -23,6 +27,20 @@ import { isBlockedIp, gateResponse, recordGateViolation, sealedGateStatus } from
 
 const app = express();
 app.disable('x-powered-by');
+
+// Enterprise API envelope: preserve already-normalized responses, wrap legacy JSON payloads.
+app.use((req, res, next) => {
+  const originalJson = res.json.bind(res);
+  res.json = (payload) => {
+    if (payload && typeof payload === 'object' && (payload.success === true || payload.success === false)) return originalJson(payload);
+    if (payload && typeof payload === 'object' && payload.ok === false) {
+      return originalJson({ success: false, error: payload.error || 'Request failed.', code: payload.code || 'REQUEST_FAILED' });
+    }
+    return originalJson({ success: true, data: payload ?? {} });
+  };
+  next();
+});
+app.use(requestLogging);
 app.use(express.json({ limit: '1mb' }));
 app.use(express.static('public', { extensions: ['svg'] }));
 const ROOT_INDEX = fileURLToPath(new URL('./index.html', import.meta.url));
@@ -50,6 +68,11 @@ const HERCULES_WEBHOOK_PATH = '/webhooks/hercules';
 const HELP_WEBHOOK_PATH = '/api/help/signal';
 const smartThingsOAuthStates = new Set();
 let smartThingsTokens = null;
+
+app.get('/api/health', healthRateLimit, (_req, res) => res.status(200).json({
+  success: true,
+  data: { status: 'ok', uptime: process.uptime(), model: config.GEMINI_MODEL, memory: process.memoryUsage().rss },
+}));
 
 app.get('/api/gate', (_req, res) => res.status(200).json({ ok: true, ...sealedGateStatus() }));
 app.post('/api/gate', (req, res) => {
@@ -111,3 +134,5 @@ app.post('/api/governance/evaluate', (req, res) => { try { const actor = req.bod
 app.post('/api/verify', async (_req, res) => res.json({ success: true, governanceBound: true, engineVersion: ENGINE_VERSION, serverRelease: SERVER_RELEASE, constitutionVersion: MERCYSOUL_CONSTITUTION.version, omnipresentHelp: omnipresentHelpStatus(), helpWebhook: HELP_WEBHOOK_PATH, instantJustice: INSTANT_JUSTICE_PROTOCOL.version, globalJurisdiction: GLOBAL_JURISDICTION_PROTOCOL.version, sovereignJurisdictionVersion: MERCYSOUL_ENGINE.jurisdiction.version, watchtower: WATCHTOWER_PROTOCOL.version, obsessionShield: OBSESSION_SHIELD_PROTOCOL.version, emotionalShield: EMOTIONAL_SHIELD_PROTOCOL.version, herculesWebhook: HERCULES_WEBHOOK_PATH, magneticAttraction: magneticStatus(), divineIncome: divineIncomeStatus(), deploymentDirective: deploymentDirectiveStatus(), smartThings: smartThingsStatus(), googleOAuth: googleOAuthStatus(), supabase: supabaseStatus(), sealedGate: sealedGateStatus(), magneticTalisman: '/magnetic-talisman.svg' }));
 
 export default app;
+
+app.use(errorHandler);
