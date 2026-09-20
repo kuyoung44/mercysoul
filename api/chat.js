@@ -1,10 +1,11 @@
+import crypto from 'node:crypto';
 import multer from 'multer';
 import { config } from '../config.js';
 import { chatRateLimit } from '../middleware/rateLimit.js';
 import { sanitizeMessage } from '../middleware/input.js';
 import { handleApiError } from '../middleware/errorHandler.js';
 
-export const configApi = { api: { bodyParser: false } };
+export const config = { api: { bodyParser: false } };
 
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${config.GEMINI_MODEL}:generateContent`;
 const MAX_PDF_SIZE = 50 * 1024 * 1024;
