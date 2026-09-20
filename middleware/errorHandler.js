@@ -1,4 +1,4 @@
-export function errorHandler(error, req, res, _next) {
+export function handleApiError(error, req, res) {
   console.error('[MercySoul Error]', JSON.stringify({
     timestamp: new Date().toISOString(),
     method: req.method,
@@ -8,9 +8,13 @@ export function errorHandler(error, req, res, _next) {
     stack: error?.stack,
   }));
   if (res.headersSent) return;
-  res.status(error?.statusCode || 500).json({
+  return res.status(error?.statusCode || 500).json({
     success: false,
     error: error?.publicMessage || 'Internal server error.',
     code: error?.code || 'INTERNAL_ERROR',
   });
+}
+
+export function errorHandler(error, req, res, _next) {
+  return handleApiError(error, req, res);
 }
