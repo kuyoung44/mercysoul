@@ -4,6 +4,7 @@ import { config } from '../config.js';
 import { chatRateLimit } from '../middleware/rateLimit.js';
 import { sanitizeMessage } from '../middleware/input.js';
 import { handleApiError } from '../middleware/errorHandler.js';
+import { requestLogging } from '../middleware/requestLogging.js';
 
 export const config = { api: { bodyParser: false } };
 
@@ -95,6 +96,7 @@ async function fetchGemini(payload, requestId) {
 export default async function handler(req, res) {
   const requestId = String(req.headers?.['x-request-id'] || crypto.randomUUID?.() || Date.now());
   req.requestId = requestId;
+  requestLogging(req, res, () => {});
   res.setHeader('x-request-id', requestId);
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
