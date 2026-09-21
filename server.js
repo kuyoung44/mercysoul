@@ -24,6 +24,7 @@ import { createGoogleOAuthUrl, completeGoogleOAuth, disconnectGoogle, googleOAut
 import gazeRouter from './src/gaze.js';
 import { omnipresentHelpStatus, evaluateHelpSignal } from './src/omnipresent-help.js';
 import { isBlockedIp, gateResponse, recordGateViolation, sealedGateStatus } from './src/sealed-gate.js';
+import { startVisionBrainTurn, executeVisionBrainTool, continueVisionBrainTurn, visionBrainAsyncStatus } from './src/vision-brain/async-agent.js';
 
 const app = express();
 app.disable('x-powered-by');
@@ -68,6 +69,69 @@ const HERCULES_WEBHOOK_PATH = '/webhooks/hercules';
 const HELP_WEBHOOK_PATH = '/api/help/signal';
 const smartThingsOAuthStates = new Set();
 let smartThingsTokens = null;
+
+app.get('/api/vision/async/status', (_req, res) => res.json({ ok: true, visionBrain: visionBrainAsyncStatus() }));
+
+app.post('/api/vision/async', async (req, res) => {
+  const input = req.body?.input ?? req.body?.message ?? req.body?.text;
+  if (typeof input !== 'string' && !Array.isArray(input)) {
+    return res.status(400).json({ ok: false, error: 'input, message, or text is required', requestId: req.requestId });
+  }
+
+  try {
+    const started = await startVisionBrainTurn(input);
+    if (!started.call) {
+      return res.status(200).json({
+        ok: true,
+        requestId: req.requestId,
+        responseId: started.response.id,
+        output: started.response.output,
+        outputText: started.response.output_text || '',
+        asyncTool: false,
+      });
+    }
+
+    // Starting the async application job immediately is the critical part of the pattern.
+    const job = executeVisionBrainTool(started.call).catch((error) => ({ error: error.message }));
+
+    // Independent request handling could happen here without blocking the application
+    // on the external tool. The continuation waits only when it actually needs the result.
+    const result = await job;
+    const continued = await continueVisionBrainTurn({
+      previousResponseId: started.latestResponseId,
+      call: started.call,
+      result,
+    });
+
+    persistEventBestEffort({
+      eventType: 'vision_brain_async_turn',
+      requestId: req.requestId,
+      payload: {
+        responseId: continued.latestResponseId,
+        tool: started.call.name,
+        model: config.VISION_BRAIN_OPENAI_MODEL,
+        async: true,
+      },
+    });
+
+    return res.status(200).json({
+      ok: true,
+      requestId: req.requestId,
+      responseId: continued.latestResponseId,
+      output: continued.response.output,
+      outputText: continued.response.output_text || '',
+      asyncTool: true,
+      tool: started.call.name,
+    });
+  } catch (error) {
+    return res.status(502).json({
+      ok: false,
+      requestId: req.requestId,
+      error: error.message,
+      visionBrain: visionBrainAsyncStatus(),
+    });
+  }
+});
 
 app.get('/api/health', healthRateLimit, (_req, res) => res.status(200).json({
   success: true,
