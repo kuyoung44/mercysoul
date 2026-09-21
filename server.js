@@ -52,7 +52,7 @@ app.use((req, res, next) => {
   res.setHeader('x-content-type-options', 'nosniff');
   res.setHeader('x-frame-options', 'DENY');
   res.setHeader('referrer-policy', 'no-referrer');
-  res.setHeader('x-robots-tag', 'noindex, nofollow, noarchive');
+  res.setHeader('x-robots-tag', req.path.startsWith('/api/') ? 'noindex, nofollow, noarchive' : 'index, follow');
   req.requestId = requestId;
   next();
 });
