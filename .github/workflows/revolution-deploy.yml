@@ -1,4 +1,5 @@
 name: MercySoul Revolution Deploy
+# Deployment trigger: refresh Vercel from the latest main commit.
 
 on:
   push:
