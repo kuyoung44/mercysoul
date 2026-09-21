@@ -12,6 +12,7 @@
     "@langchain/langgraph": "1.4.13",
     "@vercel/firewall": "latest",
     "express": "^4.18.2",
-    "multer": "^2.0.2"
+    "multer": "^2.0.2",
+    "openai": "^7.20.0"
   }
 }
