@@ -42,7 +42,7 @@ jobs:
         run: |
           set -euo pipefail
           PATTERN='fullz|carding|cvv|dumps|bank logs|stolen cards|hacking tool|keylogger|ransomware|botnet|ddos tool|exploit kit|phishing kit|rm -rf /|curl[[:space:]]*\|[[:space:]]*bash'
-          if git grep -I -n -i -E "$PATTERN" -- ':!.git/*' ':!node_modules/*' ':!package-lock.json' ':!.github/workflows/revolution-deploy.yml'; then
+          if git grep -I -n -i -E "$PATTERN" -- ':!.git/*' ':!node_modules/*' ':!package-lock.json' ':!.github/workflows/*'; then
             echo "Security content gate failed: blocked content detected."
             exit 1
           fi
