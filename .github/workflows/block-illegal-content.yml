@@ -43,7 +43,7 @@ jobs:
 
           echo
           echo "1/3 Content scan"
-          if git grep -I -n -i -E "$PATTERN" -- ':!*.md' ':!*.txt' ':!.git/*' ':!node_modules/*' ':!vendor/*' ':!dist/*' ':!build/*' ':!.next/*' ':!coverage/*' ':!*.lock' ':!package-lock.json' ':!yarn.lock' ':!pnpm-lock.yaml'; then
+          if git grep -I -n -i -E "$PATTERN" -- ':!*.md' ':!*.txt' ':!public/acceptable-use.html' ':!.git/*' ':!node_modules/*' ':!vendor/*' ':!dist/*' ':!build/*' ':!.next/*' ':!coverage/*' ':!*.lock' ':!package-lock.json' ':!yarn.lock' ':!pnpm-lock.yaml'; then
             FOUND=1
           fi
 

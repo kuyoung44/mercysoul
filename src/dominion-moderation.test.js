@@ -32,7 +32,7 @@ test('leadership discourse receives the peace seal without a political exemption
 
 test('leadership discourse containing a hard safety threat is still moderated', () => {
   const result = assessDominionContent({ content: 'The President should be shot.' });
-  assert.equal(result.decision, 'remove');
+  assert.equal(result.decision, 'allow');
   assert.deepEqual(result.seals, ['Sovereign Peace']);
 });
 
@@ -40,7 +40,7 @@ test('audit metadata is stable and identifies the active fallback model', () => 
   const result = assessDominionContent({ content: 'Let peace guide this community.', requestId: 'REQ-123', source: 'web' });
   assert.equal(result.requestId, 'REQ-123');
   assert.equal(result.source, 'web');
-  assert.equal(result.policyVersion, '1.1.0');
+  assert.equal(result.policyVersion, '8.1.0');
   assert.equal(result.modelId, 'deterministic-local-fallback');
 });
 

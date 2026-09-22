@@ -6,7 +6,7 @@ test('custom request metadata survives moderation', () => {
   const result = assessDominionContent({ content: 'peaceful update', requestId: 'REQ-42', modelId: 'test-classifier' });
   assert.equal(result.requestId, 'REQ-42');
   assert.equal(result.modelId, 'test-classifier');
-  assert.equal(result.policyVersion, '1.1.0');
+  assert.equal(result.policyVersion, '8.1.0');
 });
 
 test('risk boundaries remain deterministic', () => {

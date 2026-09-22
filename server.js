@@ -24,6 +24,7 @@ import { createGoogleOAuthUrl, completeGoogleOAuth, disconnectGoogle, googleOAut
 import gazeRouter from './src/gaze.js';
 import { omnipresentHelpStatus, evaluateHelpSignal } from './src/omnipresent-help.js';
 import { isBlockedIp, gateResponse, recordGateViolation, sealedGateStatus } from './src/sealed-gate.js';
+import { operatingSystemStatus, executeOperatingSystem } from './src/mercyos-operating-system.js';
 import { startVisionBrainTurn, executeVisionBrainTool, continueVisionBrainTurn, visionBrainAsyncStatus } from './src/vision-brain/async-agent.js';
 
 const app = express();
@@ -69,6 +70,9 @@ const HERCULES_WEBHOOK_PATH = '/webhooks/hercules';
 const HELP_WEBHOOK_PATH = '/api/help/signal';
 const smartThingsOAuthStates = new Set();
 let smartThingsTokens = null;
+
+app.get('/api/os/status', (_req, res) => res.json(operatingSystemStatus()));
+app.post('/api/os/execute', async (req, res) => { try { const result = await executeOperatingSystem(req.body || {}, { requestId: req.requestId }); res.status(200).json(result); } catch (error) { res.status(400).json({ ok: false, requestId: req.requestId, error: error instanceof Error ? error.message : 'OS execution failed' }); } });
 
 app.get('/api/vision/async/status', (_req, res) => res.json({ ok: true, visionBrain: visionBrainAsyncStatus() }));
 
