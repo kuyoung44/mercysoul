@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>MercySoul OS — Control Plane</title>
+<style>
+:root{color-scheme:dark}body{margin:0;font-family:Inter,system-ui,sans-serif;background:#10091f;color:#f5eaff}
+main{max-width:1100px;margin:auto;padding:28px}.brand{color:#d9b45b;letter-spacing:.12em}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}.card{background:#1b1030;border:1px solid #4b3470;border-radius:16px;padding:18px}.muted{color:#b9a9c9}.ok{color:#8ff0b5}.value{font-size:28px;font-weight:700}.layer{display:flex;justify-content:space-between;gap:20px}.layer+ .layer{margin-top:12px;border-top:1px solid #38264f;padding-top:12px}
+</style>
+</head>
+<body>
+<main>
+<div class="brand">MERCYSOUL OS</div>
+<h1>Operating System Control Plane</h1>
+<p class="muted">Core orchestration, governance, persistence and runtime state.</p>
+<section id="summary" class="grid"></section>
+<h2>Architecture</h2><section id="layers" class="card"></section>
+<h2>Capabilities</h2><section id="caps" class="grid"></section>
+<script>
+async function boot(){
+ const r=await fetch('/api/os/status'); const j=await r.json(); const s=j.data||j;
+ document.querySelector('#summary').innerHTML=[
+ ['State',s.state],['OS Version',s.operatingSystemVersion],['Core',s.coreVersion],
+ ['Persistence',s.persistence?.healthy?'Connected':'Not connected']
+ ].map(([a,b])=>'<div class="card"><div class="muted">'+a+'</div><div class="value">'+b+'</div></div>').join('');
+ document.querySelector('#layers').innerHTML=s.layers.map(x=>'<div class="layer"><b>'+x.name+'</b><span class="muted">'+x.responsibility+'</span></div>').join('');
+ document.querySelector('#caps').innerHTML=Object.entries(s.capabilities).map(([a,b])=>'<div class="card"><b>'+a+'</b><div class="'+(b?'ok':'muted')+'">'+(b?'READY':'UNAVAILABLE')+'</div></div>').join('');
+}
+boot().catch(e=>document.body.innerHTML+='<p>Control plane unavailable.</p>');
+</script>
+</main>
+</body>
+</html>
