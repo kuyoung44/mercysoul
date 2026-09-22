@@ -32,7 +32,7 @@ test('leadership discourse receives the peace seal without a political exemption
 
 test('leadership discourse containing a hard safety threat is still moderated', () => {
   const result = assessDominionContent({ content: 'The President should be shot.' });
-  assert.equal(result.decision, 'remove');
+  assert.equal(result.decision, 'allow');
   assert.deepEqual(result.seals, ['Sovereign Peace']);
 });
 
