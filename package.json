@@ -9,7 +9,7 @@
     "check": "node --check server.js && node --check agent-bootstrap.js && node --check src/sealed-gate.js && node --check src/agent/mercysoul-graph.js && npm test"
   },
   "dependencies": {
-    "@langchain/langgraph": "1.4.13",
+    "@langchain/langgraph": "1.4.16",
     "@vercel/firewall": "latest",
     "express": "^4.18.2",
     "multer": "^2.0.2",
