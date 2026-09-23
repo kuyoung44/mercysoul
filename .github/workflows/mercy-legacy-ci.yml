@@ -1,0 +1,22 @@
+name: MercyLegacy CI
+on:
+  push:
+    paths:
+      - "mercy-legacy/**"
+      - ".github/workflows/mercy-legacy-ci.yml"
+  pull_request:
+    paths:
+      - "mercy-legacy/**"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mercy-legacy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npm run build
