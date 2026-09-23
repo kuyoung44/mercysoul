@@ -6,14 +6,17 @@ import { facebookMessengerStatus, handleFacebookWebhook } from './src/facebook-m
 
 app.get('/api/bot/status', (_req, res) => res.json({ ok: true, bot: mercysoulBotStatus() }));
 
-app.post('/api/bot/chat', async (req, res) => {
+async function mercySoulBotHandler(req, res) {
   try {
     const result = await runMercySoulBot(req.body || {});
     res.status(result.ok ? 200 : 400).json(result);
   } catch (error) {
     res.status(502).json({ ok: false, error: error instanceof Error ? error.message : 'MercySoul Bot failed' });
   }
-});
+}
+
+app.post('/api/bot/chat', mercySoulBotHandler);
+app.post('/api/chat', mercySoulBotHandler);
 
 app.get('/api/agent/status', (_req, res) => {
   res.json({ ok: true, service: 'MercySoul Agent', ...mercysoulGraphStatus() });
