@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { runMercySoulBot } from './agent/mercysoul-bot.js';
 
 const GRAPH_VERSION = process.env.META_GRAPH_API_VERSION;
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
@@ -78,7 +79,8 @@ export async function handleFacebookWebhook(req, res) {
       const message = event.message?.text?.trim();
       if (!senderId || !message || event.message?.is_echo) continue;
       try {
-        const reply = await generateReply(message);
+        const bot = await runMercySoulBot({ message, senderId });
+        const reply = bot.reply || await generateReply(message);
         await sendFacebookMessage(senderId, reply);
       } catch (error) {
         console.error('Facebook Messenger webhook error:', error instanceof Error ? error.message : error);
