@@ -44,6 +44,23 @@ app.use((req, res, next) => {
 });
 app.use(requestLogging);
 app.use(express.json({ limit: '1mb' }));
+app.use((req, res, next) => {
+  const origin = req.get('origin');
+  const allowed = new Set([
+    'https://mercy-vision.vercel.app',
+    'https://mercysoul.vercel.app',
+    'http://localhost:3000',
+    'http://localhost:3001',
+  ]);
+  if (origin && allowed.has(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Request-Id');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  }
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
 app.use(express.static('public', { extensions: ['svg'] }));
 const ROOT_INDEX = fileURLToPath(new URL('./index.html', import.meta.url));
 
