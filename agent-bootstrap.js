@@ -2,9 +2,11 @@ import crypto from 'node:crypto';
 import app from './server.js';
 import { runMercySoulAgent, mercysoulGraphStatus } from './src/agent/mercysoul-graph.js';
 import { runDeepResearch, deepResearchStatus } from './src/deep-research.js';
+import { runMercySoulBot, mercysoulBotStatus } from './src/agent/mercysoul-bot.js';
+import { whatsappStatus, handleWhatsAppWebhook } from './src/whatsapp-cloud.js';
 import { facebookMessengerStatus, handleFacebookWebhook } from './src/facebook-messenger.js';
 
-app.get('/api/bot/status', (_req, res) => res.json({ ok: true, bot: mercysoulBotStatus() }));
+app.get('/api/bot/status', (_req, res) => res.json({ ok: true, bot: mercysoulBotStatus(), whatsapp: whatsappStatus() }));
 
 async function mercySoulBotHandler(req, res) {
   try {
@@ -50,6 +52,8 @@ app.post('/api/research', async (req, res) => {
 app.get('/api/fb/status', (_req, res) => res.json({ ok: true, facebook: facebookMessengerStatus() }));
 app.get('/api/fb-webhook', handleFacebookWebhook);
 app.post('/api/fb-webhook', handleFacebookWebhook);
+app.get('/api/wa-webhook', handleWhatsAppWebhook);
+app.post('/api/wa-webhook', handleWhatsAppWebhook);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`MercySoul OS listening on ${PORT}`));
