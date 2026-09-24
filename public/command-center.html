@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MercySoul Command Center</title>
+<style>
+:root{--bg:#0b0911;--panel:#14111d;--line:#2a2338;--gold:#d4ad63;--text:#f5f1e8;--muted:#9f98ab;--ok:#69d39a;--warn:#e6b85c}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0,#241a35 0,transparent 38%),var(--bg);color:var(--text);font:15px system-ui,sans-serif}
+main{max-width:1180px;margin:auto;padding:28px 18px 60px}.top{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:24px}
+.kicker{color:var(--gold);letter-spacing:.18em;text-transform:uppercase;font-size:11px}.title{font-size:clamp(30px,6vw,58px);margin:6px 0;font-weight:700}.sub{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}.card{background:rgba(20,17,29,.9);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 12px 40px #0005}.wide{grid-column:1/-1}
+.label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.12em}.value{font-size:24px;margin-top:7px}.ok{color:var(--ok)}.warn{color:var(--warn)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}button{border:1px solid var(--line);background:#1b1625;color:var(--text);padding:11px 14px;border-radius:12px;cursor:pointer}button.primary{background:var(--gold);color:#160f08;border-color:var(--gold);font-weight:700}
+pre{white-space:pre-wrap;word-break:break-word;color:#cfc8d8;background:#0a0810;border-radius:12px;padding:14px;max-height:360px;overflow:auto}.status{display:flex;gap:8px;align-items:center}.dot{width:9px;height:9px;border-radius:50%;background:var(--warn)}.dot.live{background:var(--ok)}
+footer{margin-top:28px;color:var(--muted);text-align:center;font-size:12px}
+</style>
+</head>
+<body><main>
+<section class="top"><div><div class="kicker">MercySoul OS</div><h1 class="title">Command Center</h1><div class="sub">One place to see, command, build, and protect the MercySoul engine.</div></div><div class="status"><span id="dot" class="dot"></span><span id="live">Connecting…</span></div></section>
+<section class="grid">
+<div class="card"><div class="label">System</div><div id="system" class="value">—</div><div id="release" class="sub">—</div></div>
+<div class="card"><div class="label">Vision Brain</div><div id="vision" class="value">—</div><div class="sub">Async agent gateway</div></div>
+<div class="card"><div class="label">MercySoul Agent</div><div id="agent" class="value">—</div><div class="sub">Orchestration graph</div></div>
+<div class="card"><div class="label">Bot</div><div id="bot" class="value">—</div><div class="sub">Customer assistant</div></div>
+<div class="card wide"><div class="label">Command</div><div class="actions">
+<button class="primary" onclick="runAgent()">Run Agent</button>
+<button onclick="refresh()">Refresh Status</button>
+<button onclick="runVision()">Ask Vision Brain</button>
+</div><pre id="output">Ready.</pre></div>
+</section>
+<footer>MercySoul OS · Security → Privacy → Identity → Connection → Vision → Creation · Aṣẹ.</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+async function get(path){const r=await fetch(path);return r.json()}
+function show(id,v){$(id).textContent=typeof v==='string'?v:(v?'ONLINE':'OFFLINE')}
+async function refresh(){
+ try{
+  const [h,s,a,v,b]=await Promise.all([get('/api/health'),get('/api/status'),get('/api/agent/status'),get('/api/vision/async/status'),get('/api/bot/status')]);
+  show('system',h.success?'ONLINE':'DEGRADED'); $('release').textContent='Engine '+(s.data?.serverEngineVersion||s.serverEngineVersion||'active');
+  show('vision',v.ok?'READY':'CHECK'); show('agent',a.ok?'READY':'CHECK'); show('bot',b.ok?'READY':'CHECK');
+  $('dot').className='dot live'; $('live').textContent='Live';
+  $('output').textContent=JSON.stringify({health:h,status:s.data||s,agent:a.data||a,vision:v,bot:b.data||b},null,2);
+ }catch(e){$('dot').className='dot';$('live').textContent='Offline';$('output').textContent=e.message}
+}
+async function runAgent(){const task=prompt('What should MercySoul build or inspect?');if(!task)return; $('output').textContent='Executing…';try{$('output').textContent=JSON.stringify(await (await fetch('/api/agent/run',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({input:task})})).json(),null,2)}catch(e){$('output').textContent=e.message}}
+async function runVision(){const input=prompt('What should Vision Brain see?');if(!input)return; $('output').textContent='Thinking…';try{$('output').textContent=JSON.stringify(await (await fetch('/api/vision/async',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({input})})).json(),null,2)}catch(e){$('output').textContent=e.message}}
+refresh();
+</script></body></html>
