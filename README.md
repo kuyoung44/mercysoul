@@ -63,6 +63,10 @@ Creation remains aligned with the user's intended outcome. Generated artwork rec
 
 The Obsession Shield provides technical, user-controlled boundaries: block unwanted contacts on supported platforms, evaluate repeated or threatening interaction signals within MercySoul services, and redirect attention away from compulsive engagement. It does not claim to detect spirits, establish supernatural causation, retaliate against senders, or control external platforms.
 
+## No Unaccountable Violations Rule
+
+Confirmed harmful or abusive violations within MercySoul-controlled services are not silently ignored. Enforcement is evidence-based, proportionate, equally applied, auditable, and limited to MercySoul-controlled systems. Ambiguous or high-impact cases require human review; retaliation and extraterritorial punishment are prohibited. See [`rules/no-unaccountable-violations.md`](rules/no-unaccountable-violations.md).
+
 ## Dominion moderation
 
 `riskScore = modelConfidence × categoryWeight`
