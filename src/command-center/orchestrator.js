@@ -3,6 +3,7 @@ import { persistEventBestEffort } from '../supabase.js';
 import { runMercySoulAgent } from '../agent/mercysoul-graph.js';
 
 const AGENTS = {
+  cursor: { name: 'MercyCursor', capabilities: ['code edit','coding','cursor','patch','refactor','review','codebase'] },
   github: { name: 'GitHub Agent', capabilities: ['code','repo','commit','branch','pull request','github'] },
   vercel: { name: 'Vercel Agent', capabilities: ['deploy','deployment','vercel','preview'] },
   supabase: { name: 'Supabase Agent', capabilities: ['database','sql','schema','supabase','data'] },
