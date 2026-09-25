@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import { persistEventBestEffort } from '../supabase.js';
 import { runMercySoulAgent } from '../agent/mercysoul-graph.js';
+import { runMercyCursor } from '../cursor/mercy-cursor.js';
 
 const AGENTS = {
   cursor: { name: 'MercyCursor', capabilities: ['code edit','coding','cursor','patch','refactor','review','codebase'] },
@@ -57,6 +58,7 @@ export function routeCommand(command) {
 
 function makePlan(command, route) {
   const steps = [];
+  if (route.agents.includes('cursor')) steps.push({ id: 'cursor', agent: 'cursor', action: 'analyze codebase and produce an aligned coding plan' });
   if (route.agents.includes('github')) steps.push({ id: 'github', agent: 'github', action: 'inspect or modify repository' });
   if (route.agents.includes('supabase')) steps.push({ id: 'supabase', agent: 'supabase', action: 'inspect or update durable data layer' });
   if (route.agents.includes('vercel')) steps.push({ id: 'vercel', agent: 'vercel', action: 'inspect or deploy application' });
@@ -103,7 +105,9 @@ export async function executeCommand(task, options = {}) {
   for (const agent of task.agents) {
     const result = { agent, status: 'completed', startedAt: new Date().toISOString() };
     try {
-      if (agent === 'mercy') {
+      if (agent === 'cursor') {
+        result.output = await runMercyCursor({ command: task.command }, { requestId: options.requestId || task.id });
+      } else if (agent === 'mercy') {
         result.output = await runMercySoulAgent({ command: task.command, type: 'command-center' }, { requestId: options.requestId || task.id });
       } else {
         result.output = { status: 'ready', message: `${AGENTS[agent].name} is selected. External credentials/API adapter are required for live execution.` };
