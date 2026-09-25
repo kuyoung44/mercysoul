@@ -1,8 +1,10 @@
 import crypto from 'node:crypto';
 import { persistEventBestEffort } from '../supabase.js';
 import { runMercySoulAgent } from '../agent/mercysoul-graph.js';
+import { runMercyCursor } from '../cursor/mercy-cursor.js';
 
 const AGENTS = {
+  cursor: { name: 'MercyCursor', capabilities: ['code edit','coding','cursor','patch','refactor','review','codebase'] },
   github: { name: 'GitHub Agent', capabilities: ['code','repo','commit','branch','pull request','github'] },
   vercel: { name: 'Vercel Agent', capabilities: ['deploy','deployment','vercel','preview'] },
   supabase: { name: 'Supabase Agent', capabilities: ['database','sql','schema','supabase','data'] },
@@ -27,9 +29,9 @@ export function routeCommand(command) {
   }
 
   if (text.startsWith('build') || text.startsWith('create') || text.startsWith('implement')) {
-    scores.github += 2; scores.guardian += 1;
+    scores.github += 2; scores.cursor += 3; scores.guardian += 1;
   }
-  if (text.includes('deploy')) { scores.vercel += 3; scores.github += 1; scores.guardian += 1; }
+  if (text.includes('deploy')) { scores.vercel += 3; scores.github += 1; scores.cursor += 1; scores.guardian += 1; }
   if (text.includes('check') || text.includes('broken') || text.includes('error')) {
     scores.guardian += 3; scores.browser += 2;
   }
@@ -56,6 +58,7 @@ export function routeCommand(command) {
 
 function makePlan(command, route) {
   const steps = [];
+  if (route.agents.includes('cursor')) steps.push({ id: 'cursor', agent: 'cursor', action: 'analyze codebase and produce an aligned coding plan' });
   if (route.agents.includes('github')) steps.push({ id: 'github', agent: 'github', action: 'inspect or modify repository' });
   if (route.agents.includes('supabase')) steps.push({ id: 'supabase', agent: 'supabase', action: 'inspect or update durable data layer' });
   if (route.agents.includes('vercel')) steps.push({ id: 'vercel', agent: 'vercel', action: 'inspect or deploy application' });
@@ -102,7 +105,9 @@ export async function executeCommand(task, options = {}) {
   for (const agent of task.agents) {
     const result = { agent, status: 'completed', startedAt: new Date().toISOString() };
     try {
-      if (agent === 'mercy') {
+      if (agent === 'cursor') {
+        result.output = await runMercyCursor({ command: task.command }, { requestId: options.requestId || task.id });
+      } else if (agent === 'mercy') {
         result.output = await runMercySoulAgent({ command: task.command, type: 'command-center' }, { requestId: options.requestId || task.id });
       } else {
         result.output = { status: 'ready', message: `${AGENTS[agent].name} is selected. External credentials/API adapter are required for live execution.` };
