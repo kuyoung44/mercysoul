@@ -5,6 +5,9 @@ import { runDeepResearch, deepResearchStatus } from './src/deep-research.js';
 import { runMercySoulBot, mercysoulBotStatus } from './src/agent/mercysoul-bot.js';
 import { whatsappStatus, handleWhatsAppWebhook } from './src/whatsapp-cloud.js';
 import { facebookMessengerStatus, handleFacebookWebhook } from './src/facebook-messenger.js';
+import commandCenterRouter from './src/command-center/routes.js';
+
+app.use('/api', commandCenterRouter);
 
 app.get('/api/bot/status', (_req, res) => res.json({ ok: true, bot: mercysoulBotStatus(), whatsapp: whatsappStatus() }));
 
