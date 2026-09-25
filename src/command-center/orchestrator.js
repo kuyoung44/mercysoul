@@ -29,9 +29,9 @@ export function routeCommand(command) {
   }
 
   if (text.startsWith('build') || text.startsWith('create') || text.startsWith('implement')) {
-    scores.github += 2; scores.guardian += 1;
+    scores.github += 2; scores.cursor += 3; scores.guardian += 1;
   }
-  if (text.includes('deploy')) { scores.vercel += 3; scores.github += 1; scores.guardian += 1; }
+  if (text.includes('deploy')) { scores.vercel += 3; scores.github += 1; scores.cursor += 1; scores.guardian += 1; }
   if (text.includes('check') || text.includes('broken') || text.includes('error')) {
     scores.guardian += 3; scores.browser += 2;
   }
