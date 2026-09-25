@@ -1,8 +1,9 @@
 import crypto from 'node:crypto';
 import { osStatus, processInput } from './os-core.js';
 import { supabaseStatus, persistEventBestEffort } from './supabase.js';
+import { commandCenterStatus, createCommandTask, getCommandTask, controlCommandTask, updateCommandProgress } from './agent/command-center.js';
 
-const VERSION = '11.0.0';
+const VERSION = '11.1.0';
 const startedAt = new Date().toISOString();
 
 const LAYERS = Object.freeze([
@@ -27,8 +28,10 @@ export function operatingSystemStatus() {
     modules: core.modules,
     policy: core.policy,
     persistence,
+    commandCenter: commandCenterStatus(),
     capabilities: {
       agentOrchestration: true,
+      durableAgentTasks: commandCenterStatus().persistence.configured,
       moderation: true,
       governance: true,
       durableEvents: persistence.healthy,
@@ -41,6 +44,23 @@ export function operatingSystemStatus() {
 export async function executeOperatingSystem(input = {}, options = {}) {
   const requestId = options.requestId || input.requestId || crypto.randomUUID();
   const started = Date.now();
+
+  if (input.type === 'command_center') {
+    const action = String(input.action || 'status').toLowerCase();
+    let data;
+    if (action === 'create') {
+      data = await createCommandTask(input.command, { priority: input.priority, agents: input.agents });
+    } else if (action === 'status') {
+      data = input.taskId ? await getCommandTask(input.taskId) : { status: commandCenterStatus() };
+    } else if (action === 'progress') {
+      data = await updateCommandProgress(input.taskId, input.progress, input.checkpoint);
+    } else {
+      data = await controlCommandTask(input.taskId, action, input);
+    }
+    await persistEventBestEffort({ eventType: 'command_center_control', requestId, payload: { action, taskId: input.taskId || data?.task?.id || null, durable: data?.durable ?? false } });
+    return { ok: true, requestId, osVersion: VERSION, durationMs: Date.now() - started, commandCenter: data };
+  }
+
   let result;
   try {
     result = processInput({ ...input, requestId });
