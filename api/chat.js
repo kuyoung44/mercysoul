@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import multer from 'multer';
-import { config } from '../config.js';
+import { config as appConfig } from '../config.js';
 import { chatRateLimit } from '../middleware/rateLimit.js';
 import { sanitizeMessage } from '../middleware/input.js';
 import { handleApiError } from '../middleware/errorHandler.js';
@@ -8,7 +8,7 @@ import { requestLogging } from '../middleware/requestLogging.js';
 
 export const config = { api: { bodyParser: false } };
 
-const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${config.GEMINI_MODEL}:generateContent`;
+const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${appConfig.GEMINI_MODEL}:generateContent`;
 const MAX_PDF_SIZE = 50 * 1024 * 1024;
 
 const SYSTEM_PROMPT = `You are the MercySoul Vision Brain, a professional AI Sales Concierge for a digital technology agency.
@@ -63,18 +63,18 @@ function rateLimit(req, res) {
 
 function validateOrigin(req) {
   const origin = String(req.headers?.origin || '').trim();
-  return !origin || config.ALLOWED_ORIGINS.includes('*') || config.ALLOWED_ORIGINS.includes(origin);
+  return !origin || appConfig.ALLOWED_ORIGINS.includes('*') || appConfig.ALLOWED_ORIGINS.includes(origin);
 }
 
 async function fetchGemini(payload, requestId) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), config.CHAT_TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), appConfig.CHAT_TIMEOUT_MS);
   try {
     return await fetch(GEMINI_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-goog-api-key': config.GEMINI_API_KEY,
+        'x-goog-api-key': appConfig.GEMINI_API_KEY,
         'x-goog-api-client': 'mercysoul/5.0',
       },
       body: JSON.stringify(payload),
@@ -139,7 +139,7 @@ export default async function handler(req, res) {
         event: 'gemini_failure',
         requestId,
         status: response.status,
-        model: config.GEMINI_MODEL,
+        model: appConfig.GEMINI_MODEL,
         providerError: String(data?.error?.message || '').slice(0, 500),
       }));
       return res.status(200).json({ success: true, data: {
