@@ -46,7 +46,9 @@ app.use(requestLogging);
 app.use(express.json({ limit: '1mb' }));
 app.use((req, res, next) => {
   const origin = req.get('origin');
+  const configuredOrigins = Array.isArray(config.ALLOWED_ORIGINS) ? config.ALLOWED_ORIGINS : [];
   const allowed = new Set([
+    ...configuredOrigins,
     'https://mercy-vision.vercel.app',
     'https://mercysoul.vercel.app',
     'http://localhost:3000',
