@@ -26,6 +26,7 @@ import { omnipresentHelpStatus, evaluateHelpSignal } from './src/omnipresent-hel
 import { isBlockedIp, gateResponse, recordGateViolation, sealedGateStatus } from './src/sealed-gate.js';
 import { operatingSystemStatus, executeOperatingSystem } from './src/mercyos-operating-system.js';
 import { startVisionBrainTurn, executeVisionBrainTool, continueVisionBrainTurn, visionBrainAsyncStatus } from './src/vision-brain/async-agent.js';
+import orchestratorRouter from './src/orchestrator/http.js';
 
 const app = express();
 app.disable('x-powered-by');
@@ -82,6 +83,7 @@ app.use((req, res, next) => {
 });
 app.use(watchtowerMiddleware);
 app.use(instantJusticeMiddleware);
+app.use('/api', orchestratorRouter);
 
 const ENGINE_VERSION = MERCYSOUL_ENGINE.version;
 const SERVER_RELEASE = '10.1.7';
