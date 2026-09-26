@@ -3,6 +3,7 @@ import { createCommandTask, getCommandTask, controlCommandTask } from '../agent/
 import { routeCommand } from './router.js';
 import { toolRegistryStatus } from './tool-registry.js';
 import { authorizeOrchestration } from './guard.js';
+import { executeOrchestrationTask } from './executor.js';
 
 const router = express.Router();
 
@@ -30,8 +31,9 @@ router.post('/orchestrator/command', async (req, res) => {
     return res.status(202).json({ ok: true, execution: 'approval-required', plan });
   }
   try {
-    const result = await createCommandTask(command, { agents: req.body?.agents, priority: req.body?.priority });
-    res.status(201).json({ ok: true, execution: 'accepted', plan, ...result });
+    const accepted = await createCommandTask(command, { agents: req.body?.agents, priority: req.body?.priority });
+    const execution = await executeOrchestrationTask(accepted.task.id, { payload: req.body?.payload || {}, continueOnError: req.body?.continueOnError === true });
+    res.status(execution.halted ? 502 : 201).json({ ok: !execution.halted, execution: execution.halted ? 'halted' : 'completed', plan, ...execution });
   } catch (error) {
     res.status(500).json({ ok: false, error: error.message });
   }
