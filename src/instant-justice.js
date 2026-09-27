@@ -57,11 +57,19 @@ export function instantJustice(input = {}) {
   };
 }
 
-export function instantJusticeMiddleware(req, res, next) {
+export async function instantJusticeMiddleware(req, res, next) {
   if (req.method === 'GET' || req.path === '/health') return next();
   const input = { ...(req.body || {}), accountId: req.body?.accountId || req.get('x-account-id'), accountRole: req.body?.accountRole || req.get('x-account-role') || 'client', requestId: req.requestId, source: req.get('x-source') || req.path, watchtowerIdentity: req.watchtower?.identity };
   const result = instantJustice(input);
   req.instantJustice = result;
+  if (result.aiFraud?.review) {
+    try {
+      const { persistFraudReview } = await import('./ai-fraud-rule.js');
+      await persistFraudReview(result.aiFraud.review);
+    } catch (error) {
+      return res.status(503).json({ ok: false, requestId: req.requestId, error: 'AI-fraud review persistence unavailable', persistenceError: error.message });
+    }
+  }
   if (result.accountEnforcement?.suspended) return res.status(423).json({ ok: false, requestId: req.requestId, ...result });
   if (result.aiFraud?.blocked || result.aiFraud?.confirmed) return res.status(403).json({ ok: false, requestId: req.requestId, ...result });
   if (result.adjudication === 'block') return res.status(403).json({ ok: false, requestId: req.requestId, ...result });
