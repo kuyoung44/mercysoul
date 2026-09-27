@@ -12,7 +12,7 @@ import { RELATIONSHIP_CONTEXT_POLICY, evaluateRelationshipContext } from './src/
 import { globalJurisdictionStatus, GLOBAL_JURISDICTION_PROTOCOL } from './src/governance/global-jurisdiction.js';
 import { WATCHTOWER_PROTOCOL, getWatchtowerAudit, watchtowerMiddleware, watchtowerStatus } from './src/watchtower.js';
 import { INSTANT_JUSTICE_PROTOCOL, instantJusticeMiddleware } from './src/instant-justice.js';
-import { AI_FRAUD_RULE, aiFraudStatus, assessAiFraud, createFraudReview, confirmFraudReview, clearFraudReview } from './src/ai-fraud-rule.js';
+import { AI_FRAUD_RULE, aiFraudStatus, assessAiFraud, createFraudReview, persistFraudReview, confirmFraudReview, clearFraudReview } from './src/ai-fraud-rule.js';
 import { MERCYSOUL_ENGINE, engineStatus } from './src/engine/v8-engine.js';
 import { OBSESSION_SHIELD_PROTOCOL, evaluateObsessionShield, obsessionShieldStatus } from './src/obsession-shield.js';
 import { EMOTIONAL_SHIELD_PROTOCOL, evaluateEmotionalShield, emotionalShieldStatus } from './src/emotional-shield.js';
@@ -166,8 +166,8 @@ app.get('/api/health', healthRateLimit, (_req, res) => res.status(200).json({
 
 app.get('/api/gate', (_req, res) => res.status(200).json({ ok: true, ...sealedGateStatus() }));
 app.get('/api/governance/ai-fraud', (_req, res) => res.status(200).json({ ok: true, ...aiFraudStatus() }));
-app.post('/api/governance/ai-fraud/review', (req, res) => { const assessment = assessAiFraud(req.body || {}); const review = assessment.matched && !assessment.confirmed ? createFraudReview(req.body || {}, assessment) : null; return res.status(assessment.matched ? 200 : 204).json(assessment.matched ? { ok: true, protocol: AI_FRAUD_RULE, assessment, review } : {}); });
-app.post('/api/governance/ai-fraud/decision', (req, res) => { const token = String(req.get('authorization') || '').replace(/^Bearer\s+/i, ''); if (!token || token !== config.ADMIN_API_TOKEN) return res.status(401).json({ ok: false, error: 'Unauthorized' }); const actor = req.body?.actor || 'authorized-reviewer'; const result = req.body?.decision === 'confirm' ? confirmFraudReview(req.body?.reviewId, actor) : clearFraudReview(req.body?.reviewId, actor); return res.status(result.ok ? 200 : 400).json(result); });
+app.post('/api/governance/ai-fraud/review', async (req, res) => { const assessment = assessAiFraud(req.body || {}); const review = assessment.matched && !assessment.confirmed ? createFraudReview(req.body || {}, assessment) : null; if (review) { try { await persistFraudReview(review); } catch (error) { return res.status(503).json({ ok: false, error: 'AI-fraud review persistence unavailable', detail: error.message }); } } return res.status(assessment.matched ? 200 : 204).json(assessment.matched ? { ok: true, protocol: AI_FRAUD_RULE, assessment, review } : {}); });
+app.post('/api/governance/ai-fraud/decision', async (req, res) => { const token = String(req.get('authorization') || '').replace(/^Bearer\s+/i, ''); if (!token || token !== config.ADMIN_API_TOKEN) return res.status(401).json({ ok: false, error: 'Unauthorized' }); const actor = req.body?.actor || 'authorized-reviewer'; let result; try { result = req.body?.decision === 'confirm' ? await confirmFraudReview(req.body?.reviewId, actor) : await clearFraudReview(req.body?.reviewId, actor); } catch (error) { return res.status(503).json({ ok: false, error: 'AI-fraud decision persistence unavailable', detail: error.message }); } return res.status(result.ok ? 200 : 400).json(result); });
 app.post('/api/gate', (req, res) => {
   const result = recordGateViolation(req, { reason: req.body?.reason, disrespectful: req.body?.disrespectful, draining: req.body?.draining });
   res.status(result.blocked ? 403 : 200).json(result.blocked ? gateResponse() : result);
