@@ -115,3 +115,12 @@ Never commit service-role keys or other secrets. Production deployments should p
 **MercySoul OS 10.1.3 — Divine Income hardening release**
 
 **Legacy continuity:** foundational MercySoul Dominion protocols remain preserved as legacy governance layers while current releases continue to harden implementation and security.
+
+
+## AI-Assisted Fraud Rule v1.0.0
+
+AI use is not fraud by itself. MercySoul requires both an AI-assistance signal and evidence of deceptive or fraudulent activity before opening a fraud review.
+
+Enforcement is two-stage: the first signal creates one auditable human-review case; it does not automatically block the account. An authorized reviewer can confirm once, which blocks the account for future requests, or clear the case. The rule applies equally to owner, admin, client, and user roles.
+
+API: `GET /api/governance/ai-fraud`, `POST /api/governance/ai-fraud/review`, and authorized `POST /api/governance/ai-fraud/decision`.
