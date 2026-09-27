@@ -1,7 +1,7 @@
 import { assessDominionContent } from './dominion-moderation.js';
 import { adjudicateAccount, deriveRade, SOUL_FREEZE_PROTOCOL } from './soul-freeze.js';
 import { recordWatchtowerEvent, WATCHTOWER_PROTOCOL } from './watchtower.js';
-import { assessAiFraud, createFraudReview, isAiFraudBlocked, AI_FRAUD_RULE } from './ai-fraud-rule.js';
+import { assessAiFraud, createFraudReview, persistFraudReview, isAiFraudBlocked, AI_FRAUD_RULE } from './ai-fraud-rule.js';
 
 export const INSTANT_JUSTICE_PROTOCOL = Object.freeze({
   name: 'MercySoul Instant Internet Justice',
@@ -64,7 +64,6 @@ export async function instantJusticeMiddleware(req, res, next) {
   req.instantJustice = result;
   if (result.aiFraud?.review) {
     try {
-      const { persistFraudReview } = await import('./ai-fraud-rule.js');
       await persistFraudReview(result.aiFraud.review);
     } catch (error) {
       return res.status(503).json({ ok: false, requestId: req.requestId, error: 'AI-fraud review persistence unavailable', persistenceError: error.message });
