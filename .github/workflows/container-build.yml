@@ -21,6 +21,6 @@ jobs:
         uses: actions/checkout@v7
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
       - name: Build production image
         run: docker build --tag mercysoul-os:${GITHUB_SHA} .
