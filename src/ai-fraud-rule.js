@@ -40,6 +40,8 @@ const FRAUD_SIGNALS = [
 
 const reviews = new Map();
 const blockedAccounts = new Map();
+let persistenceReady = false;
+let persistenceError = null;
 
 function textOf(input = {}) {
   return String(input.content ?? input.text ?? input.message ?? input.body ?? '').slice(0, 20000);
@@ -116,7 +118,8 @@ export async function persistFraudReview(review) {
 }
 
 export async function initializeAiFraudPersistence() {
-  const state = await loadAiFraudState();
+  try {
+    const state = await loadAiFraudState();
   for (const row of state.reviews || []) {
     const review = {
       reviewId: row.review_id,
@@ -141,7 +144,14 @@ export async function initializeAiFraudPersistence() {
       });
     }
   }
-  return { persisted: state.persisted, loadedReviews: reviews.size, blockedAccounts: blockedAccounts.size };
+    persistenceReady = true;
+    persistenceError = null;
+    return { persisted: state.persisted, loadedReviews: reviews.size, blockedAccounts: blockedAccounts.size };
+  } catch (error) {
+    persistenceReady = false;
+    persistenceError = error.message;
+    throw error;
+  }
 }
 
 export async function confirmFraudReview(reviewId, actor = 'authorized-reviewer') {
@@ -194,6 +204,8 @@ export function aiFraudStatus() {
     openReviews: [...reviews.values()].filter(r => r.decision === 'pending').length,
     confirmedReviews: [...reviews.values()].filter(r => r.decision === 'confirmed').length,
     clearedReviews: [...reviews.values()].filter(r => r.decision === 'cleared').length,
-    blockedAccounts: blockedAccounts.size
+    blockedAccounts: blockedAccounts.size,
+    persistenceReady,
+    persistenceError
   };
 }
