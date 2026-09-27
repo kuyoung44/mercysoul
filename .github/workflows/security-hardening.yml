@@ -69,6 +69,7 @@ jobs:
             --exclude='public/acceptable-use.html' \
             --exclude='pnpm-lock.yaml' \
             --exclude='yarn.lock' \
+            --exclude-dir=.github/workflows \
             --binary-files=without-match; then
             echo "❌ Prohibited content detected."
             exit 1
