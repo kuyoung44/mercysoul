@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { loadAiFraudState, persistAiFraudReview, updateAiFraudDecision } from './supabase.js';
 
 export const AI_FRAUD_RULE = Object.freeze({
   name: 'MercySoul AI-Assisted Fraud Rule',
@@ -109,15 +110,54 @@ export function createFraudReview(input = {}, assessment = assessAiFraud(input))
   return review;
 }
 
-export function confirmFraudReview(reviewId, actor = 'authorized-reviewer') {
+export async function persistFraudReview(review) {
+  if (!review) return { persisted: false, reason: 'no-review' };
+  return persistAiFraudReview(review);
+}
+
+export async function initializeAiFraudPersistence() {
+  const state = await loadAiFraudState();
+  for (const row of state.reviews || []) {
+    const review = {
+      reviewId: row.review_id,
+      accountId: row.account_id || null,
+      status: row.status,
+      decision: row.decision,
+      createdAt: row.created_at,
+      reviewedAt: row.reviewed_at || null,
+      reviewedBy: row.reviewed_by || null,
+      blockedAt: row.blocked_at || null,
+      evidence: row.evidence || {}
+    };
+    const key = review.accountId || `request:${review.reviewId}`;
+    reviews.set(key, review);
+    if (review.decision === 'confirmed' && review.accountId) {
+      blockedAccounts.set(review.accountId, {
+        accountId: review.accountId,
+        status: 'blocked',
+        reason: 'Confirmed AI-assisted fraud',
+        reviewId: review.reviewId,
+        blockedAt: review.blockedAt || review.reviewedAt
+      });
+    }
+  }
+  return { persisted: state.persisted, loadedReviews: reviews.size, blockedAccounts: blockedAccounts.size };
+}
+
+export async function confirmFraudReview(reviewId, actor = 'authorized-reviewer') {
   const review = [...reviews.values()].find(item => item.reviewId === reviewId);
   if (!review) return { ok: false, error: 'FRAUD_REVIEW_NOT_FOUND' };
   if (review.decision !== 'pending') return { ok: false, error: 'FRAUD_REVIEW_ALREADY_DECIDED', review };
 
+  const reviewedAt = new Date().toISOString();
+  const decision = { decision: 'confirmed', status: 'blocked', reviewed_at: reviewedAt, reviewed_by: actor, blocked_at: reviewedAt };
+  await updateAiFraudDecision(review.reviewId, decision);
+
   review.decision = 'confirmed';
   review.status = 'blocked';
-  review.reviewedAt = new Date().toISOString();
+  review.reviewedAt = reviewedAt;
   review.reviewedBy = actor;
+  review.blockedAt = reviewedAt;
 
   if (review.accountId) {
     blockedAccounts.set(review.accountId, {
@@ -131,13 +171,15 @@ export function confirmFraudReview(reviewId, actor = 'authorized-reviewer') {
   return { ok: true, review };
 }
 
-export function clearFraudReview(reviewId, actor = 'authorized-reviewer') {
+export async function clearFraudReview(reviewId, actor = 'authorized-reviewer') {
   const review = [...reviews.values()].find(item => item.reviewId === reviewId);
   if (!review) return { ok: false, error: 'FRAUD_REVIEW_NOT_FOUND' };
   if (review.decision !== 'pending') return { ok: false, error: 'FRAUD_REVIEW_ALREADY_DECIDED', review };
+  const reviewedAt = new Date().toISOString();
+  await updateAiFraudDecision(review.reviewId, { decision: 'cleared', status: 'allowed', reviewed_at: reviewedAt, reviewed_by: actor, blocked_at: null });
   review.decision = 'cleared';
   review.status = 'allowed';
-  review.reviewedAt = new Date().toISOString();
+  review.reviewedAt = reviewedAt;
   review.reviewedBy = actor;
   return { ok: true, review };
 }
