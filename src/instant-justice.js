@@ -1,6 +1,7 @@
 import { assessDominionContent } from './dominion-moderation.js';
 import { adjudicateAccount, deriveRade, SOUL_FREEZE_PROTOCOL } from './soul-freeze.js';
 import { recordWatchtowerEvent, WATCHTOWER_PROTOCOL } from './watchtower.js';
+import { assessAiFraud, createFraudReview, isAiFraudBlocked, AI_FRAUD_RULE } from './ai-fraud-rule.js';
 
 export const INSTANT_JUSTICE_PROTOCOL = Object.freeze({
   name: 'MercySoul Instant Internet Justice',
@@ -23,9 +24,12 @@ const BLOCKED = new Set(INSTANT_JUSTICE_PROTOCOL.failClosedCategories);
 export function instantJustice(input = {}) {
   const started = Date.now();
   const assessment = assessDominionContent(input);
-  const critical = assessment.categories.some(category => BLOCKED.has(category)) || assessment.hardSafety === true;
+  const aiFraud = assessAiFraud(input);
+  const fraudReview = aiFraud.matched && !aiFraud.confirmed ? createFraudReview(input, aiFraud) : null;
+  const aiFraudBlocked = isAiFraudBlocked(input.accountId || input.userId || input.actorId);
+  const critical = assessment.categories.some(category => BLOCKED.has(category)) || assessment.hardSafety === true || aiFraudBlocked || aiFraud.confirmed;
   const rade = deriveRade(assessment);
-  const adjudication = critical ? 'block' : assessment.decision === 'remove' ? 'block' : assessment.decision;
+  const adjudication = critical ? 'block' : aiFraud.matched && !aiFraud.confirmed ? 'review' : assessment.decision === 'remove' ? 'block' : assessment.decision;
   const accountEnforcement = adjudicateAccount(input, assessment);
   const watchtower = recordWatchtowerEvent(input.watchtowerIdentity || { accountId: input.accountId || input.userId || input.actorId, ipHash: input.ipHash || null }, assessment, input.requestId || null);
   const elapsedMs = Date.now() - started;
@@ -48,7 +52,8 @@ export function instantJustice(input = {}) {
         : null,
     evaluationMs: elapsedMs,
     within500msBudget: elapsedMs <= INSTANT_JUSTICE_PROTOCOL.evaluationBudgetMs,
-    assessment
+    assessment,
+    aiFraud: { protocol: AI_FRAUD_RULE.version, ...aiFraud, review: fraudReview, blocked: aiFraudBlocked }
   };
 }
 
@@ -58,6 +63,7 @@ export function instantJusticeMiddleware(req, res, next) {
   const result = instantJustice(input);
   req.instantJustice = result;
   if (result.accountEnforcement?.suspended) return res.status(423).json({ ok: false, requestId: req.requestId, ...result });
+  if (result.aiFraud?.blocked || result.aiFraud?.confirmed) return res.status(403).json({ ok: false, requestId: req.requestId, ...result });
   if (result.adjudication === 'block') return res.status(403).json({ ok: false, requestId: req.requestId, ...result });
   return next();
 }
