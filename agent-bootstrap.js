@@ -7,6 +7,7 @@ import { whatsappStatus, handleWhatsAppWebhook } from './src/whatsapp-cloud.js';
 import { facebookMessengerStatus, handleFacebookWebhook } from './src/facebook-messenger.js';
 import commandCenterRouter from './src/command-center/routes.js';
 import cursorRouter from './src/cursor/routes.js';
+import { initializeAiFraudPersistence } from './src/ai-fraud-rule.js';
 
 app.use('/api', commandCenterRouter);
 app.use('/api', cursorRouter);
@@ -61,4 +62,16 @@ app.get('/api/wa-webhook', handleWhatsAppWebhook);
 app.post('/api/wa-webhook', handleWhatsAppWebhook);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`MercySoul OS listening on ${PORT}`));
+
+async function bootstrap() {
+  try {
+    const fraudPersistence = await initializeAiFraudPersistence();
+    console.log('[MercySoul] AI-fraud persistence initialized:', fraudPersistence);
+  } catch (error) {
+    console.error('[MercySoul] AI-fraud persistence initialization failed:', error.message);
+    if (String(process.env.REQUIRE_DURABLE_PERSISTENCE || '').toLowerCase() === 'true') process.exit(1);
+  }
+  app.listen(PORT, () => console.log(`MercySoul OS listening on ${PORT}`));
+}
+
+bootstrap();
