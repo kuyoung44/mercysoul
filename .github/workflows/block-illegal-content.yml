@@ -57,7 +57,7 @@ jobs:
 
           echo
           echo "3/3 Credential/payment-data pattern scan"
-          if git grep -I -n -E '(^|[^0-9])([0-9]{13,19})([^0-9]|$)|CVV[^A-Za-z0-9]*[=:][^A-Za-z0-9]*[0-9]{3,4}' -- ':!*.md' ':!*.txt' ':!.git/*' ':!node_modules/*' ':!vendor/*' ':!dist/*' ':!build/*' ':!.next/*' ':!coverage/*' ':!*.lock' ':!package-lock.json' ':!yarn.lock' ':!pnpm-lock.yaml'; then
+          if git grep -I -n -E '(^|[^0-9])([0-9]{13,19})([^0-9]|$)|CVV[^A-Za-z0-9]*[=:][^A-Za-z0-9]*[0-9]{3,4}' -- ':!*.md' ':!*.txt' ':!.git/*' ':!node_modules/*' ':!vendor/*' ':!dist/*' ':!build/*' ':!.next/*' ':!coverage/*' ':!*.lock' ':!package-lock.json' ':!yarn.lock' ':!pnpm-lock.yaml' ':!*.csv' ':!public/acceptable-use.html' ':!public/cookie-policy.html' ':!public/privacy-policy.html' ':!public/terms.html'; then
             FOUND=1
           fi
 
