@@ -28,7 +28,7 @@ const AI_SIGNALS = [
 ];
 
 const FRAUD_SIGNALS = [
-  /\b(phish|phishing)\b/i,
+  /\bphish(?:ing)?\b/i,
   /\bimpersonat(e|ion|ing)\b/i,
   /\b(fake|forged|fabricated)\b.{0,50}\b(invoice|receipt|document|identity|payment|proof|evidence)\b/i,
   /\b(stolen|false)\b.{0,30}\b(identity|credentials|card|account)\b/i,
