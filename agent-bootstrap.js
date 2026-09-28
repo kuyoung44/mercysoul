@@ -3,6 +3,7 @@ import app from './server.js';
 import { runMercySoulAgent, mercysoulGraphStatus } from './src/agent/mercysoul-graph.js';
 import { runDeepResearch, deepResearchStatus } from './src/deep-research.js';
 import { runMercySoulBot, mercysoulBotStatus } from './src/agent/mercysoul-bot.js';
+import { runPersonalBot, personalBotStatus } from './src/agent/personal-bot.js';
 import { whatsappStatus, handleWhatsAppWebhook } from './src/whatsapp-cloud.js';
 import { facebookMessengerStatus, handleFacebookWebhook } from './src/facebook-messenger.js';
 import commandCenterRouter from './src/command-center/routes.js';
@@ -13,6 +14,8 @@ app.use('/api', commandCenterRouter);
 app.use('/api', cursorRouter);
 
 app.get('/api/bot/status', (_req, res) => res.json({ ok: true, bot: mercysoulBotStatus(), whatsapp: whatsappStatus() }));
+app.get('/api/personal/status', (_req, res) => res.json({ ok: true, personal: personalBotStatus() }));
+app.post('/api/personal/chat', async (req, res) => { try { const result = await runPersonalBot(req.body || {}); res.status(result.ok ? 200 : 400).json(result); } catch (error) { res.status(502).json({ ok: false, error: error instanceof Error ? error.message : 'Personal chatbot failed' }); } });
 
 async function mercySoulBotHandler(req, res) {
   try {
@@ -25,6 +28,8 @@ async function mercySoulBotHandler(req, res) {
 
 app.post('/api/bot/chat', mercySoulBotHandler);
 app.post('/api/chat', mercySoulBotHandler);
+
+app.get('/personal', (_req, res) => res.sendFile(new URL('./public/personal.html', import.meta.url).pathname));
 
 app.get('/api/agent/status', (_req, res) => {
   res.json({ ok: true, service: 'MercySoul Agent', ...mercysoulGraphStatus() });
