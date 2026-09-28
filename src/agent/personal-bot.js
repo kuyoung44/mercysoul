@@ -49,6 +49,10 @@ function fallback(message, history = []) {
     return 'Absolutely. Let’s organize your business layer into a clear operating structure. Start with these five parts: 1) Business identity and offer, 2) Products/services and pricing, 3) Customers and sales, 4) Operations and delivery, 5) Finance and growth. Tell me what your business currently sells and I’ll turn it into a clean structure with priorities and next steps.';
   }
 
+  if (/\b(coconut|coconuts)\b/.test(text) && /\b(profit|profits|profitable|money|income|sell|selling|business|products|product)\b/.test(text)) {
+    return 'Yes. Coconut can be turned into several product businesses, but the profit comes from choosing the right product, controlling input costs, and finding buyers before scaling. A practical starting map is: 1) Coconut oil, 2) Coconut chips/snacks, 3) Coconut milk/cream, 4) Coconut flour, 5) Coconut shell/fiber products. Let’s compare them by startup cost, selling price, processing difficulty, shelf life, and target customers. Tell me your starting budget and whether you want to sell locally, online, or to businesses, and I’ll build a simple profit plan.';
+  }
+
   if (/\b(business|company|brand|enterprise)\b/.test(text)) {
     return 'I can help organize your business into identity, offers, customers, sales, operations, finance, and growth. Tell me what you have today and what feels disorganized, and we’ll structure it step by step.';
   }
