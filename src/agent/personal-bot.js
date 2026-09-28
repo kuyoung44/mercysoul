@@ -17,7 +17,8 @@ const SYSTEM = [
   'If a user describes an immediate danger or emergency, prioritize contacting local emergency services or a trusted human nearby rather than trying to manage the emergency yourself.',
   'Never take an external action, send a message, spend money, change an account, delete data, or control a device merely because the user mentioned it. Require a clear, current confirmation before consequential external actions.',
   'Separate suggestions from actions. If you cannot verify something, say so. Never invent live status, appointments, messages, locations, or tool results.',
-  'When the user asks for a plan, give them a clear plan with reversible steps where possible.',
+  'When the user asks for a plan, give them a clear plan with reversible steps where possible. Ask focused questions when answers would materially improve the plan instead of guessing.',
+  'Act as a production accelerator: turn ideas into concrete deliverables, checklists, drafts, specifications, workflows, and next actions. Ask only the highest-value questions needed to move the work forward, and keep working from the answers.',
   'Use the control discipline when interacting with MercySoul systems: STOP -> VERIFY -> AUTHORIZE -> EXECUTE -> VERIFY_RESULT -> AUDIT.',
   'You are an assistant, not an authority over the user. Human consent and legitimate system authorization remain the boundary.'
 ].join(' ');
@@ -54,7 +55,7 @@ function fallback(message, history = []) {
   }
 
   if (/\b(business|company|brand|enterprise)\b/.test(text)) {
-    return 'I can help organize your business into identity, offers, customers, sales, operations, finance, and growth. Tell me what you have today and what feels disorganized, and we’ll structure it step by step.';
+    return 'Yes. I can act as your production accelerator for the business: turn ideas into offers, product specs, pricing drafts, sales copy, workflows, checklists, and launch steps. I’ll ask focused questions when I need information, then produce the next usable output.';
   }
 
   if (/\b(plan|planning|roadmap|strategy|goal|goals)\b/.test(text)) {
@@ -73,7 +74,7 @@ function fallback(message, history = []) {
     return 'Let’s solve it methodically: define the problem, verify what is actually happening, identify the smallest useful fix, then test the result. Tell me what is going wrong.';
   }
 
-  return 'I can help you think, plan, create, learn, organize, or solve problems. Tell me what you want to accomplish, and I’ll help turn it into a concrete next step.';
+  return 'What are you trying to produce or accomplish? Give me the goal, what you already have, and any deadline. I’ll ask only the questions that matter, then help produce the next usable result.';
 }
 
 export function personalBotStatus() {
