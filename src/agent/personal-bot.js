@@ -36,53 +36,32 @@ function trimHistory(history) {
 }
 
 function fallback(message, history = []) {
-  const text = message.toLowerCase().replace(/\s+/g, ' ').trim();
+  const text = message.trim();
+  const lower = text.toLowerCase();
 
-  if (/\b(hello|hi|hey)\b/.test(text)) {
-    return 'Hello. I am here to help you think, plan, create, or organize—while keeping you in control. What would you like to work on?';
+  if (/\\b(hello|hi|hey|good morning|good afternoon|good evening)\\b/.test(lower)) {
+    return 'Hello. I’m MercySoul Personal. Tell me what you need—questions, ideas, writing, learning, planning, business, technical help, or everyday problem-solving—and I’ll work with you from there.';
   }
 
-  if (text === 'mercysoul vision brain' || text === 'vision brain' || text.includes('mercysoul vision brain')) {
-    return 'MercySoul Vision Brain is the creative intelligence layer of MercySoul. It is built to turn imagination, descriptions, and creative direction into visual and creative production—such as signature artwork, portraits, fantasy scenes, wallpapers, social artwork, and other branded visuals. It is part of the wider MercySoul ecosystem: Vision Brain creates, MercySoul OS coordinates and governs, and the project layer delivers the result. What do you want to use Vision Brain for: personal creation, a business, or building the Vision Brain product itself?';
+  if (/\\b(emergency|danger|hurt|suicide|kill myself|overdose)\\b/.test(lower)) {
+    return 'If there is immediate danger, contact local emergency services or a trusted person who can be physically with you now. I can help you focus on the next safe step.';
   }
 
-  if (/\b(what'?s|what is|tell me about|explain|describe|how does)\b/.test(text) && /\b(mercy\s*soul\s*vision\s*brain|vision\s*brain)\b/.test(text)) {
-    return 'MercySoul Vision Brain is MercySoul’s creative intelligence layer: it turns ideas, descriptions, and creative direction into useful visual and creative outputs. In the MercySoul ecosystem, Vision Brain is positioned around imagination, creation, and production—not just conversation. If you want, I can explain its purpose, how it fits with MercySoul OS, or how to turn it into a product/business.';
-  }
+  if (!text) return 'What would you like to work on?';
 
-  if (/\b(emergency|danger|hurt|suicide|kill myself|overdose)\b/.test(text)) {
-    return 'If there is immediate danger, please contact local emergency services or a trusted person who can be physically with you now. I can stay focused with you while you take that step.';
-  }
+  const recent = history.slice(-4)
+    .filter(item => item?.role && item?.content)
+    .map(item => item.role + ': ' + String(item.content).slice(0, 500))
+    .join('\\n');
 
-  if (/\b(organize|structure|restructure|systematize)\b/.test(text) && /\b(business|company|brand|work|enterprise|business layer)\b/.test(text)) {
-    return 'Absolutely. Let’s organize your business layer into a clear operating structure. Start with these five parts: 1) Business identity and offer, 2) Products/services and pricing, 3) Customers and sales, 4) Operations and delivery, 5) Finance and growth. Tell me what your business currently sells and I’ll turn it into a clean structure with priorities and next steps.';
-  }
-
-  if (/\b(coconut|coconuts)\b/.test(text) && /\b(profit|profits|profitable|money|income|sell|selling|business|products|product)\b/.test(text)) {
-    return 'Yes. Coconut can be turned into several product businesses, but the profit comes from choosing the right product, controlling input costs, and finding buyers before scaling. A practical starting map is: 1) Coconut oil, 2) Coconut chips/snacks, 3) Coconut milk/cream, 4) Coconut flour, 5) Coconut shell/fiber products. Let’s compare them by startup cost, selling price, processing difficulty, shelf life, and target customers. Tell me your starting budget and whether you want to sell locally, online, or to businesses, and I’ll build a simple profit plan.';
-  }
-
-  if (/\b(business|company|brand|enterprise)\b/.test(text)) {
-    return 'Yes. I can act as your production accelerator for the business: turn ideas into offers, product specs, pricing drafts, sales copy, workflows, checklists, and launch steps. I’ll ask focused questions when I need information, then produce the next usable output.';
-  }
-
-  if (/\b(plan|planning|roadmap|strategy|goal|goals)\b/.test(text)) {
-    return 'Let’s turn that into a practical plan. Give me the outcome you want, your current situation, and any deadline or constraint. I’ll separate priorities, actions, and decisions.';
-  }
-
-  if (/\b(write|writing|draft|email|message|caption|document)\b/.test(text)) {
-    return 'I can draft or improve it. Send me the rough idea or existing text, tell me who it is for, and I’ll turn it into usable copy.';
-  }
-
-  if (/\b(learn|study|understand|teach|explain)\b/.test(text)) {
-    return 'Absolutely. Tell me the subject and your current level, and I’ll explain it clearly and build from there.';
-  }
-
-  if (/\b(problem|issue|stuck|fix|solve|solution)\b/.test(text)) {
-    return 'Let’s solve it methodically: define the problem, verify what is actually happening, identify the smallest useful fix, then test the result. Tell me what is going wrong.';
-  }
-
-  return 'What are you trying to produce or accomplish? Give me the goal, what you already have, and any deadline. I’ll ask only the questions that matter, then help produce the next usable result.';
+  return [
+    'I understand you’re asking about: “' + text.slice(0, 500) + '”',
+    '',
+    'I can work with you on this even if it is a new topic. I’ll help break it into the useful parts, identify what is known, ask only the missing high-value question, and then produce the next practical result.',
+    '',
+    'What outcome do you want from this?',
+    recent ? '\\nI’ll also keep the recent conversation context in mind.' : ''
+  ].join('\\n');
 }
 
 export function personalBotStatus() {
@@ -94,7 +73,7 @@ export function personalBotStatus() {
     externalActions: 'confirmation-required',
     humanAgency: true,
     privacy: 'minimal-data by default',
-    modelConfigured: Boolean(process.env.OPENAI_API_KEY)
+    modelConfigured: Boolean(process.env.OPENAI_API_KEY || process.env.MERCYSOUL_PERSONAL_API_KEY)
   };
 }
 
