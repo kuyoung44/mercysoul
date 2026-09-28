@@ -1,0 +1,121 @@
+name: MercySoul Control Plane
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: Run the live authorized execution probe
+        required: true
+        default: false
+        type: boolean
+      deploy_render:
+        description: Trigger Render deploy through configured hook
+        required: true
+        default: false
+        type: boolean
+      deploy_vercel:
+        description: Trigger Vercel production deploy
+        required: true
+        default: false
+        type: boolean
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mercy-control-plane-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Stop Verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm test --if-present
+      - name: Verify Engine contract
+        run: |
+          test -f src/engine/kernel.js
+          grep -q "STOP.*VERIFY.*AUTHORIZE.*EXECUTE.*VERIFY_RESULT.*AUDIT" src/engine/kernel.js
+          grep -q "aiIsComponent: true" src/engine/kernel.js
+      - name: Verify Obsidian knowledge layer
+        run: |
+          test -f OBSIDIAN/00-INDEX.md
+          test -f OBSIDIAN/01-ARCHITECTURE/Engine.md
+          test -f "OBSIDIAN/02-SECURITY/Security Protocol.md"
+          test -f OBSIDIAN/03-ENGINE/Lifecycle.md
+          test -f "OBSIDIAN/06-AUDIT/Audit Model.md"
+      - name: Verify Render health
+        run: |
+          curl --fail --silent --show-error --max-time 30 https://mercysoul-os.onrender.com/api/health
+          echo
+          curl --fail --silent --show-error --max-time 30 https://mercysoul-os.onrender.com/api/engine/status
+          echo
+
+  render:
+    name: Render deploy
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_render }}
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Trigger Render
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          test -n "$RENDER_DEPLOY_HOOK_URL"
+          curl --fail --silent --show-error -X POST "$RENDER_DEPLOY_HOOK_URL"
+          echo "Render deployment triggered."
+
+  vercel:
+    name: Vercel production deploy
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_vercel }}
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          test -n "$VERCEL_TOKEN"
+          npx vercel --prod --yes --token="$VERCEL_TOKEN"
+
+  execute:
+    name: Authorized execution probe
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.execute }}
+    needs: [verify, render, vercel]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Execute through MercySoul Engine
+        env:
+          ENGINE_URL: https://mercysoul-os.onrender.com
+          ADMIN_API_TOKEN: ${{ secrets.MERCYSOUL_ADMIN_API_TOKEN }}
+        run: |
+          test -n "$ADMIN_API_TOKEN"
+          curl --fail --silent --show-error --max-time 60             -X POST "$ENGINE_URL/api/engine/run"             -H "Authorization: Bearer $ADMIN_API_TOKEN"             -H "Content-Type: application/json"             --data '{"command":"health","execute":true,"continueOnError":false}'
+          echo
+
+  audit:
+    name: Verify result
+    if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.execute }}
+    needs: [execute]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify execution result
+        run: |
+          echo "Execution job result: ${{ needs.execute.result }}"
+          test "${{ needs.execute.result }}" = "success"
+          echo "STOP -> VERIFY -> AUTHORIZE -> EXECUTE -> VERIFY_RESULT -> AUDIT completed."
