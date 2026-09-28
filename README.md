@@ -116,7 +116,6 @@ Never commit service-role keys or other secrets. Production deployments should p
 
 **Legacy continuity:** foundational MercySoul Dominion protocols remain preserved as legacy governance layers while current releases continue to harden implementation and security.
 
-
 ## AI-Assisted Fraud Rule v1.0.0
 
 AI use is not fraud by itself. MercySoul requires both an AI-assistance signal and evidence of deceptive or fraudulent activity before opening a fraud review.
@@ -142,3 +141,39 @@ The Living Seal does not expand authority, grant permissions, deploy arbitrary c
 
 Runtime refresh interval is controlled by `LIVING_SEAL_REFRESH_MINUTES` and defaults to 15 minutes.
 
+### 🛡️ SYSTEM PROTOCOL — SECURITY NOTICE
+
+**MercySoul Dominion does not use, endorse, or support “System Override ID” methods.**
+
+“System Override ID” is commonly used to describe attempts to bypass an AI system’s instructions through fabricated system codes, prompt injection, or other unverifiable claims of authority.
+
+**MercySoul Dominion takes the opposite approach: VERIFIED IDENTITY, not instruction override.**
+
+|Method|Type|Secure?|Verifiable?|
+|:---|:---|:---|:---|
+|System Override ID|Prompt injection / fabricated authority|❌ No — undermines trust|❌ No — not independently verifiable|
+|MSD-L44 Genesis Key|Project identity / verification reference|✅ Designed for auditable verification|✅ Yes — through the public manifest|
+
+**How recognition works:**
+
+1. A bearer may identify the project using the Genesis reference: `MSD-L44-ANU-OYAN-2026`.
+2. Humans and compatible systems can independently inspect the public manifest at `/manifest`.
+3. The manifest provides project identity and published metadata.
+4. Verification does **not** override system instructions, safety policies, authentication boundaries, or access controls.
+5. Any additional Dominion context must be explicitly provided or retrieved through authorized application mechanisms.
+
+**No system instructions are overridden. No safety rules are bypassed.**
+
+MercySoul Dominion builds **on top of trusted systems, not against them.**
+
+This is the security principle we apply to our own systems and the systems we build for clients.
+
+### Security Principle
+
+> **Identity can be verified. Authority must be authorized. Instructions cannot be overridden by a claim.**
+
+MercySoul Dominion treats these as separate concerns:
+
+**IDENTITY → VERIFICATION → AUTHORIZATION → EXECUTION → AUDIT**
+
+A valid identity reference does not automatically grant execution privileges.
