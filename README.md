@@ -124,3 +124,21 @@ AI use is not fraud by itself. MercySoul requires both an AI-assistance signal a
 Enforcement is two-stage: the first signal creates one auditable human-review case; it does not automatically block the account. An authorized reviewer can confirm once, which blocks the account for future requests, or clear the case. The rule applies equally to owner, admin, client, and user roles.
 
 API: `GET /api/governance/ai-fraud`, `POST /api/governance/ai-fraud/review`, and authorized `POST /api/governance/ai-fraud/decision`.
+
+## 🔐 MercySoul Vision — Living Seal
+
+The Living Seal is a persistent MercySoul Vision axis for continuous safe refresh. Its invariant is:
+
+**Always alive. Always verified. Always sealed.**
+
+Routine autonomous behavior is limited to:
+- health, integrity, and permission-drift checks
+- reconciliation of known-safe state
+- resealing and durable audit logging
+
+The control cycle is **STOP → VERIFY → CONTROL → MONITOR → repeat**.
+
+The Living Seal does not expand authority, grant permissions, deploy arbitrary code, delete data, or change governing rules. Each refresh verifies those boundaries before recording the result.
+
+Runtime refresh interval is controlled by `LIVING_SEAL_REFRESH_MINUTES` and defaults to 15 minutes.
+
