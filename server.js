@@ -29,6 +29,7 @@ import { operatingSystemStatus, executeOperatingSystem } from './src/mercyos-ope
 import { startVisionBrainTurn, executeVisionBrainTool, continueVisionBrainTurn, visionBrainAsyncStatus } from './src/vision-brain/async-agent.js';
 import orchestratorRouter from './src/orchestrator/http.js';
 import { engineStatus as controlEngineStatus, runEngine } from './src/engine/kernel.js';
+import { runPersonalBot, personalBotStatus } from './src/agent/personal-bot.js';
 
 const app = express();
 app.disable('x-powered-by');
@@ -179,6 +180,16 @@ app.post('/api/vision/async', async (req, res) => {
   }
 });
 
+app.get('/api/personal/status', (_req, res) => res.json({ ok: true, personal: personalBotStatus() }));
+app.post('/api/personal/chat', async (req, res) => {
+  try {
+    const result = await runPersonalBot(req.body || {});
+    res.status(result.ok ? 200 : 400).json(result);
+  } catch (error) {
+    res.status(502).json({ ok: false, error: error instanceof Error ? error.message : 'Personal chatbot failed' });
+  }
+});
+
 app.get('/api/health', healthRateLimit, (_req, res) => res.status(200).json({
   success: true,
   data: { status: 'ok', uptime: process.uptime(), model: config.GEMINI_MODEL, memory: process.memoryUsage().rss },
@@ -215,6 +226,7 @@ const handleHerculesWebhook = (req, res) => {
   }
 };
 
+app.get('/personal', (_req, res) => res.sendFile(fileURLToPath(new URL('./public/personal.html', import.meta.url))));
 app.get('/', (_req, res) => res.sendFile(ROOT_INDEX));
 app.get('/health', (_req, res) => { const db = supabaseStatus(); res.status(db.healthy ? 200 : 503).json({ ok: db.healthy, service: 'MercySoul OS', version: ENGINE_VERSION, serverRelease: SERVER_RELEASE, engine: MERCYSOUL_ENGINE.name, omnipresentHelp: omnipresentHelpStatus(), helpWebhook: HELP_WEBHOOK_PATH, supabase: db }); });
 app.get('/api/status', (_req, res) => res.json({ ...osStatus(), serverEngineVersion: ENGINE_VERSION, serverRelease: SERVER_RELEASE, engine: engineStatus(), moderationPolicyVersion: DOMINION_POLICY.version, instantJustice: INSTANT_JUSTICE_PROTOCOL, globalJurisdiction: globalJurisdictionStatus(), watchtower: watchtowerStatus(), obsessionShield: obsessionShieldStatus(), emotionalShield: emotionalShieldStatus(), governance: constitutionStatus(), relationshipContext: RELATIONSHIP_CONTEXT_POLICY, omnipresentHelp: omnipresentHelpStatus(), helpWebhook: HELP_WEBHOOK_PATH, herculesWebhook: HERCULES_WEBHOOK_PATH, magneticAttraction: magneticStatus(), divineIncome: divineIncomeStatus(), deploymentDirective: deploymentDirectiveStatus(), smartThings: smartThingsStatus(), googleOAuth: googleOAuthStatus(), supabase: supabaseStatus(), sealedGate: sealedGateStatus(), aiFraud: aiFraudStatus() }));
