@@ -7,10 +7,6 @@
   },
   "rewrites": [
     {
-      "source": "/",
-      "destination": "/personal.html"
-    },
-    {
       "source": "/personal",
       "destination": "/personal.html"
     },
