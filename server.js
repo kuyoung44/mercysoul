@@ -28,6 +28,7 @@ import { isBlockedIp, gateResponse, recordGateViolation, sealedGateStatus } from
 import { operatingSystemStatus, executeOperatingSystem } from './src/mercyos-operating-system.js';
 import { startVisionBrainTurn, executeVisionBrainTool, continueVisionBrainTurn, visionBrainAsyncStatus } from './src/vision-brain/async-agent.js';
 import orchestratorRouter from './src/orchestrator/http.js';
+import { engineStatus as controlEngineStatus, runEngine } from './src/engine/kernel.js';
 
 const app = express();
 app.disable('x-powered-by');
@@ -85,6 +86,25 @@ app.use((req, res, next) => {
 app.use(watchtowerMiddleware);
 app.use(instantJusticeMiddleware);
 app.use('/api', orchestratorRouter);
+app.get('/api/engine/status', (_req, res) => res.json({ ok: true, ...controlEngineStatus() }));
+app.post('/api/engine/run', async (req, res) => {
+  const token = String(req.get('authorization') || '').replace(/^Bearer\\s+/i, '');
+  const expected = String(config.ADMIN_API_TOKEN || '').trim();
+  if (!expected || token !== expected) return res.status(expected ? 401 : 503).json({ ok: false, error: expected ? 'Unauthorized' : 'ADMIN_API_TOKEN is not configured' });
+  try {
+    const result = await runEngine(req.body?.command, {
+      execute: req.body?.execute === true,
+      agents: req.body?.agents,
+      priority: req.body?.priority,
+      payload: req.body?.payload,
+      continueOnError: req.body?.continueOnError === true,
+    });
+    res.status(result.execution === 'approval-required' ? 202 : (result.ok ? 200 : 502)).json(result);
+  } catch (error) {
+    res.status(400).json({ ok: false, error: error instanceof Error ? error.message : 'Engine execution failed' });
+  }
+});
+
 
 const ENGINE_VERSION = MERCYSOUL_ENGINE.version;
 const SERVER_RELEASE = '10.1.7';
