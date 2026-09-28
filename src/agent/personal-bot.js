@@ -34,15 +34,42 @@ function trimHistory(history) {
   return history.slice(-MAX_MESSAGES);
 }
 
-function fallback(message) {
+function fallback(message, history = []) {
   const text = message.toLowerCase();
-  if (/hello|hi|hey/.test(text)) {
-    return 'Hello. I am here to help you think, plan, create, or organize—while keeping you in control.';
+
+  if (/\b(hello|hi|hey)\b/.test(text)) {
+    return 'Hello. I am here to help you think, plan, create, or organize—while keeping you in control. What would you like to work on?';
   }
-  if (/emergency|danger|hurt|suicide|kill myself|overdose/.test(text)) {
+
+  if (/\b(emergency|danger|hurt|suicide|kill myself|overdose)\b/.test(text)) {
     return 'If there is immediate danger, please contact local emergency services or a trusted person who can be physically with you now. I can stay focused with you while you take that step.';
   }
-  return 'I can help with planning, writing, learning, organizing, problem-solving, and everyday decisions. Tell me what is happening and what outcome you want.';
+
+  if (/\b(organize|structure|restructure|systematize)\b/.test(text) && /\b(business|company|brand|work|enterprise|business layer)\b/.test(text)) {
+    return 'Absolutely. Let’s organize your business layer into a clear operating structure. Start with these five parts: 1) Business identity and offer, 2) Products/services and pricing, 3) Customers and sales, 4) Operations and delivery, 5) Finance and growth. Tell me what your business currently sells and I’ll turn it into a clean structure with priorities and next steps.';
+  }
+
+  if (/\b(business|company|brand|enterprise)\b/.test(text)) {
+    return 'I can help organize your business into identity, offers, customers, sales, operations, finance, and growth. Tell me what you have today and what feels disorganized, and we’ll structure it step by step.';
+  }
+
+  if (/\b(plan|planning|roadmap|strategy|goal|goals)\b/.test(text)) {
+    return 'Let’s turn that into a practical plan. Give me the outcome you want, your current situation, and any deadline or constraint. I’ll separate priorities, actions, and decisions.';
+  }
+
+  if (/\b(write|writing|draft|email|message|caption|document)\b/.test(text)) {
+    return 'I can draft or improve it. Send me the rough idea or existing text, tell me who it is for, and I’ll turn it into usable copy.';
+  }
+
+  if (/\b(learn|study|understand|teach|explain)\b/.test(text)) {
+    return 'Absolutely. Tell me the subject and your current level, and I’ll explain it clearly and build from there.';
+  }
+
+  if (/\b(problem|issue|stuck|fix|solve|solution)\b/.test(text)) {
+    return 'Let’s solve it methodically: define the problem, verify what is actually happening, identify the smallest useful fix, then test the result. Tell me what is going wrong.';
+  }
+
+  return 'I can help you think, plan, create, learn, organize, or solve problems. Tell me what you want to accomplish, and I’ll help turn it into a concrete next step.';
 }
 
 export function personalBotStatus() {
@@ -76,9 +103,9 @@ export async function runPersonalBot({ message, sessionId, userId } = {}) {
       input: [...history, { role: 'user', content: userMessage }],
       max_output_tokens: 700
     });
-    reply = response.output_text?.trim() || fallback(userMessage);
+    reply = response.output_text?.trim() || fallback(userMessage, history);
   } else {
-    reply = fallback(userMessage);
+    reply = fallback(userMessage, history);
   }
 
   history.push(
