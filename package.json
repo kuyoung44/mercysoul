@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node agent-bootstrap.js",
-    "test": "node --test src/*.test.js",
+    "test": "node --test src",
     "check": "node --check server.js && node --check agent-bootstrap.js && node --check src/sealed-gate.js && node --check src/agent/mercysoul-graph.js && npm test"
   },
   "dependencies": {
