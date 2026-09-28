@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MercySoul Personal</title>
+<meta name="description" content="A private, human-centered MercySoul personal assistant.">
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#080711;color:#f4f1e8;font:16px system-ui,sans-serif;min-height:100vh;display:flex;justify-content:center}.app{width:min(760px,100%);min-height:100vh;display:flex;flex-direction:column}.head{padding:24px 20px;border-bottom:1px solid #2c2940;background:#100d1d}.head h1{margin:0;font-size:1.35rem}.head p{margin:6px 0 0;color:#aaa4b8;font-size:.9rem}.chat{flex:1;padding:20px;display:flex;flex-direction:column;gap:12px;overflow:auto}.msg{max-width:86%;padding:12px 15px;border-radius:16px;line-height:1.55;white-space:pre-wrap}.bot{align-self:flex-start;background:#171326;border:1px solid #302943}.user{align-self:flex-end;background:#d4af37;color:#17130a}.bar{display:flex;gap:8px;padding:14px;background:#100d1d;border-top:1px solid #2c2940}.bar input{flex:1;min-width:0;padding:13px 15px;border-radius:24px;border:1px solid #45405a;background:#0a0910;color:#fff;outline:none}.bar button{border:0;border-radius:24px;padding:0 20px;background:#d4af37;color:#15120a;font-weight:700}.notice{padding:8px 20px;color:#8f899c;font-size:.75rem;text-align:center;border-top:1px solid #222}
+</style>
+</head>
+<body><main class="app">
+<header class="head"><h1>MercySoul Personal</h1><p>Private-minded. Human-centered. You remain in control.</p></header>
+<section class="chat" id="chat"><div class="msg bot">Hello. I am here to help you think, plan, create, learn, or organize—without taking control away from you.</div></section>
+<form class="bar" id="form"><input id="input" autocomplete="off" placeholder="What do you need help with?"><button>Send</button></form>
+<div class="notice">No external action is taken from this chat without clear confirmation.</div>
+</main>
+<script>
+const chat=document.querySelector('#chat'),form=document.querySelector('#form'),input=document.querySelector('#input');
+const sessionId=crypto.randomUUID();
+function add(role,text){const el=document.createElement('div');el.className='msg '+role;el.textContent=text;chat.appendChild(el);chat.scrollTop=chat.scrollHeight;return el}
+form.addEventListener('submit',async e=>{e.preventDefault();const message=input.value.trim();if(!message)return;add('user',message);input.value='';const wait=add('bot','Thinking…');try{const r=await fetch('/api/personal/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message,sessionId})});const data=await r.json();wait.remove();add('bot',data.reply||data.error||'I could not complete that request.');}catch{wait.remove();add('bot','I cannot reach the assistant right now. Please try again.')}});
+</script></body></html>
