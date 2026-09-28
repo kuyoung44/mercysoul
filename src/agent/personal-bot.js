@@ -42,6 +42,10 @@ function fallback(message, history = []) {
     return 'Hello. I am here to help you think, plan, create, or organize—while keeping you in control. What would you like to work on?';
   }
 
+  if (/^mercy\s*soul\s*vision\s*brain[?.!]*$/i.test(text) || /^vision\s*brain[?.!]*$/i.test(text)) {
+    return 'MercySoul Vision Brain is the creative intelligence layer of MercySoul. It is built to turn imagination, descriptions, and creative direction into visual and creative production—such as signature artwork, portraits, fantasy scenes, wallpapers, social artwork, and other branded visuals. It is part of the wider MercySoul ecosystem: Vision Brain creates, MercySoul OS coordinates and governs, and the project layer delivers the result. What do you want to use Vision Brain for: personal creation, a business, or building the Vision Brain product itself?';
+  }
+
   if (/\b(what'?s|what is|tell me about|explain|describe|how does)\b/.test(text) && /\b(mercy\s*soul\s*vision\s*brain|vision\s*brain)\b/.test(text)) {
     return 'MercySoul Vision Brain is MercySoul’s creative intelligence layer: it turns ideas, descriptions, and creative direction into useful visual and creative outputs. In the MercySoul ecosystem, Vision Brain is positioned around imagination, creation, and production—not just conversation. If you want, I can explain its purpose, how it fits with MercySoul OS, or how to turn it into a product/business.';
   }
