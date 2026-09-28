@@ -177,3 +177,26 @@ MercySoul Dominion treats these as separate concerns:
 **IDENTITY → VERIFICATION → AUTHORIZATION → EXECUTION → AUDIT**
 
 A valid identity reference does not automatically grant execution privileges.
+
+## MercySoul Engine — Execution Control Plane v1.0.0
+
+MercySoul Engine is the execution-control layer above individual AI models. AI is a component of the system, not the system's authority.
+
+Its invariant lifecycle is:
+
+**STOP → VERIFY → AUTHORIZE → EXECUTE → VERIFY_RESULT → AUDIT**
+
+The Engine:
+- routes approved commands to installed execution adapters;
+- requires explicit authorization for execution;
+- separates identity, authorization, execution, and proof;
+- verifies provider results instead of treating a generated plan as execution;
+- persists lifecycle events through the existing durable audit path;
+- does not expand permissions, bypass platform security, or override system instructions.
+
+Runtime endpoints:
+
+- `GET /api/engine/status` — Engine capabilities and lifecycle.
+- `POST /api/engine/run` — controlled plan/execute path; execution requires the configured `ADMIN_API_TOKEN`.
+
+The Engine is therefore **more than AI**: models can reason or generate plans, while the Engine provides the controlled state machine, authorization boundary, real execution adapters, result verification, and audit trail.
