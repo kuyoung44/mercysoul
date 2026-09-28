@@ -42,6 +42,10 @@ function fallback(message, history = []) {
     return 'Hello. I am here to help you think, plan, create, or organize—while keeping you in control. What would you like to work on?';
   }
 
+  if (/\b(what'?s|what is|tell me about|explain|describe|how does)\b/.test(text) && /\b(mercy\s*soul\s*vision\s*brain|vision\s*brain)\b/.test(text)) {
+    return 'MercySoul Vision Brain is MercySoul’s creative intelligence layer: it turns ideas, descriptions, and creative direction into useful visual and creative outputs. In the MercySoul ecosystem, Vision Brain is positioned around imagination, creation, and production—not just conversation. If you want, I can explain its purpose, how it fits with MercySoul OS, or how to turn it into a product/business.';
+  }
+
   if (/\b(emergency|danger|hurt|suicide|kill myself|overdose)\b/.test(text)) {
     return 'If there is immediate danger, please contact local emergency services or a trusted person who can be physically with you now. I can stay focused with you while you take that step.';
   }
