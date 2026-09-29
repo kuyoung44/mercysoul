@@ -69,6 +69,14 @@ export default async function handler(req,res){
   const requestId=String(req.headers?.['x-request-id']||crypto.randomUUID?.()||Date.now());
   req.requestId=requestId;requestLogging(req,res,()=>{});
   res.setHeader('x-request-id',requestId);res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('X-Frame-Options','DENY');res.setHeader('Referrer-Policy','no-referrer');res.setHeader('Cache-Control','no-store');
+  const origin=String(req.headers?.origin||'').trim();
+  if(origin && appConfig.ALLOWED_ORIGINS.includes(origin)){
+    res.setHeader('Access-Control-Allow-Origin',origin);
+    res.setHeader('Vary','Origin');
+  }
+  res.setHeader('Access-Control-Allow-Methods','POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers','Content-Type, Accept, X-Request-Id');
+  if(req.method==='OPTIONS')return res.status(204).end();
   if(req.method!=='POST')return res.status(405).json({success:false,error:'Method not allowed.',code:'METHOD_NOT_ALLOWED'});
   if(!validateOrigin(req))return res.status(403).json({success:false,error:'Request origin is not authorized.',code:'ORIGIN_NOT_ALLOWED'});
   if(!rateLimit(req,res))return;
