@@ -1,0 +1,22 @@
+services:
+  gateway:
+    image: caddy:2
+    restart: unless-stopped
+    ports: ["80:80","443:443"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - gateway_data:/data
+      - gateway_config:/config
+
+  control-api:
+    build: ../services/app
+    restart: unless-stopped
+    environment:
+      PORT: "3000"
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+    expose: ["3000"]
+
+volumes:
+  gateway_data:
+  gateway_config:
