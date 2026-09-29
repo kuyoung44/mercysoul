@@ -1,0 +1,42 @@
+- name: Prepare MercySoul Cloud nodes
+  hosts: all
+  become: true
+  tasks:
+    - name: Install base packages
+      ansible.builtin.apt:
+        update_cache: true
+        name:
+          - ca-certificates
+          - curl
+          - git
+          - ufw
+        state: present
+
+    - name: Allow SSH
+      community.general.ufw:
+        rule: allow
+        port: "22"
+        proto: tcp
+
+    - name: Enable firewall
+      community.general.ufw:
+        state: enabled
+        policy: deny
+
+- name: Install Docker on application nodes
+  hosts: control:compute:storage
+  become: true
+  tasks:
+    - name: Install Docker
+      ansible.builtin.apt:
+        name:
+          - docker.io
+          - docker-compose-plugin
+        state: present
+        update_cache: true
+
+    - name: Enable Docker
+      ansible.builtin.service:
+        name: docker
+        enabled: true
+        state: started
