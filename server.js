@@ -18,6 +18,7 @@ import { OBSESSION_SHIELD_PROTOCOL, evaluateObsessionShield, obsessionShieldStat
 import { EMOTIONAL_SHIELD_PROTOCOL, evaluateEmotionalShield, emotionalShieldStatus } from './src/emotional-shield.js';
 import { magneticStatus, trackMagneticInteraction } from './src/magnetic-attraction.js';
 import { createTalismanOrder, divineIncomeStatus, isClientListAuthorized, listTalismanClients } from './src/divine-income.js';
+import { KYC_PAYMENT_PROTOCOL, kycPaymentStatus, requireVerifiedKyc } from './src/kyc-payment-gate.js';
 import { deploymentDirectiveStatus, listDeploymentReports, recordDeploymentReport } from './src/deployment-directive.js';
 import { createOAuthState, exchangeOAuthCode, listSmartThingsDevices, getSmartThingsLocations, sendSmartThingsCommand, smartThingsAuthorizeUrl, smartThingsStatus } from './src/smartthings.js';
 import { supabaseStatus, persistEventBestEffort } from './src/supabase.js';
@@ -235,9 +236,13 @@ app.get('/api/auth/google/callback', async (req, res) => { try { const result = 
 app.get('/api/auth/google/status', (_req, res) => res.json({ ok: true, googleOAuth: googleOAuthStatus() }));
 app.post('/api/auth/google/disconnect', (_req, res) => { disconnectGoogle(); res.json({ ok: true, connected: false, googleOAuth: googleOAuthStatus() }); });
 app.get('/api/magnetic/status', (_req, res) => res.json(magneticStatus()));
+app.get('/api/governance/kyc-payment', (_req, res) => res.json({ ok: true, ...kycPaymentStatus() }));
 app.get('/api/magnetic/talisman', (_req, res) => res.redirect('/magnetic-talisman.svg'));
 app.post('/api/magnetic/interaction', (req, res) => { const result = trackMagneticInteraction({ type: req.body?.type, source: req.body?.source || 'social-network' }); persistEventBestEffort({ eventType: 'magnetic_interaction', requestId: req.requestId, payload: { type: req.body?.type || null, source: req.body?.source || 'social-network', result } }); res.json({ ok: true, requestId: req.requestId, ...result }); });
-app.post('/api/order/talisman', async (req, res) => { try { const result = await createTalismanOrder({ ...req.body, requestId: req.requestId }); res.status(result.status || 201).json({ ok: result.ok, message: result.message, error: result.error, orderId: result.orderId, persistence: result.persistence, source: result.source, requestId: req.requestId }); } catch { res.status(500).json({ ok: false, error: 'Unable to create talisman order', requestId: req.requestId }); } });
+app.post('/api/order/talisman', async (req, res) => { try {
+  const kyc = requireVerifiedKyc({ subject: req.body?.customerId || req.body?.email, reference: req.body?.kycVerificationRef, expiresAt: req.body?.kycExpiresAt, signature: req.body?.kycSignature });
+  if (!kyc.ok) { persistEventBestEffort({ eventType: 'payment_blocked_kyc', requestId: req.requestId, payload: { code: kyc.kyc.code, reason: kyc.kyc.reason } }); return res.status(kyc.status).json({ ok: false, error: 'Payment/order blocked: verified KYC is required', code: kyc.kyc.code, kyc: KYC_PAYMENT_PROTOCOL, requestId: req.requestId }); }
+  const result = await createTalismanOrder({ ...req.body, requestId: req.requestId, kycVerificationRef: kyc.kyc.reference }); res.status(result.status || 201).json({ ok: result.ok, message: result.message, error: result.error, orderId: result.orderId, persistence: result.persistence, source: result.source, requestId: req.requestId }); } catch { res.status(500).json({ ok: false, error: 'Unable to create talisman order', requestId: req.requestId }); } });
 app.get('/api/order/clients', async (req, res) => { if (!isClientListAuthorized(req.get('authorization'))) return res.status(401).json({ ok: false, error: 'Unauthorized', message: 'Provide a valid Bearer token.' }); try { const result = await listTalismanClients(); res.status(200).json(result); } catch { res.status(500).json({ ok: false, error: 'Unable to load talisman clients' }); } });
 app.get('/api/deployment/order', (_req, res) => res.json(deploymentDirectiveStatus()));
 app.get('/api/deployment/reports', (req, res) => res.json({ ok: true, directiveRef: deploymentDirectiveStatus().directive.ref, reports: listDeploymentReports(req.query.limit) }));
