@@ -5,6 +5,7 @@ import { chatRateLimit } from '../middleware/rateLimit.js';
 import { sanitizeMessage } from '../middleware/input.js';
 import { handleApiError } from '../middleware/errorHandler.js';
 import { requestLogging } from '../middleware/requestLogging.js';
+import { enforceMercySoulInput } from '../lib/mercy-enforcement.js';
 
 export const config = { api: { bodyParser: false } };
 const MAX_PDF_SIZE = 50 * 1024 * 1024;
@@ -84,6 +85,8 @@ export default async function handler(req,res){
     const isMultipart=String(req.headers['content-type']||'').toLowerCase().startsWith('multipart/form-data');
     if(isMultipart)await parseMultipart(req);
     const message=sanitizeMessage(req.body?.message);
+    const enforcement=await enforceMercySoulInput({input:message,sourceService:'mercysoul-os',kind:'prompt'});
+    if(enforcement.action==='block'||enforcement.action==='quarantine')return res.status(422).json({success:false,error:'This request is blocked by the MercySoul Creation & Provenance Lock.',code:'MERCYSOUL_ENFORCEMENT_BLOCKED',reason:enforcement.reason});
     if(BLOCKED.some(pattern=>pattern.test(message)))return res.status(400).json({success:false,error:'The request cannot be processed.',code:'REQUEST_BLOCKED'});
     if(PRICE_PATTERN.test(message)||SERVICE_PATTERN.test(message))return res.status(200).json({success:true,data:{reply:`${PRICE_LIST}\\n\\nFor orders, please click the gold 'Chat on WhatsApp' button below.\\n\\nAṣẹ.`,concierge:true}});
     const uploadedFile=req.file;
