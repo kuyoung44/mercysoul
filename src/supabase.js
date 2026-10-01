@@ -111,3 +111,61 @@ export function persistEventBestEffort(event) {
     return { persisted: false, error: error.message };
   });
 }
+
+const CONTENT_SUSPENSION_TABLE = process.env.SUPABASE_CONTENT_SUSPENSION_TABLE || 'mercysoul_content_suspensions';
+
+export async function persistContentSuspension(review) {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    if (REQUIRE_DURABLE_PERSISTENCE) throw new Error('Supabase durable persistence is required but not configured');
+    return { persisted: false, reason: 'not-configured' };
+  }
+  const url = SUPABASE_URL + '/rest/v1/' + encodeURIComponent(CONTENT_SUSPENSION_TABLE) + '?on_conflict=review_id';
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: headers('resolution=merge-duplicates,return=minimal'),
+    body: JSON.stringify({
+      review_id: review.reviewId,
+      fingerprint: review.fingerprint,
+      account_id: review.accountId || null,
+      status: review.status,
+      decision: review.decision,
+      evidence: review.evidence || {},
+      created_at: review.createdAt,
+      reviewed_at: review.reviewedAt || null,
+      reviewed_by: review.reviewedBy || null
+    })
+  });
+  if (!response.ok) {
+    const detail = await response.text().catch(() => 'Supabase content-suspension persistence failed');
+    throw new Error('Supabase content-suspension persistence failed (' + response.status + '): ' + detail.slice(0, 300));
+  }
+  return { persisted: true };
+}
+
+export async function updateContentSuspension(reviewId, decision) {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    if (REQUIRE_DURABLE_PERSISTENCE) throw new Error('Supabase durable persistence is required but not configured');
+    return { persisted: false, reason: 'not-configured' };
+  }
+  const url = SUPABASE_URL + '/rest/v1/' + encodeURIComponent(CONTENT_SUSPENSION_TABLE) + '?review_id=eq.' + encodeURIComponent(reviewId);
+  const response = await fetch(url, { method: 'PATCH', headers: headers('return=minimal'), body: JSON.stringify(decision) });
+  if (!response.ok) {
+    const detail = await response.text().catch(() => 'Supabase content-suspension decision update failed');
+    throw new Error('Supabase content-suspension decision update failed (' + response.status + '): ' + detail.slice(0, 300));
+  }
+  return { persisted: true };
+}
+
+export async function loadContentSuspensionState() {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    if (REQUIRE_DURABLE_PERSISTENCE) throw new Error('Supabase durable persistence is required but not configured');
+    return { persisted: false, reviews: [] };
+  }
+  const url = SUPABASE_URL + '/rest/v1/' + encodeURIComponent(CONTENT_SUSPENSION_TABLE) + '?decision=eq.pending&select=review_id,fingerprint,account_id,status,decision,evidence,created_at,reviewed_at,reviewed_by&order=created_at.asc&limit=5000';
+  const response = await fetch(url, { method: 'GET', headers: headers('return=representation') });
+  if (!response.ok) {
+    const detail = await response.text().catch(() => 'Supabase content-suspension state load failed');
+    throw new Error('Supabase content-suspension state load failed (' + response.status + '): ' + detail.slice(0, 300));
+  }
+  return { persisted: true, reviews: await response.json() };
+}
