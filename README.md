@@ -232,6 +232,22 @@ Shutdown lifecycle:
 
 Re-enable is configuration-controlled: remove the shutdown flag/window, then verify Engine status before authorizing new execution. This implements controlled shutdown behavior without silently taking destructive action.
 
+## MercySoul Amnesty Principle
+
+**Forgive without falsifying reality. Release without erasing truth. Restore without surrendering principle.**
+
+Amnesty is a deliberate, scoped release from specified past consequences. It does not erase facts, evidence, lawful obligations, or future accountability.
+
+The lifecycle is:
+
+**ACKNOWLEDGE → VERIFY → DEFINE SCOPE → AUTHORIZE → RELEASE → RECORD**
+
+Mercy Overtake integrates amnesty as:
+
+**MERCY → VERIFY → PROTECT → AUTHORIZE → RELEASE → VERIFY → RECORD**
+
+Amnesty is not a hidden bypass, does not authorize future misconduct, and does not expand permissions or external authority. See [`rules/amnesty-principle.md`](rules/amnesty-principle.md).
+
 ## Inner-State Protector Chore v1.0.0
 
 MercySoul maintains a lightweight internal protection chore across its governance
