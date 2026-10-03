@@ -178,6 +178,19 @@ MercySoul Dominion treats these as separate concerns:
 
 A valid identity reference does not automatically grant execution privileges.
 
+
+## MercySoul Command Principle
+
+**Consider first. Verify before authority. Authorize before consequence.**
+
+The engine follows:
+
+**CONSIDER → VERIFY → AUTHORIZE → ACT → VERIFY → RECORD**
+
+The `01` exception gate is explicit and auditable; it is not a hidden bypass and does not remove safety, consent, privacy, authentication, lawful-authority, or audit requirements. See [`rules/command-principle.md`](rules/command-principle.md).
+
+Core invariants: transparency without unlimited authority; protection without control; no allegation treated as fact without verification; no bribery, retaliation, or vengeance; proportionate lawful response; and no unauthorized consequential mutation.
+
 ## MercySoul Engine — Execution Control Plane v1.0.0
 
 MercySoul Engine is the execution-control layer above individual AI models. AI is a component of the system, not the system's authority.
