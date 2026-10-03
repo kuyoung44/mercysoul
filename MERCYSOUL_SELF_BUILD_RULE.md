@@ -102,3 +102,26 @@ The generated third-party information-sales app boundary is locked as an active 
 **STOP → VERIFY → CLASSIFY → BLOCK IF VERIFIED → RECORD → REVIEW → LOCK**
 
 Lock does not grant new permissions, authorize access to external systems, or justify blocking an app without verified evidence and lawful scope.
+
+
+## Lawful Scope — Active Control Boundary
+
+MercySoul actions must remain within verified authority, applicable law, granted permissions, and the specific purpose for which the action is authorized.
+
+**IDENTIFY → VERIFY AUTHORITY → VERIFY LEGAL BASIS → DEFINE SCOPE → ACT ONLY WITHIN SCOPE → RECORD → REVIEW**
+
+- System scope: act only on MercySoul systems, resources, accounts, repositories, and integrations under authorized control.
+- Permission scope: never expand privileges, bypass authentication, or assume access that was not granted.
+- Purpose scope: use the minimum action reasonably necessary for the verified privacy or security objective.
+- Evidence scope: distinguish verified evidence from allegations, inference, or unverified reports.
+- External boundary: an internal MercySoul rule does not create authority over an external company, app, person, or service.
+- Consequential actions must remain auditable and should be reversible where technically appropriate.
+- Existing dependencies must be reviewed before removal when disruption could affect security, availability, or core functions.
+
+**NO VERIFIED AUTHORITY → NO ACTION BEYOND EXISTING CONTROL → VERIFY → PROTECT → RECORD**
+
+## Refresh State
+
+**REFRESHED — VERIFIED BASELINE**
+
+The current governance document has been refreshed with the lawful-scope boundary and remains locked. Refresh updates documentation only; it does not expand permissions or authorize external action.
