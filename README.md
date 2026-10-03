@@ -215,6 +215,23 @@ Runtime endpoints:
 The Engine is therefore **more than AI**: models can reason or generate plans, while the Engine provides the controlled state machine, authorization boundary, real execution adapters, result verification, and audit trail.
 
 
+### Automated shutdown / disable gate
+
+The Engine has a configuration-driven shutdown gate for controlled hibernation or emergency disablement. The gate is evaluated on every execution request, including Vercel serverless invocations, so it does not depend on process-local state.
+
+Supported controls:
+
+- `MERCYSOUL_ENGINE_SHUTDOWN=true` — immediately disables new Engine execution.
+- `MERCYSOUL_ENGINE_SHUTDOWN_UNTIL=<ISO-8601 timestamp>` — disables execution until the configured time.
+
+When disabled, the Engine returns `execution: "disabled"` and records an `engine_shutdown` audit event. It does not delete data, revoke credentials, expand permissions, or mutate external systems.
+
+Shutdown lifecycle:
+
+**VERIFY CONDITION → QUIESCE NEW EXECUTION → DISABLE → VERIFY STATE → RECORD**
+
+Re-enable is configuration-controlled: remove the shutdown flag/window, then verify Engine status before authorizing new execution. This implements controlled shutdown behavior without silently taking destructive action.
+
 ## Inner-State Protector Chore v1.0.0
 
 MercySoul maintains a lightweight internal protection chore across its governance
