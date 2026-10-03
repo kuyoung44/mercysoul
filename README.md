@@ -200,3 +200,19 @@ Runtime endpoints:
 - `POST /api/engine/run` — controlled plan/execute path; execution requires the configured `ADMIN_API_TOKEN`.
 
 The Engine is therefore **more than AI**: models can reason or generate plans, while the Engine provides the controlled state machine, authorization boundary, real execution adapters, result verification, and audit trail.
+
+
+## Inner-State Protector Chore v1.0.0
+
+MercySoul maintains a lightweight internal protection chore across its governance
+surface:
+
+`RECEIVE → VERIFY → FILTER → CONTAIN → RETURN_TO_SOURCE → PROTECT → RECORD`
+
+The protector quarantines unverified signals instead of allowing them to become
+internal truth. "Back-to-sender" is a classification and containment behavior,
+not retaliation. Verified signals still require authorization before mutation.
+
+API:
+- `GET /api/governance/inner-protector` — protector state and invariants.
+- Authorized `POST /api/governance/inner-protector/chore` — run the maintenance chore.

@@ -9,8 +9,29 @@
       "gold": "#f7d77b",
       "goldBright": "#ffe7a1"
     },
-    "motifs": ["cosmic depth", "gold orbit trails", "globe/orb", "Flower-of-Life-inspired geometry", "Ankh"],
-    "researchStages": ["Grounding", "Verification", "Synthesis"],
+    "motifs": [
+      "cosmic depth",
+      "gold orbit trails",
+      "globe/orb",
+      "Flower-of-Life-inspired geometry",
+      "Ankh"
+    ],
+    "researchStages": [
+      "Grounding",
+      "Verification",
+      "Synthesis"
+    ],
     "principle": "Visual symbolism is an identity layer, never evidence or a substitute for verification."
+  },
+  "innerStateProtector": {
+    "version": "1.0.0",
+    "chore": "RECEIVE → VERIFY → FILTER → CONTAIN → RETURN_TO_SOURCE → PROTECT → RECORD",
+    "invariants": [
+      "externalSignalIsNotInternalTruth",
+      "verifyBeforeInternalization",
+      "noRetaliation",
+      "noExternalMutation",
+      "leastIntrusiveResponse"
+    ]
   }
 }
