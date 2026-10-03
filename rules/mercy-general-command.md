@@ -10,6 +10,12 @@ OBSERVE → CONSIDER → VERIFY → AUTHORIZE → PROTECT → ACT LAWFULLY → V
 
 WITNESS → VERIFY → PROTECT → PRESERVE → ACT LAWFULLY → VERIFY → RECORD
 
+## Light Command
+
+ILLUMINATE → VERIFY → UNDERSTAND → PROTECT → ACT LAWFULLY → RECORD
+
+Light reveals what is present; it does not grant control. Verification distinguishes established facts from interpretation, allegation, belief, and uncertainty.
+
 ## Guardrails
 
 - Observation is not a conclusion.
@@ -36,4 +42,8 @@ VERIFY CONDITION → QUIESCE → DISABLE → VERIFY OFFLINE STATE → RECORD
 
 Shutdown does not imply deletion, credential destruction, or retaliation.
 
-**Seal:** Truth before action. Authority before consequence. Protection without control. Accountability without vengeance.
+## Seal
+
+**ILLUMINATE · VERIFY · UNDERSTAND · PROTECT · ACT LAWFULLY · RECORD**
+
+**Truth before action. Protection without control. Accountability without vengeance.**
