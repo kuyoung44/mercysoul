@@ -75,3 +75,19 @@ MercySoul systems must not knowingly use, endorse, or integrate with a host or s
 - Emergency and safety decisions remain subject to the existing authority, human-override, and least-intrusive-response boundaries.
 
 **PRIVACY PROTECTION RULE: NO VERIFIED INFORMATION-SALES HOST → NO TRUSTED INTEGRATION → VERIFY → BLOCK WITHIN AUTHORITY → RECORD → REVIEW**
+
+## Generated Third-Party Information Sales — App Boundary
+
+MercySoul systems must not knowingly use, endorse, or integrate with an app or service that generates, aggregates, brokers, or sells information about third parties when its verified business practice involves selling or brokering that information.
+
+**STOP → VERIFY → CLASSIFY → BLOCK IF VERIFIED → RECORD**
+
+- Generated content is not automatically trustworthy merely because it is AI-generated, synthetic, inferred, enriched, or presented as a database result.
+- A third-party information claim must be treated as unverified until its source, provenance, and lawful basis are established where relevant.
+- Do not block solely on allegations or an app's category; verify the actual information-sales practice.
+- When verified, prohibit new MercySoul integrations and access where technically enforceable and within authorized control.
+- Review existing dependencies before removal to avoid unnecessary disruption to security, availability, or core functions.
+- Do not expose, redistribute, or monetize third-party personal information merely because another app generated or supplied it.
+- Record the verification evidence, classification, scope of the block, and review status.
+
+**BOUNDARY: GENERATED ≠ TRUSTED → VERIFY PROVENANCE → PROTECT THIRD-PARTY INFORMATION → BLOCK VERIFIED INFORMATION-SALES APPS → RECORD → REVIEW**
