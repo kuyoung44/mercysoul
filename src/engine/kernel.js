@@ -3,6 +3,7 @@ import { persistEventBestEffort } from '../supabase.js';
 import { routeCommand } from '../orchestrator/router.js';
 import { createCommandTask } from '../agent/command-center.js';
 import { executeOrchestrationTask } from '../orchestrator/executor.js';
+import { engineCanExecute, shutdownGate } from './shutdown-gate.js';
 
 export const ENGINE_LIFECYCLE = Object.freeze([
   'STOP',
@@ -23,6 +24,7 @@ export function engineStatus() {
     authorityExpansion: false,
     durableAudit: true,
     executionRequiresExplicitAuthorization: true,
+    shutdown: shutdownGate(),
   };
 }
 
@@ -31,6 +33,23 @@ export async function runEngine(command, options = {}) {
   if (!text) throw new Error('command is required');
 
   const executionId = crypto.randomUUID();
+  const shutdown = shutdownGate();
+
+  if (!engineCanExecute()) {
+    await persistEventBestEffort({
+      eventType: 'engine_shutdown',
+      requestId: executionId,
+      payload: { phase: 'DISABLED', reason: shutdown.reason, shutdownUntil: shutdown.shutdownUntil },
+    });
+    return {
+      ok: false,
+      execution: 'disabled',
+      executionId,
+      lifecycle: ENGINE_LIFECYCLE,
+      shutdown,
+    };
+  }
+
   const plan = routeCommand(text);
   const requestedWrite = options.execute === true;
 
