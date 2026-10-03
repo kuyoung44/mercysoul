@@ -91,3 +91,14 @@ MercySoul systems must not knowingly use, endorse, or integrate with an app or s
 - Record the verification evidence, classification, scope of the block, and review status.
 
 **BOUNDARY: GENERATED ≠ TRUSTED → VERIFY PROVENANCE → PROTECT THIRD-PARTY INFORMATION → BLOCK VERIFIED INFORMATION-SALES APPS → RECORD → REVIEW**
+
+
+## Lock State
+
+**LOCKED — ACTIVE BASELINE**
+
+The generated third-party information-sales app boundary is locked as an active MercySoul governance baseline.
+
+**STOP → VERIFY → CLASSIFY → BLOCK IF VERIFIED → RECORD → REVIEW → LOCK**
+
+Lock does not grant new permissions, authorize access to external systems, or justify blocking an app without verified evidence and lawful scope.
