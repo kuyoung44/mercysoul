@@ -34,6 +34,10 @@
       "dest": "/api/index.js"
     },
     {
+      "src": "/01/?",
+      "dest": "/01.html"
+    },
+    {
       "src": "/personal/?",
       "dest": "/personal.html"
     },
