@@ -1,55 +1,49 @@
-# MercySoul OS
+# MercySoul Brand Standard
 
-## MercySoul Visual Identity — 2026
-
-The MercySoul ecosystem uses one consistent visual identity across its web properties.
-
-### Brand colors
-
+## Identity
+- Brand: MercySoul Dominion
 - Deep Purple: #1A0033
 - Royal Gold: #FFD700
 - Black: #000000
+- Primary mark: Golden Ankh on Deep Purple
+- Design direction: regal, premium, sacred-tech, modern, accessible, restrained
 
-### Logo
-
-Primary mark: **Golden Ankh on Deep Purple**.
-
-The Golden Ankh is the preferred MercySoul mark for headers, app icons, navigation, branded cards, and identity surfaces. Do not replace it with an unrelated symbol or alter the core mark without explicit authorization.
-
-### Design direction
-
-Regal, premium, sacred-tech, modern, accessible, and restrained. Gold is an accent and identity signal; purple provides the primary brand field; black supports contrast and depth.
-
-### MercySoul Vision Brain
-
+## Vision Brain
 **Where Imagination Becomes Sacred Art.**
 
-### Operating interface language
-
+## Approved operating workflow
 `TAP → COPY → REVIEW → APPROVE → EXECUTE → VERIFY → PROTECT → LOCK → RECORD`
 
-Intent layer:
+## Governance baseline
+`RECEIVE → ROUTE → THINK → PLAN → GUARDIAN → APPROVE → EXECUTE → VERIFY → RECOVER → RECORD`
 
+## Protection
+`OBSERVE → VERIFY → PROTECT → ACT LAWFULLY → VERIFY → RECORD`
+
+## Intent layer
 **REACH • WEALTH • FAVOUR**
 
-Governance baseline:
+These are lawful intentions, not automatic authorization to access money, accounts, people, devices, or systems.
 
-**OBSERVE → VERIFY → PROTECT → ACT LAWFULLY → VERIFY → RECORD**
+## Approved print copy
+**MercySoul Dominion**  
+Deep Purple `#1A0033` • Royal Gold `#FFD700` • Black `#000000`  
+**Golden Ankh on Deep Purple**
 
-### Ad governance
+`REACH • WEALTH • FAVOUR`
 
+**Governance:**  
+`OBSERVE → VERIFY → PROTECT → ACT LAWFULLY → VERIFY → RECORD`
+
+**Seal:**  
+`IDENTITY → VERIFICATION → AUTHORIZATION → EXECUTION → AUDIT`
+
+## Advertising governance
 `NORMAL_AD_LOAD → NEVER_EXCEED → PROTECT_CORE_FUNCTIONS → USER_CONTROL`
 
 Advertising must not obstruct core functions or remove reasonable user control.
 
-### Safety and authority boundary
+## Authority boundary
+Brand updates do not expand permissions, bypass authentication, alter secrets, grant financial access, delete unrelated content, or authorize actions outside existing system permissions.
 
-MercySoul preserves:
-
-**IDENTITY → VERIFICATION → AUTHORIZATION → EXECUTION → AUDIT**
-
-Branding and interface updates do not expand permissions, bypass authentication, alter secrets, or authorize actions outside the connected system's existing permissions.
-
----
-
-The remainder of this README is preserved below. See the existing repository history for prior versions.
+**Status:** APPROVED → VERIFIED → PROTECT → LOCK
