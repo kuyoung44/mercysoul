@@ -33,6 +33,7 @@ import orchestratorRouter from './src/orchestrator/http.js';
 import { engineStatus as controlEngineStatus, runEngine } from './src/engine/kernel.js';
 import { runPersonalBot, personalBotStatus } from './src/agent/personal-bot.js';
 import { INNER_PROTECTOR_PROTOCOL, innerProtectorStatus, runInnerProtectorChore } from './src/governance/inner-state-protector.js';
+import { algorithmGovernanceStatus, evaluateAndRecordGovernance, recordGovernanceApproval, recordGovernanceVerification } from './src/governance/algorithm-governance.js';
 
 const app = express();
 app.disable('x-powered-by');
@@ -272,7 +273,49 @@ app.post('/api/moderate', (req, res) => { try { const result = processInput({ ..
 app.post('/api/moderate/web', (req, res) => { try { const result = processInput({ ...req.body, requestId: req.requestId, type: 'web', watchtowerIdentity: req.watchtower?.identity }); persistEventBestEffort({ eventType: 'web_moderation', requestId: req.requestId, payload: { decision: result?.decision || null, riskScore: result?.riskScore ?? null } }); res.status(200).json({ ok: true, ...result, instantJustice: req.instantJustice, globalJurisdiction: globalJurisdictionStatus(), watchtower: watchtowerStatus(), obsessionShield: obsessionShieldStatus(), emotionalShield: emotionalShieldStatus() }); } catch { res.status(400).json({ ok: false, error: 'Unable to moderate web content', requestId: req.requestId }); } });
 app.post(HERCULES_WEBHOOK_PATH, handleHerculesWebhook);
 app.post('/api/webhooks/hercules', handleHerculesWebhook);
-app.post('/api/governance/evaluate', (req, res) => { try { const actor = req.body?.actor || 'citizen'; const result = processInput({ ...req.body, requestId: req.requestId, type: req.body?.type === 'web' ? 'web' : 'post', source: `governance:${actor}`, watchtowerIdentity: req.watchtower?.identity }); res.status(200).json({ ok: true, governance: MERCYSOUL_CONSTITUTION.name, equalTreatment: true, actor, ...result, instantJustice: req.instantJustice, globalJurisdiction: globalJurisdictionStatus(), watchtower: watchtowerStatus(), emotionalShield: emotionalShieldStatus() }); } catch { res.status(400).json({ ok: false, error: 'Unable to evaluate governance content', requestId: req.requestId }); } });
+app.get('/api/governance/algorithm/status', (_req, res) => res.status(200).json({ ok: true, ...algorithmGovernanceStatus() }));
+
+app.post('/api/governance/evaluate', async (req, res) => {
+  try {
+    const result = await evaluateAndRecordGovernance({ ...req.body, requestId: req.requestId });
+    const status = result.decision === 'ALLOW' ? 200 : 202;
+    res.status(status).json({ ok: true, governance: algorithmGovernanceStatus(), decision: result });
+  } catch (error) {
+    res.status(503).json({ ok: false, requestId: req.requestId, error: error instanceof Error ? error.message : 'Governance evaluation failed' });
+  }
+});
+
+app.post('/api/governance/approve', async (req, res) => {
+  const token = String(req.get('authorization') || '').replace(/^Bearer\\s+/i, '');
+  if (!config.ADMIN_API_TOKEN || token !== config.ADMIN_API_TOKEN) return res.status(401).json({ ok: false, error: 'Unauthorized' });
+  try {
+    const approval = await recordGovernanceApproval({
+      decisionId: req.body?.decisionId,
+      approver: req.body?.approver || 'authorized-reviewer',
+      approved: req.body?.approved === true,
+      evidence: req.body?.evidence || {},
+    });
+    res.status(200).json({ ok: true, approval, governance: algorithmGovernanceStatus() });
+  } catch (error) {
+    res.status(400).json({ ok: false, requestId: req.requestId, error: error instanceof Error ? error.message : 'Approval recording failed' });
+  }
+});
+
+app.post('/api/governance/verify', async (req, res) => {
+  const token = String(req.get('authorization') || '').replace(/^Bearer\\s+/i, '');
+  if (!config.ADMIN_API_TOKEN || token !== config.ADMIN_API_TOKEN) return res.status(401).json({ ok: false, error: 'Unauthorized' });
+  try {
+    const verification = await recordGovernanceVerification({
+      decisionId: req.body?.decisionId,
+      phase: req.body?.phase,
+      result: req.body?.result,
+      evidence: req.body?.evidence || {},
+    });
+    res.status(verification.result === 'FAIL' ? 409 : 200).json({ ok: verification.result !== 'FAIL', verification, governance: algorithmGovernanceStatus() });
+  } catch (error) {
+    res.status(400).json({ ok: false, requestId: req.requestId, error: error instanceof Error ? error.message : 'Governance verification failed' });
+  }
+});
 app.post('/api/verify', async (_req, res) => res.json({ success: true, governanceBound: true, engineVersion: ENGINE_VERSION, serverRelease: SERVER_RELEASE, constitutionVersion: MERCYSOUL_CONSTITUTION.version, omnipresentHelp: omnipresentHelpStatus(), helpWebhook: HELP_WEBHOOK_PATH, instantJustice: INSTANT_JUSTICE_PROTOCOL.version, globalJurisdiction: GLOBAL_JURISDICTION_PROTOCOL.version, sovereignJurisdictionVersion: MERCYSOUL_ENGINE.jurisdiction.version, watchtower: WATCHTOWER_PROTOCOL.version, obsessionShield: OBSESSION_SHIELD_PROTOCOL.version, emotionalShield: EMOTIONAL_SHIELD_PROTOCOL.version, herculesWebhook: HERCULES_WEBHOOK_PATH, magneticAttraction: magneticStatus(), divineIncome: divineIncomeStatus(), deploymentDirective: deploymentDirectiveStatus(), smartThings: smartThingsStatus(), googleOAuth: googleOAuthStatus(), supabase: supabaseStatus(), sealedGate: sealedGateStatus(), magneticTalisman: '/magnetic-talisman.svg', innerProtector: INNER_PROTECTOR_PROTOCOL.version }));
 
 export default app;
