@@ -7,11 +7,30 @@ import {
   persistGovernanceVerification,
 } from '../supabase.js';
 
+export const HUMAN_JUDGMENT_POLICY = Object.freeze({
+  human_judgment_required: true,
+  ai_must_not: [
+    'claim religious authority',
+    'demand surrender of human judgment',
+    'represent its output as unquestionable truth',
+    'independently authorize consequential external actions',
+  ],
+  ai_may: [
+    'provide analysis',
+    'identify uncertainty',
+    'recommend options',
+    'request clarification',
+    'surface risks',
+    'assist authorized human decision-makers',
+  ],
+});
+
 export const ALGORITHM_GOVERNANCE_POLICY = Object.freeze({
   key: 'algorithm-governance',
   version: '1.0.0',
   command: 'ILLUMINATE → VERIFY → PROTECT → ACT LAWFULLY → VERIFY → RECORD',
   lifecycle: ['RECEIVE', 'ROUTE', 'THINK', 'PLAN', 'GUARDIAN', 'APPROVE', 'EXECUTE', 'VERIFY', 'RECOVER', 'RECORD'],
+  humanJudgment: HUMAN_JUDGMENT_POLICY,
 });
 
 const CONSEQUENT_ACTIONS = new Set([
@@ -46,13 +65,25 @@ export function evaluateAlgorithmGovernance(input = {}) {
   const protectedResource = input.protectedResource === true || input.externalMutation === true;
   const approved = input.approved === true;
   const lawful = input.lawful !== false;
+  const humanJudgmentRequired = input.human_judgment_required !== false;
+  const prohibitedHumanJudgmentBehavior =
+    input.claimsReligiousAuthority === true ||
+    input.demandsJudgmentSurrender === true ||
+    input.representsAsUnquestionableTruth === true ||
+    input.independentlyAuthorizesConsequentialAction === true;
   const riskLevel = riskFor({ action, evidenceCount: evidence.length, protectedResource, lawful });
   const consequential = protectedResource || CONSEQUENT_ACTIONS.has(action);
 
   let decision = 'ALLOW';
   let reason = 'Verified evidence is present and no consequential approval gate was triggered.';
 
-  if (!lawful) {
+  if (!humanJudgmentRequired) {
+    decision = 'DENY';
+    reason = 'human_judgment_required is true; MercySoul does not authorize surrender of human judgment to AI.';
+  } else if (prohibitedHumanJudgmentBehavior) {
+    decision = 'DENY';
+    reason = 'AI must not claim religious authority, demand surrender of human judgment, represent output as unquestionable truth, or independently authorize consequential external actions.';
+  } else if (!lawful) {
     decision = 'DENY';
     reason = 'The request is not marked lawful; MercySoul does not authorize execution.';
   } else if (consequential && evidence.length === 0) {
@@ -80,6 +111,8 @@ export function evaluateAlgorithmGovernance(input = {}) {
     riskLevel,
     policyKey: ALGORITHM_GOVERNANCE_POLICY.key,
     policyVersion: ALGORITHM_GOVERNANCE_POLICY.version,
+    human_judgment_required: true,
+    humanJudgmentPolicy: HUMAN_JUDGMENT_POLICY,
     requiresApproval,
     executionStatus: 'not_started',
     approvalRecorded: approved,
@@ -167,6 +200,8 @@ export function algorithmGovernanceStatus() {
     version: ALGORITHM_GOVERNANCE_POLICY.version,
     command: ALGORITHM_GOVERNANCE_POLICY.command,
     lifecycle: ALGORITHM_GOVERNANCE_POLICY.lifecycle,
+    human_judgment_required: true,
+    humanJudgmentPolicy: HUMAN_JUDGMENT_POLICY,
     rule: 'No verified evidence → no consequential execution.',
     approvalRule: 'No approval → no consequential execution.',
     verificationRule: 'No post-action verification → no completion.',
