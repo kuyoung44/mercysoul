@@ -1,9 +1,13 @@
-name: MercySoul Golden Path
+name: MercySoul Golden Path v1.1 Security
 
 on:
   push:
     branches: [main, master]
   pull_request:
+
+permissions:
+  contents: read
+  security-events: write
 
 jobs:
   golden-path:
@@ -15,3 +19,24 @@ jobs:
           node-version: 20
       - name: Verify Golden Path
         run: node templates/mercysoul-project/scripts/verify-golden-path.mjs
+
+  codeql:
+    name: CodeQL
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+      - uses: github/codeql-action/autobuild@v3
+      - uses: github/codeql-action/analyze@v3
+
+  dependency-review:
+    name: Dependency Review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/dependency-review-action@v4
