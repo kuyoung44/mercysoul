@@ -44,7 +44,7 @@ export function evaluateAlgorithmGovernance(input = {}) {
   const scope = text(input.scope, 'unspecified');
   const evidence = Array.isArray(input.evidence) ? input.evidence : [];
   const protectedResource = input.protectedResource === true || input.externalMutation === true;
-  const approvalRequested = input.approvalRequested === true;
+  const approved = input.approved === true;
   const lawful = input.lawful !== false;
   const riskLevel = riskFor({ action, evidenceCount: evidence.length, protectedResource, lawful });
   const consequential = protectedResource || CONSEQUENT_ACTIONS.has(action);
@@ -58,7 +58,7 @@ export function evaluateAlgorithmGovernance(input = {}) {
   } else if (consequential && evidence.length === 0) {
     decision = 'REVIEW';
     reason = 'Consequential execution requires verified evidence before execution.';
-  } else if (consequential && !approvalRequested) {
+  } else if (consequential && !approved) {
     decision = 'REVIEW';
     reason = 'Consequential execution requires explicit approval before execution.';
   } else if (riskLevel === 'CRITICAL') {
@@ -66,7 +66,8 @@ export function evaluateAlgorithmGovernance(input = {}) {
     reason = 'Critical-risk action requires human review.';
   }
 
-  const requiresApproval = decision === 'REVIEW' && lawful;
+  const requiresApproval = consequential && !approved;
+  const executionEligible = decision === 'ALLOW' && (!consequential || approved);
   return {
     id: crypto.randomUUID(),
     requestId,
@@ -81,6 +82,8 @@ export function evaluateAlgorithmGovernance(input = {}) {
     policyVersion: ALGORITHM_GOVERNANCE_POLICY.version,
     requiresApproval,
     executionStatus: 'not_started',
+    approvalRecorded: approved,
+    executionEligible,
     verificationRequired: true,
     recoveryOnFailure: true,
     lifecycle: ALGORITHM_GOVERNANCE_POLICY.lifecycle,
