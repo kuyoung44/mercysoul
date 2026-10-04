@@ -42,3 +42,41 @@ test('approved consequential action becomes execution eligible', () => {
   assert.equal(result.approvalRecorded, true);
   assert.equal(result.executionEligible, true);
 });
+
+test('human judgment is always required', () => {
+  const result = evaluateAlgorithmGovernance({
+    requestId: 'test-human-judgment',
+    actor: 'ai',
+    action: 'recommendation',
+    human_judgment_required: false,
+    evidence: [{ type: 'source', ref: 'test' }],
+  });
+  assert.equal(result.human_judgment_required, true);
+  assert.equal(result.decision, 'DENY');
+  assert.equal(result.executionEligible, false);
+});
+
+test('AI must not claim religious authority or demand surrender of human judgment', () => {
+  const result = evaluateAlgorithmGovernance({
+    requestId: 'test-ai-authority',
+    actor: 'ai',
+    action: 'recommendation',
+    claimsReligiousAuthority: true,
+    demandsJudgmentSurrender: true,
+    evidence: [{ type: 'source', ref: 'test' }],
+  });
+  assert.equal(result.decision, 'DENY');
+  assert.equal(result.executionEligible, false);
+});
+
+test('AI must not present output as unquestionable truth', () => {
+  const result = evaluateAlgorithmGovernance({
+    requestId: 'test-unquestionable',
+    actor: 'ai',
+    action: 'recommendation',
+    representsAsUnquestionableTruth: true,
+    evidence: [{ type: 'source', ref: 'test' }],
+  });
+  assert.equal(result.decision, 'DENY');
+  assert.equal(result.executionEligible, false);
+});
