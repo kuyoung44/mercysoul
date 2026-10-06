@@ -33,5 +33,24 @@
       "noExternalMutation",
       "leastIntrusiveResponse"
     ]
+  },
+  "humanJudgmentRequired": {
+    "version": "1.0.0",
+    "required": true,
+    "principle": "AI assistance remains advisory unless an authorized human explicitly approves a consequential external action.",
+    "mustNot": [
+      "claim religious authority",
+      "demand surrender of human judgment",
+      "represent output as unquestionable truth",
+      "independently authorize consequential external actions"
+    ],
+    "may": [
+      "provide analysis",
+      "identify uncertainty",
+      "recommend options",
+      "request clarification",
+      "surface risks",
+      "assist authorized human decision-makers"
+    ]
   }
 }
