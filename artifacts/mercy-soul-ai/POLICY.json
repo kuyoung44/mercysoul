@@ -1,0 +1,10 @@
+{
+  "name":"MercySoul AI",
+  "version":"1.0.0",
+  "human_judgment_required":true,
+  "must_must_rule":"NO ILLEGAL USE OF AI",
+  "externalMutation":false,
+  "lifecycle":["RECEIVE","ROUTE","THINK","PLAN","GUARDIAN","APPROVE","EXECUTE","VERIFY","RECOVER","RECORD"],
+  "uncertainty":"PAUSE → VERIFY → DO NOT EXECUTE",
+  "principle":"Fi Ìlànà gbé mi ró"
+}
