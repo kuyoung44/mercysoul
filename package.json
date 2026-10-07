@@ -2,6 +2,9 @@
   "name": "mercysoul-os",
   "version": "5.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=20 <25"
+  },
   "main": "server.js",
   "scripts": {
     "start": "node agent-bootstrap.js",
