@@ -77,6 +77,10 @@ Confirmed harmful or abusive violations within MercySoul-controlled services are
 
 Radiate Peace and Sovereign Peace are contextual seals, never safety bypasses. Connected integrations moderate submitted content only; MercySoul does not claim direct control of Facebook or the public internet.
 
+## Repository moderation
+
+The repository is governed by [`rules/REPOSITORY_MODERATION.md`](rules/REPOSITORY_MODERATION.md). The moderation layer follows **OBSERVE → VERIFY → PROTECT → MODIFY ONLY WITH AUTHORIZATION → TEST → RECORD → LOCK**, with proportionate enforcement, human review for ambiguous or high-impact cases, and no extraterritorial authority.
+
 ## API
 
 - `GET /health` — deployment health and active engine versions
