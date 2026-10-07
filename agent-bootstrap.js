@@ -9,11 +9,22 @@ import { facebookMessengerStatus, handleFacebookWebhook } from './src/facebook-m
 import commandCenterRouter from './src/command-center/routes.js';
 import cursorRouter from './src/cursor/routes.js';
 import { initializeAiFraudPersistence } from './src/ai-fraud-rule.js';
+import { mercySoulAiStatus, runMercySoulAI } from './src/ai/mercy-soul-ai.js';
 
 app.use('/api', commandCenterRouter);
 app.use('/api', cursorRouter);
 
 app.get('/api/bot/status', (_req, res) => res.json({ ok: true, bot: mercysoulBotStatus(), whatsapp: whatsappStatus() }));
+app.get('/api/ai/status', (_req, res) => res.json({ ok: true, ai: mercySoulAiStatus() }));
+app.post('/api/ai/chat', async (req, res) => {
+  const requestId = req.get('x-request-id') || crypto.randomUUID();
+  try {
+    const result = await runMercySoulAI(req.body || {}, { requestId });
+    res.status(result.ok ? 200 : 422).json(result);
+  } catch (error) {
+    res.status(500).json({ ok: false, requestId, decision: 'review', error: error instanceof Error ? error.message : 'MercySoul AI failed' });
+  }
+});
 app.get('/api/personal/status', (_req, res) => res.json({ ok: true, personal: personalBotStatus() }));
 app.post('/api/personal/chat', async (req, res) => { try { const result = await runPersonalBot(req.body || {}); res.status(result.ok ? 200 : 400).json(result); } catch (error) { res.status(502).json({ ok: false, error: error instanceof Error ? error.message : 'Personal chatbot failed' }); } });
 
