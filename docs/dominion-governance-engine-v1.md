@@ -81,3 +81,18 @@ The API records proposal and authorization-gate outcomes through the existing be
 4. The gate checks proposal integrity, scope, required fields, and expiry before passing control to the existing engine.
 
 **Security limitation:** the current integration uses the existing shared `ADMIN_API_TOKEN` as its authentication boundary. The approval object's approver label is not an independent identity proof. Before broad production use, replace this with a trusted approval record issued by a separately authenticated approval workflow, and ensure the approval is single-use/idempotent. Keep the admin token server-side.
+
+
+## Natural Conversation Mode v1.0
+
+The conversation layer now applies the rule set in `src/natural-conversation-mode.js` and integrates it into `src/agent/personal-bot.js`.
+
+- Common greetings, thanks, acknowledgments, and casual check-ins receive short, natural replies without being routed as tasks.
+- The model instructions for substantive requests reinforce proportionate conversation, no unnecessary paraphrasing, focused clarification, and correctly rendered text.
+- Conversation-mode status is included in `getGovernanceStatus()` and therefore appears in the Dominion status response.
+- Actionable requests continue through the normal assistant path. Natural Conversation Mode does not grant execution authority, bypass scoped approval, or change repository/deployment permissions.
+- Unit tests cover classification, example replies, non-interception of actionable requests, and the no-governance-bypass invariant.
+
+Example: `Good evening` → `Good evening! Aṣẹ. What shall we work on tonight?`
+
+This is source-level integration on the feature branch. Runtime behavior and the full test suite must be verified before merge or deployment.
