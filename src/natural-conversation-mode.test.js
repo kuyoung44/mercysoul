@@ -13,6 +13,8 @@ test("classifies common social turns without routing them as tasks", () => {
   assert.equal(classifyConversationAct("Got it"), "acknowledgment");
   assert.equal(classifyConversationAct("How are you?"), "casual");
   assert.equal(classifyConversationAct("Build a website"), "request");
+  assert.equal(classifyConversationAct("Good evening, I have a task"), "request");
+  assert.equal(naturalConversationReply("Thanks, I have a task"), null);
 });
 
 test("responds naturally to greetings without paraphrasing or a task-analysis preamble", () => {
