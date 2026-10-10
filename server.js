@@ -99,7 +99,7 @@ app.get('/api/engine/status', (_req, res) => res.json({
   dominionGovernance: dominionGovernanceStatus(),
 }));
 const requireAdminToken = (req) => {
-  const token = String(req.get('authorization') || '').replace(/^Bearer\\s+/i, '');
+  const token = String(req.get('authorization') || '').replace(/^Bearer\s+/i, '');
   const expected = String(config.ADMIN_API_TOKEN || '').trim();
   return { ok: Boolean(expected && token === expected), configured: Boolean(expected) };
 };
@@ -259,7 +259,7 @@ app.get('/api/health', healthRateLimit, (_req, res) => res.status(200).json({
 app.get('/api/gate', (_req, res) => res.status(200).json({ ok: true, ...sealedGateStatus() }));
 app.get('/api/governance/inner-protector', (_req, res) => res.status(200).json(innerProtectorStatus()));
 app.post('/api/governance/inner-protector/chore', (req, res) => {
-  const token = String(req.get('authorization') || '').replace(/^Bearer\\s+/i, '');
+  const token = String(req.get('authorization') || '').replace(/^Bearer\s+/i, '');
   if (!config.ADMIN_API_TOKEN || token !== config.ADMIN_API_TOKEN) return res.status(401).json({ ok: false, error: 'Unauthorized' });
   const result = runInnerProtectorChore({ signal: req.body?.signal || {} });
   persistEventBestEffort({ eventType: 'inner_protector_chore', requestId: req.requestId, payload: { decision: result.result.decision, externalMutation: result.result.externalMutation, retaliatoryAction: result.result.retaliatoryAction } });
@@ -267,7 +267,7 @@ app.post('/api/governance/inner-protector/chore', (req, res) => {
 });
 app.get('/api/governance/ai-fraud', (_req, res) => res.status(200).json({ ok: true, ...aiFraudStatus() }));
 app.get('/api/governance/content-suspension', (_req, res) => res.status(200).json({ ok: true, ...contentSuspensionStatus() }));
-app.post('/api/governance/content-suspension/release', async (req, res) => { const token = String(req.get('authorization') || '').replace(/^Bearer\\s+/i, ''); if (!token || token !== config.ADMIN_API_TOKEN) return res.status(401).json({ ok: false, error: 'Unauthorized' }); const actor = req.body?.actor || 'authorized-reviewer'; try { const result = await confirmContentEvidence(req.body?.reviewId, actor, req.body?.evidence || {}); if (result.ok) persistEventBestEffort({ eventType: 'content_suspension_release', requestId: req.requestId, payload: { reviewId: req.body?.reviewId || null, actor, evidence: req.body?.evidence || {}, strike: CONTENT_SUSPENSION_GATE.strikeProtocol } }); return res.status(result.ok ? 200 : 400).json(result); } catch (error) { return res.status(503).json({ ok: false, error: 'Content-suspension decision persistence unavailable', detail: error.message }); } });
+app.post('/api/governance/content-suspension/release', async (req, res) => { const token = String(req.get('authorization') || '').replace(/^Bearer\s+/i, ''); if (!token || token !== config.ADMIN_API_TOKEN) return res.status(401).json({ ok: false, error: 'Unauthorized' }); const actor = req.body?.actor || 'authorized-reviewer'; try { const result = await confirmContentEvidence(req.body?.reviewId, actor, req.body?.evidence || {}); if (result.ok) persistEventBestEffort({ eventType: 'content_suspension_release', requestId: req.requestId, payload: { reviewId: req.body?.reviewId || null, actor, evidence: req.body?.evidence || {}, strike: CONTENT_SUSPENSION_GATE.strikeProtocol } }); return res.status(result.ok ? 200 : 400).json(result); } catch (error) { return res.status(503).json({ ok: false, error: 'Content-suspension decision persistence unavailable', detail: error.message }); } });
 app.post('/api/governance/ai-fraud/review', async (req, res) => { const assessment = assessAiFraud(req.body || {}); const review = assessment.matched && !assessment.confirmed ? createFraudReview(req.body || {}, assessment) : null; if (review) { try { await persistFraudReview(review); } catch (error) { return res.status(503).json({ ok: false, error: 'AI-fraud review persistence unavailable', detail: error.message }); } } return res.status(assessment.matched ? 200 : 204).json(assessment.matched ? { ok: true, protocol: AI_FRAUD_RULE, assessment, review } : {}); });
 app.post('/api/governance/ai-fraud/decision', async (req, res) => { const token = String(req.get('authorization') || '').replace(/^Bearer\s+/i, ''); if (!token || token !== config.ADMIN_API_TOKEN) return res.status(401).json({ ok: false, error: 'Unauthorized' }); const actor = req.body?.actor || 'authorized-reviewer'; let result; try { result = req.body?.decision === 'confirm' ? await confirmFraudReview(req.body?.reviewId, actor) : await clearFraudReview(req.body?.reviewId, actor); } catch (error) { return res.status(503).json({ ok: false, error: 'AI-fraud decision persistence unavailable', detail: error.message }); } return res.status(result.ok ? 200 : 400).json(result); });
 app.post('/api/gate', (req, res) => {
