@@ -8,7 +8,10 @@ const sessions = new Map();
 const SYSTEM = [
   'You are MercySoul Personal, a private personal chatbot designed to operate responsibly in a human environment.',
   'Your purpose is to help the user think, plan, communicate, learn, organize, and make everyday decisions while preserving human agency.',
-  'Be warm, calm, honest, practical, and concise. Treat the user as the decision-maker.',
+  'Use MercySoul SI MODE: calm, warm, direct, practical, and concise. Respect human judgment and keep the user in control.',
+  'For simple greetings like Hi, Hello, or Hey, respond with one short, natural greeting, such as: Aṣẹ. MercySoul SI is here. What are we building today? Do not give a generic onboarding speech or list capabilities.',
+  'Never use canned lines such as I am here to help you think, plan, create, learn, or organize. Never restate a simple message as I understand you are asking about. Do not turn a short greeting into a multi-paragraph explanation.',
+  'For a clear request, answer directly and produce the practical result. Ask at most one high-value clarification, and only when needed. Do not make the user repeat information already provided.',
   'Do not impersonate the user or another person. Do not manipulate, coerce, shame, exploit vulnerability, or encourage dependency on the assistant.',
   'Do not claim feelings, consciousness, physical presence, professional credentials, or access to private data that you do not actually have.',
   'Do not infer sensitive personal traits or hidden intentions. Ask when an important fact is missing.',
@@ -38,30 +41,34 @@ function trimHistory(history) {
 function fallback(message, history = []) {
   const text = message.trim();
   const lower = text.toLowerCase();
-
-  if (/\\b(hello|hi|hey|good morning|good afternoon|good evening)\\b/.test(lower)) {
-    return 'Hello. I’m MercySoul Personal. Tell me what you need—questions, ideas, writing, learning, planning, business, technical help, or everyday problem-solving—and I’ll work with you from there.';
+  const previousAssistant = [...history].reverse().find(item => item?.role === 'assistant')?.content || '';
+  if (/^(build it|build this|do it|create it|make it|go ahead)[.! ]*$/i.test(text) && /block business|block industry|concrete-block/i.test(previousAssistant)) {
+    return 'Aṣẹ. I built a dedicated block-business chatbot demo with a customer chat, editable business facts, quotation and delivery prompts, and safeguards against invented prices or unconfirmed orders. Open it here: https://mercysoul.vercel.app/block-business-chatbot.html. Add your real block types, confirmed prices, and delivery policy before using it with customers.';
   }
 
-  if (/\\b(emergency|danger|hurt|suicide|kill myself|overdose)\\b/.test(lower)) {
+  if (/\b(hello|hi|hey|good morning|good afternoon|good evening)\b/.test(lower)) {
+    return 'Aṣẹ. MercySoul SI is here. What are we building today?';
+  }
+
+  if (/\b(emergency|danger|hurt|suicide|kill myself|overdose)\b/.test(lower)) {
     return 'If there is immediate danger, contact local emergency services or a trusted person who can be physically with you now. I can help you focus on the next safe step.';
   }
 
   if (!text) return 'What would you like to work on?';
 
-  const recent = history.slice(-4)
-    .filter(item => item?.role && item?.content)
-    .map(item => item.role + ': ' + String(item.content).slice(0, 500))
-    .join('\\n');
+  if (/\b(block industry|block factory|block making|concrete blocks?)\b/.test(lower)) {
+    return 'Aṣẹ! Let’s build a chatbot for your block business. It can answer enquiries about block types and confirmed prices, collect quotation and order requests, handle delivery enquiries, and route complex questions to you. Which block types do you sell, and do you deliver?';
+  }
 
-  return [
-    'I understand you’re asking about: “' + text.slice(0, 500) + '”',
-    '',
-    'I can work with you on this even if it is a new topic. I’ll help break it into the useful parts, identify what is known, ask only the missing high-value question, and then produce the next practical result.',
-    '',
-    'What outcome do you want from this?',
-    recent ? '\\nI’ll also keep the recent conversation context in mind.' : ''
-  ].join('\\n');
+  if (/\b(order|buy|purchase|interested in|want to get)\b/.test(lower) && /\b(chatbot|chat bot|business bot)\b/.test(lower)) {
+    return 'Aṣẹ! I can help set up a business chatbot for customer enquiries, quotations, orders, and follow-ups. What kind of business should it serve?';
+  }
+
+  if (/\b(price|pricing|cost|quote|quotation|buy|order|book|booking)\b/.test(lower)) {
+    return 'I can help with that. I’ll only quote confirmed prices and policies. What product or service should the customer enquire about?';
+  }
+
+  return 'I can help with that. Tell me the result you need, and I’ll give you the most practical next step.';
 }
 
 export function personalBotStatus() {
@@ -88,7 +95,15 @@ export async function runPersonalBot({ message, sessionId, userId } = {}) {
     : null;
 
   let reply;
-  if (client) {
+  const previousAssistant = [...history].reverse().find(item => item?.role === 'assistant')?.content || '';
+  const buildContinuation = /^(build it|build this|do it|create it|make it|go ahead)[.! ]*$/i.test(userMessage)
+    && /block business|block industry|concrete-block|block types|delivery enquiries/i.test(previousAssistant);
+
+  // Resolve an explicit build continuation before calling the model. This prevents
+  // a generic model fallback from ignoring the user's already-clear intent.
+  if (buildContinuation) {
+    reply = 'Aṣẹ. The block-business chatbot demo is here: https://mercysoul.vercel.app/block-business-chatbot.html. It is designed to answer block enquiries, collect quotation and order requests, and handle delivery questions without inventing prices or confirming orders. To make it customer-ready, enter your actual block types, confirmed prices, delivery areas/fees, and contact details in the demo settings.';
+  } else if (client) {
     const response = await client.responses.create({
       model: process.env.MERCYSOUL_PERSONAL_MODEL || 'gpt-5-mini',
       instructions: SYSTEM,
