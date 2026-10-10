@@ -95,7 +95,15 @@ export async function runPersonalBot({ message, sessionId, userId } = {}) {
     : null;
 
   let reply;
-  if (client) {
+  const previousAssistant = [...history].reverse().find(item => item?.role === 'assistant')?.content || '';
+  const buildContinuation = /^(build it|build this|do it|create it|make it|go ahead)[.! ]*$/i.test(userMessage)
+    && /block business|block industry|concrete-block|block types|delivery enquiries/i.test(previousAssistant);
+
+  // Resolve an explicit build continuation before calling the model. This prevents
+  // a generic model fallback from ignoring the user's already-clear intent.
+  if (buildContinuation) {
+    reply = 'Aṣẹ. The block-business chatbot demo is here: https://mercysoul.vercel.app/block-business-chatbot.html. It is designed to answer block enquiries, collect quotation and order requests, and handle delivery questions without inventing prices or confirming orders. To make it customer-ready, enter your actual block types, confirmed prices, delivery areas/fees, and contact details in the demo settings.';
+  } else if (client) {
     const response = await client.responses.create({
       model: process.env.MERCYSOUL_PERSONAL_MODEL || 'gpt-5-mini',
       instructions: SYSTEM,
