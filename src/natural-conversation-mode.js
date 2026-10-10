@@ -21,10 +21,10 @@ export const NATURAL_CONVERSATION_MODE = Object.freeze({
   ]),
 });
 
-const GREETING = /^(?:hello|hi|hey|hiya|good morning|good afternoon|good evening|evening|morning|afternoon)(?:[!,.? ]|$)/i;
-const THANKS = /^(?:thanks|thank you|thank u|many thanks|appreciate it|much appreciated)(?:[!,.? ]|$)/i;
-const ACKNOWLEDGMENT = /^(?:ok|okay|alright|all right|got it|understood|noted|sure|makes sense|great|perfect|cool)(?:[!,.? ]|$)/i;
-const CASUAL = /^(?:how are you|how's it going|what's up|whats up|good to see you|nice to see you)(?:[!,.? ]|$)/i;
+const GREETING = /^(?:hello|hi|hey|hiya|good morning|good afternoon|good evening|evening|morning|afternoon)[!,.?]?$/i;
+const THANKS = /^(?:thanks|thank you|thank u|many thanks|appreciate it|much appreciated)[!,.?]?$/i;
+const ACKNOWLEDGMENT = /^(?:ok|okay|alright|all right|got it|understood|noted|sure|makes sense|great|perfect|cool)[!,.?]?$/i;
+const CASUAL = /^(?:how are you|how's it going|what's up|whats up|good to see you|nice to see you)[!,.?]?$/i;
 
 export function classifyConversationAct(value) {
   const text = typeof value === "string" ? value.trim() : "";
