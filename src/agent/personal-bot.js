@@ -42,27 +42,29 @@ function fallback(message, history = []) {
   const text = message.trim();
   const lower = text.toLowerCase();
 
-  if (/\\b(hello|hi|hey|good morning|good afternoon|good evening)\\b/.test(lower)) {
+  if (/\b(hello|hi|hey|good morning|good afternoon|good evening)\b/.test(lower)) {
     return 'Aṣẹ. MercySoul SI is here. What are we building today?';
   }
 
-  if (/\\b(emergency|danger|hurt|suicide|kill myself|overdose)\\b/.test(lower)) {
+  if (/\b(emergency|danger|hurt|suicide|kill myself|overdose)\b/.test(lower)) {
     return 'If there is immediate danger, contact local emergency services or a trusted person who can be physically with you now. I can help you focus on the next safe step.';
   }
 
   if (!text) return 'What would you like to work on?';
 
-  const recent = history.slice(-4)
-    .filter(item => item?.role && item?.content)
-    .map(item => item.role + ': ' + String(item.content).slice(0, 500))
-    .join('\\n');
+  if (/\b(block industry|block factory|block making|concrete blocks?)\b/.test(lower)) {
+    return 'Aṣẹ! Let’s build a chatbot for your block business. It can answer enquiries about block types and confirmed prices, collect quotation and order requests, handle delivery enquiries, and route complex questions to you. Which block types do you sell, and do you deliver?';
+  }
 
-  return [
-    text,
-    '',
-    'I’ll handle the request directly and keep the next step practical. What specific result should I produce first?',
-    recent ? '\\nI’ll use the recent conversation context where relevant.' : ''
-  ].join('\\n');
+  if (/\b(order|buy|purchase|interested in|want to get)\b/.test(lower) && /\b(chatbot|chat bot|business bot)\b/.test(lower)) {
+    return 'Aṣẹ! I can help set up a business chatbot for customer enquiries, quotations, orders, and follow-ups. What kind of business should it serve?';
+  }
+
+  if (/\b(price|pricing|cost|quote|quotation|buy|order|book|booking)\b/.test(lower)) {
+    return 'I can help with that. I’ll only quote confirmed prices and policies. What product or service should the customer enquire about?';
+  }
+
+  return 'I can help with that. Tell me the result you need, and I’ll give you the most practical next step.';
 }
 
 export function personalBotStatus() {
