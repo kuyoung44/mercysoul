@@ -61,3 +61,23 @@ Approval records must be obtained through a trusted, authenticated human approva
 ## Deployment and permissions
 
 No production deployment is triggered by this module. No database, secret, permission, repository setting, existing project, or external service is modified by the runtime code in this feature. Merge and deployment remain separate human decisions.
+
+
+## Integrated guarded API mode
+
+The feature branch integrates the policy layer with the existing Express engine routes:
+
+- `GET /api/governance/dominion/status` — reports the active guarded-governance mode and lifecycle pattern.
+- `POST /api/governance/dominion/propose` — requires the configured admin bearer token and returns a proposal bound to the exact engine command. Proposal creation does not execute it.
+- `POST /api/engine/run` — read-only planning remains available to authenticated admins. When `execute: true`, the request must include the exact returned `governanceProposal` plus an explicit `approval` object with `approved: true`, matching `proposalId` and `scope`, approver, reason, approval reference, and a future `expiresAt`.
+
+The API records proposal and authorization-gate outcomes through the existing best-effort Supabase event path. This does not by itself prove that Supabase persisted the event. The status endpoint deliberately reports the governance helper's audit implementation as non-durable until persistence is independently verified.
+
+### API flow
+
+1. Call `POST /api/governance/dominion/propose` with `{ "command": "...", "owner": "...", "issue": "..." }` using an admin bearer token.
+2. Review the returned proposal and exact scope.
+3. A human must explicitly approve the exact proposal. Send the proposal and approval record to `POST /api/engine/run` with `execute: true`.
+4. The gate checks proposal integrity, scope, required fields, and expiry before passing control to the existing engine.
+
+**Security limitation:** the current integration uses the existing shared `ADMIN_API_TOKEN` as its authentication boundary. The approval object's approver label is not an independent identity proof. Before broad production use, replace this with a trusted approval record issued by a separately authenticated approval workflow, and ensure the approval is single-use/idempotent. Keep the admin token server-side.
