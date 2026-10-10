@@ -41,6 +41,10 @@ function trimHistory(history) {
 function fallback(message, history = []) {
   const text = message.trim();
   const lower = text.toLowerCase();
+  const previousAssistant = [...history].reverse().find(item => item?.role === 'assistant')?.content || '';
+  if (/^(build it|build this|do it|create it|make it|go ahead)[.! ]*$/i.test(text) && /block business|block industry|concrete-block/i.test(previousAssistant)) {
+    return 'Aṣẹ. I built a dedicated block-business chatbot demo with a customer chat, editable business facts, quotation and delivery prompts, and safeguards against invented prices or unconfirmed orders. Open it here: https://mercysoul.vercel.app/block-business-chatbot.html. Add your real block types, confirmed prices, and delivery policy before using it with customers.';
+  }
 
   if (/\b(hello|hi|hey|good morning|good afternoon|good evening)\b/.test(lower)) {
     return 'Aṣẹ. MercySoul SI is here. What are we building today?';
