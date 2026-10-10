@@ -33,6 +33,7 @@ import orchestratorRouter from './src/orchestrator/http.js';
 import { engineStatus as controlEngineStatus, runEngine } from './src/engine/kernel.js';
 import { runPersonalBot, personalBotStatus } from './src/agent/personal-bot.js';
 import { INNER_PROTECTOR_PROTOCOL, innerProtectorStatus, runInnerProtectorChore } from './src/governance/inner-state-protector.js';
+import { algorithmGovernanceStatus, evaluateAndRecordGovernance, recordGovernanceApproval, recordGovernanceVerification } from './src/governance/algorithm-governance.js';
 
 const app = express();
 app.disable('x-powered-by');
@@ -242,7 +243,7 @@ const handleHerculesWebhook = (req, res) => {
 app.get('/personal', (_req, res) => res.sendFile(fileURLToPath(new URL('./public/personal.html', import.meta.url))));
 app.get('/', (_req, res) => res.sendFile(ROOT_INDEX));
 app.get('/health', (_req, res) => { const db = supabaseStatus(); res.status(db.healthy ? 200 : 503).json({ ok: db.healthy, service: 'MercySoul OS', version: ENGINE_VERSION, serverRelease: SERVER_RELEASE, engine: MERCYSOUL_ENGINE.name, omnipresentHelp: omnipresentHelpStatus(), helpWebhook: HELP_WEBHOOK_PATH, supabase: db }); });
-app.get('/api/status', (_req, res) => res.json({ ...osStatus(), serverEngineVersion: ENGINE_VERSION, serverRelease: SERVER_RELEASE, engine: engineStatus(), moderationPolicyVersion: DOMINION_POLICY.version, instantJustice: INSTANT_JUSTICE_PROTOCOL, globalJurisdiction: globalJurisdictionStatus(), watchtower: watchtowerStatus(), obsessionShield: obsessionShieldStatus(), emotionalShield: emotionalShieldStatus(), governance: constitutionStatus(), relationshipContext: RELATIONSHIP_CONTEXT_POLICY, omnipresentHelp: omnipresentHelpStatus(), helpWebhook: HELP_WEBHOOK_PATH, herculesWebhook: HERCULES_WEBHOOK_PATH, magneticAttraction: magneticStatus(), divineIncome: divineIncomeStatus(), deploymentDirective: deploymentDirectiveStatus(), smartThings: smartThingsStatus(), googleOAuth: googleOAuthStatus(), supabase: supabaseStatus(), sealedGate: sealedGateStatus(), aiFraud: aiFraudStatus(), contentSuspension: contentSuspensionStatus(), kycPayment: kycPaymentStatus(), innerProtector: innerProtectorStatus() }));
+app.get('/api/status', (_req, res) => res.json({ ...osStatus(), serverEngineVersion: ENGINE_VERSION, serverRelease: SERVER_RELEASE, engine: engineStatus(), moderationPolicyVersion: DOMINION_POLICY.version, instantJustice: INSTANT_JUSTICE_PROTOCOL, globalJurisdiction: globalJurisdictionStatus(), watchtower: watchtowerStatus(), obsessionShield: obsessionShieldStatus(), emotionalShield: emotionalShieldStatus(), governance: constitutionStatus(), relationshipContext: RELATIONSHIP_CONTEXT_POLICY, omnipresentHelp: omnipresentHelpStatus(), helpWebhook: HELP_WEBHOOK_PATH, herculesWebhook: HERCULES_WEBHOOK_PATH, magneticAttraction: magneticStatus(), divineIncome: divineIncomeStatus(), deploymentDirective: deploymentDirectiveStatus(), smartThings: smartThingsStatus(), googleOAuth: googleOAuthStatus(), supabase: supabaseStatus(), sealedGate: sealedGateStatus(), aiFraud: aiFraudStatus(), contentSuspension: contentSuspensionStatus(), kycPayment: kycPaymentStatus(), innerProtector: innerProtectorStatus(), algorithmGovernance: algorithmGovernanceStatus() }));
 app.get('/api/auth/google', (_req, res) => { try { res.redirect(createGoogleOAuthUrl()); } catch (error) { res.status(503).json({ ok: false, error: error.message, googleOAuth: googleOAuthStatus() }); } });
 app.get('/api/auth/google/callback', async (req, res) => { try { const result = await completeGoogleOAuth(req.query?.code, req.query?.state); persistEventBestEffort({ eventType: 'google_oauth_connected', requestId: req.requestId, payload: { email: result.email, scope: result.scope, connectedAt: result.connectedAt } }); res.status(200).json({ ok: true, authenticated: true, provider: 'google', profile: { email: result.email, name: result.name, picture: result.picture, subject: result.subject }, scope: result.scope, googleOAuth: googleOAuthStatus(), message: 'Google authorization completed. Gmail access is enabled only when the configured OAuth scope explicitly includes it.' }); } catch (error) { res.status(400).json({ ok: false, authenticated: false, error: error.message, googleOAuth: googleOAuthStatus() }); } });
 app.get('/api/auth/google/status', (_req, res) => res.json({ ok: true, googleOAuth: googleOAuthStatus() }));
@@ -272,8 +273,50 @@ app.post('/api/moderate', (req, res) => { try { const result = processInput({ ..
 app.post('/api/moderate/web', (req, res) => { try { const result = processInput({ ...req.body, requestId: req.requestId, type: 'web', watchtowerIdentity: req.watchtower?.identity }); persistEventBestEffort({ eventType: 'web_moderation', requestId: req.requestId, payload: { decision: result?.decision || null, riskScore: result?.riskScore ?? null } }); res.status(200).json({ ok: true, ...result, instantJustice: req.instantJustice, globalJurisdiction: globalJurisdictionStatus(), watchtower: watchtowerStatus(), obsessionShield: obsessionShieldStatus(), emotionalShield: emotionalShieldStatus() }); } catch { res.status(400).json({ ok: false, error: 'Unable to moderate web content', requestId: req.requestId }); } });
 app.post(HERCULES_WEBHOOK_PATH, handleHerculesWebhook);
 app.post('/api/webhooks/hercules', handleHerculesWebhook);
-app.post('/api/governance/evaluate', (req, res) => { try { const actor = req.body?.actor || 'citizen'; const result = processInput({ ...req.body, requestId: req.requestId, type: req.body?.type === 'web' ? 'web' : 'post', source: `governance:${actor}`, watchtowerIdentity: req.watchtower?.identity }); res.status(200).json({ ok: true, governance: MERCYSOUL_CONSTITUTION.name, equalTreatment: true, actor, ...result, instantJustice: req.instantJustice, globalJurisdiction: globalJurisdictionStatus(), watchtower: watchtowerStatus(), emotionalShield: emotionalShieldStatus() }); } catch { res.status(400).json({ ok: false, error: 'Unable to evaluate governance content', requestId: req.requestId }); } });
-app.post('/api/verify', async (_req, res) => res.json({ success: true, governanceBound: true, engineVersion: ENGINE_VERSION, serverRelease: SERVER_RELEASE, constitutionVersion: MERCYSOUL_CONSTITUTION.version, omnipresentHelp: omnipresentHelpStatus(), helpWebhook: HELP_WEBHOOK_PATH, instantJustice: INSTANT_JUSTICE_PROTOCOL.version, globalJurisdiction: GLOBAL_JURISDICTION_PROTOCOL.version, sovereignJurisdictionVersion: MERCYSOUL_ENGINE.jurisdiction.version, watchtower: WATCHTOWER_PROTOCOL.version, obsessionShield: OBSESSION_SHIELD_PROTOCOL.version, emotionalShield: EMOTIONAL_SHIELD_PROTOCOL.version, herculesWebhook: HERCULES_WEBHOOK_PATH, magneticAttraction: magneticStatus(), divineIncome: divineIncomeStatus(), deploymentDirective: deploymentDirectiveStatus(), smartThings: smartThingsStatus(), googleOAuth: googleOAuthStatus(), supabase: supabaseStatus(), sealedGate: sealedGateStatus(), magneticTalisman: '/magnetic-talisman.svg', innerProtector: INNER_PROTECTOR_PROTOCOL.version }));
+app.get('/api/governance/algorithm/status', (_req, res) => res.status(200).json({ ok: true, ...algorithmGovernanceStatus() }));
+
+app.post('/api/governance/evaluate', async (req, res) => {
+  try {
+    const result = await evaluateAndRecordGovernance({ ...req.body, requestId: req.requestId });
+    const status = result.decision === 'ALLOW' ? 200 : 202;
+    res.status(status).json({ ok: true, governance: algorithmGovernanceStatus(), decision: result });
+  } catch (error) {
+    res.status(503).json({ ok: false, requestId: req.requestId, error: error instanceof Error ? error.message : 'Governance evaluation failed' });
+  }
+});
+
+app.post('/api/governance/approve', async (req, res) => {
+  const token = String(req.get('authorization') || '').replace(/^Bearer\\s+/i, '');
+  if (!config.ADMIN_API_TOKEN || token !== config.ADMIN_API_TOKEN) return res.status(401).json({ ok: false, error: 'Unauthorized' });
+  try {
+    const approval = await recordGovernanceApproval({
+      decisionId: req.body?.decisionId,
+      approver: req.body?.approver || 'authorized-reviewer',
+      approved: req.body?.approved === true,
+      evidence: req.body?.evidence || {},
+    });
+    res.status(200).json({ ok: true, approval, governance: algorithmGovernanceStatus() });
+  } catch (error) {
+    res.status(400).json({ ok: false, requestId: req.requestId, error: error instanceof Error ? error.message : 'Approval recording failed' });
+  }
+});
+
+app.post('/api/governance/verify', async (req, res) => {
+  const token = String(req.get('authorization') || '').replace(/^Bearer\\s+/i, '');
+  if (!config.ADMIN_API_TOKEN || token !== config.ADMIN_API_TOKEN) return res.status(401).json({ ok: false, error: 'Unauthorized' });
+  try {
+    const verification = await recordGovernanceVerification({
+      decisionId: req.body?.decisionId,
+      phase: req.body?.phase,
+      result: req.body?.result,
+      evidence: req.body?.evidence || {},
+    });
+    res.status(verification.result === 'FAIL' ? 409 : 200).json({ ok: verification.result !== 'FAIL', verification, governance: algorithmGovernanceStatus() });
+  } catch (error) {
+    res.status(400).json({ ok: false, requestId: req.requestId, error: error instanceof Error ? error.message : 'Governance verification failed' });
+  }
+});
+app.post('/api/verify', async (_req, res) => res.json({ success: true, governanceBound: true, engineVersion: ENGINE_VERSION, serverRelease: SERVER_RELEASE, constitutionVersion: MERCYSOUL_CONSTITUTION.version, omnipresentHelp: omnipresentHelpStatus(), helpWebhook: HELP_WEBHOOK_PATH, instantJustice: INSTANT_JUSTICE_PROTOCOL.version, globalJurisdiction: GLOBAL_JURISDICTION_PROTOCOL.version, sovereignJurisdictionVersion: MERCYSOUL_ENGINE.jurisdiction.version, watchtower: WATCHTOWER_PROTOCOL.version, obsessionShield: OBSESSION_SHIELD_PROTOCOL.version, emotionalShield: EMOTIONAL_SHIELD_PROTOCOL.version, herculesWebhook: HERCULES_WEBHOOK_PATH, magneticAttraction: magneticStatus(), divineIncome: divineIncomeStatus(), deploymentDirective: deploymentDirectiveStatus(), smartThings: smartThingsStatus(), googleOAuth: googleOAuthStatus(), supabase: supabaseStatus(), sealedGate: sealedGateStatus(), magneticTalisman: '/magnetic-talisman.svg', innerProtector: INNER_PROTECTOR_PROTOCOL.version, algorithmGovernance: algorithmGovernanceStatus() }));
 
 export default app;
 

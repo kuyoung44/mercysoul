@@ -169,3 +169,100 @@ export async function loadContentSuspensionState() {
   }
   return { persisted: true, reviews: await response.json() };
 }
+
+
+const GOVERNANCE_DECISIONS_TABLE = 'mercysoul_governance_decisions';
+const GOVERNANCE_APPROVALS_TABLE = 'mercysoul_governance_approvals';
+const GOVERNANCE_VERIFICATIONS_TABLE = 'mercysoul_governance_verifications';
+const GOVERNANCE_AUDIT_TABLE = 'mercysoul_governance_audit_events';
+const GOVERNANCE_RECOVERY_TABLE = 'mercysoul_governance_recovery_events';
+
+function requireSupabase() {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    if (REQUIRE_DURABLE_PERSISTENCE) throw new Error('Supabase durable persistence is required but not configured');
+    return false;
+  }
+  return true;
+}
+
+async function postJson(table, payload, prefer = 'return=representation') {
+  if (!requireSupabase()) return { persisted: false, reason: 'not-configured' };
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/${encodeURIComponent(table)}`, {
+    method: 'POST',
+    headers: headers(prefer),
+    body: JSON.stringify(payload)
+  });
+  if (!response.ok) {
+    const detail = await response.text().catch(() => 'Supabase governance persistence failed');
+    throw new Error(`Supabase governance persistence failed (${response.status}): ${detail.slice(0, 300)}`);
+  }
+  let data = null;
+  if (prefer.includes('representation')) data = await response.json().catch(() => null);
+  return { persisted: true, data };
+}
+
+export async function persistGovernanceDecision(decision) {
+  return postJson(GOVERNANCE_DECISIONS_TABLE, {
+    id: decision.id,
+    request_id: decision.requestId,
+    actor: decision.actor,
+    action: decision.action,
+    scope: decision.scope || null,
+    evidence: decision.evidence || [],
+    decision: decision.decision,
+    reason: decision.reason,
+    risk_level: decision.riskLevel,
+    policy_key: decision.policyKey,
+    policy_version: decision.policyVersion,
+    requires_approval: Boolean(decision.requiresApproval),
+    execution_status: decision.executionStatus || 'not_started',
+    created_at: decision.createdAt || new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  });
+}
+
+export async function persistGovernanceApproval(approval) {
+  return postJson(GOVERNANCE_APPROVALS_TABLE, {
+    id: approval.id,
+    decision_id: approval.decisionId,
+    approver: approval.approver,
+    approved: Boolean(approval.approved),
+    evidence: approval.evidence || {},
+    approved_at: approval.approvedAt || new Date().toISOString()
+  }, 'return=minimal');
+}
+
+export async function persistGovernanceVerification(verification) {
+  return postJson(GOVERNANCE_VERIFICATIONS_TABLE, {
+    id: verification.id,
+    decision_id: verification.decisionId,
+    phase: verification.phase,
+    result: verification.result,
+    evidence: verification.evidence || {},
+    verified_at: verification.verifiedAt || new Date().toISOString()
+  }, 'return=minimal');
+}
+
+export async function persistGovernanceAudit(event) {
+  return postJson(GOVERNANCE_AUDIT_TABLE, {
+    id: event.id,
+    decision_id: event.decisionId || null,
+    request_id: event.requestId || null,
+    event_type: event.eventType,
+    actor: event.actor || null,
+    payload: event.payload || {},
+    created_at: event.createdAt || new Date().toISOString()
+  }, 'return=minimal');
+}
+
+export async function persistGovernanceRecovery(event) {
+  return postJson(GOVERNANCE_RECOVERY_TABLE, {
+    id: event.id,
+    decision_id: event.decisionId || null,
+    action: event.action,
+    reason: event.reason,
+    evidence: event.evidence || {},
+    actor: event.actor || null,
+    created_at: event.createdAt || new Date().toISOString()
+  }, 'return=minimal');
+}
