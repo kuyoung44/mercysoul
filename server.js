@@ -33,6 +33,7 @@ import orchestratorRouter from './src/orchestrator/http.js';
 import { engineStatus as controlEngineStatus, runEngine } from './src/engine/kernel.js';
 import { runPersonalBot, personalBotStatus } from './src/agent/personal-bot.js';
 import { INNER_PROTECTOR_PROTOCOL, innerProtectorStatus, runInnerProtectorChore } from './src/governance/inner-state-protector.js';
+import { evaluateRequest as evaluateDominionRequest, authorizeProposal as authorizeDominionProposal, getGovernanceStatus as dominionGovernanceStatus } from './src/dominion-governance-engine.js';
 
 const app = express();
 app.disable('x-powered-by');
@@ -90,20 +91,77 @@ app.use((req, res, next) => {
 app.use(watchtowerMiddleware);
 app.use(instantJusticeMiddleware);
 app.use('/api', orchestratorRouter);
-app.get('/api/engine/status', (_req, res) => res.json({ ok: true, ...controlEngineStatus() }));
-app.post('/api/engine/run', async (req, res) => {
-  const token = String(req.get('authorization') || '').replace(/^Bearer\\s+/i, '');
+app.get('/api/engine/status', (_req, res) => res.json({
+  ok: true,
+  ...controlEngineStatus(),
+  mode: 'guarded-governance',
+  executionPattern: ['STOP', 'VERIFY', 'AUTHORIZE', 'EXECUTE', 'VERIFY_RESULT', 'AUDIT'],
+  dominionGovernance: dominionGovernanceStatus(),
+}));
+const requireAdminToken = (req) => {
+  const token = String(req.get('authorization') || '').replace(/^Bearer\s+/i, '');
   const expected = String(config.ADMIN_API_TOKEN || '').trim();
-  if (!expected || token !== expected) return res.status(expected ? 401 : 503).json({ ok: false, error: expected ? 'Unauthorized' : 'ADMIN_API_TOKEN is not configured' });
+  return { ok: Boolean(expected && token === expected), configured: Boolean(expected) };
+};
+app.get('/api/governance/dominion/status', (_req, res) => res.json({
+  ok: true,
+  mode: 'guarded-governance',
+  pattern: ['RECEIVE', 'ROUTE', 'THINK', 'PLAN', 'GUARDIAN', 'APPROVE', 'EXECUTE', 'VERIFY', 'RECOVER', 'RECORD'],
+  governance: dominionGovernanceStatus(),
+  engine: controlEngineStatus(),
+}));
+app.post('/api/governance/dominion/propose', (req, res) => {
+  const auth = requireAdminToken(req);
+  if (!auth.ok) return res.status(auth.configured ? 401 : 503).json({ ok: false, error: auth.configured ? 'Unauthorized' : 'ADMIN_API_TOKEN is not configured' });
+  const command = String(req.body?.command || '').trim();
+  if (!command) return res.status(400).json({ ok: false, error: 'command is required' });
+  const proposal = evaluateDominionRequest({
+    action: 'engine.run',
+    scope: `engine.run:${command}`,
+    owner: String(req.body?.owner || 'authenticated-admin'),
+    issue: String(req.body?.issue || req.get('x-request-id') || req.requestId),
+    repoPermission: true,
+    externalMutation: true,
+  });
+  persistEventBestEffort({
+    eventType: 'dominion_governance_proposal',
+    requestId: req.requestId,
+    payload: { proposalId: proposal.proposalId, action: proposal.action, scope: proposal.scope, status: proposal.status, externalMutation: proposal.externalMutation },
+  });
+  return res.status(202).json({ ok: true, mode: 'guarded-governance', proposal, approvalRequired: true, executionPerformed: false });
+});
+app.post('/api/engine/run', async (req, res) => {
+  const auth = requireAdminToken(req);
+  if (!auth.ok) return res.status(auth.configured ? 401 : 503).json({ ok: false, error: auth.configured ? 'Unauthorized' : 'ADMIN_API_TOKEN is not configured' });
   try {
-    const result = await runEngine(req.body?.command, {
+    const command = String(req.body?.command || '').trim();
+    if (!command) return res.status(400).json({ ok: false, error: 'command is required' });
+    if (req.body?.execute === true) {
+      const proposal = req.body?.governanceProposal;
+      const approval = req.body?.approval;
+      if (!proposal || proposal.scope !== `engine.run:${command}` || proposal.action !== 'engine.run') {
+        persistEventBestEffort({ eventType: 'dominion_governance_execution_blocked', requestId: req.requestId, payload: { reason: 'matching_governance_proposal_required', command } });
+        return res.status(403).json({ ok: false, execution: 'blocked', error: 'A matching Dominion proposal and explicit scoped approval are required.', next: 'POST /api/governance/dominion/propose' });
+      }
+      const gate = authorizeDominionProposal(proposal, approval);
+      if (!gate.authorized) {
+        persistEventBestEffort({ eventType: 'dominion_governance_execution_blocked', requestId: req.requestId, payload: { proposalId: proposal.proposalId || null, reasons: gate.reasons } });
+        return res.status(403).json({ ok: false, execution: 'blocked', governance: gate, executionPerformed: false });
+      }
+      persistEventBestEffort({ eventType: 'dominion_governance_authorized_handoff', requestId: req.requestId, payload: { proposalId: proposal.proposalId, approvalId: gate.approvalId, scope: proposal.scope } });
+    }
+    const result = await runEngine(command, {
       execute: req.body?.execute === true,
       agents: req.body?.agents,
       priority: req.body?.priority,
       payload: req.body?.payload,
       continueOnError: req.body?.continueOnError === true,
     });
-    res.status(result.execution === 'approval-required' ? 202 : (result.ok ? 200 : 502)).json(result);
+    res.status(result.execution === 'approval-required' ? 202 : (result.ok ? 200 : 502)).json({
+      ...result,
+      mode: 'guarded-governance',
+      governanceGate: req.body?.execute === true ? 'approved_for_handoff' : 'plan_only',
+    });
   } catch (error) {
     res.status(400).json({ ok: false, error: error instanceof Error ? error.message : 'Engine execution failed' });
   }
@@ -201,7 +259,7 @@ app.get('/api/health', healthRateLimit, (_req, res) => res.status(200).json({
 app.get('/api/gate', (_req, res) => res.status(200).json({ ok: true, ...sealedGateStatus() }));
 app.get('/api/governance/inner-protector', (_req, res) => res.status(200).json(innerProtectorStatus()));
 app.post('/api/governance/inner-protector/chore', (req, res) => {
-  const token = String(req.get('authorization') || '').replace(/^Bearer\\s+/i, '');
+  const token = String(req.get('authorization') || '').replace(/^Bearer\s+/i, '');
   if (!config.ADMIN_API_TOKEN || token !== config.ADMIN_API_TOKEN) return res.status(401).json({ ok: false, error: 'Unauthorized' });
   const result = runInnerProtectorChore({ signal: req.body?.signal || {} });
   persistEventBestEffort({ eventType: 'inner_protector_chore', requestId: req.requestId, payload: { decision: result.result.decision, externalMutation: result.result.externalMutation, retaliatoryAction: result.result.retaliatoryAction } });
@@ -209,7 +267,7 @@ app.post('/api/governance/inner-protector/chore', (req, res) => {
 });
 app.get('/api/governance/ai-fraud', (_req, res) => res.status(200).json({ ok: true, ...aiFraudStatus() }));
 app.get('/api/governance/content-suspension', (_req, res) => res.status(200).json({ ok: true, ...contentSuspensionStatus() }));
-app.post('/api/governance/content-suspension/release', async (req, res) => { const token = String(req.get('authorization') || '').replace(/^Bearer\\s+/i, ''); if (!token || token !== config.ADMIN_API_TOKEN) return res.status(401).json({ ok: false, error: 'Unauthorized' }); const actor = req.body?.actor || 'authorized-reviewer'; try { const result = await confirmContentEvidence(req.body?.reviewId, actor, req.body?.evidence || {}); if (result.ok) persistEventBestEffort({ eventType: 'content_suspension_release', requestId: req.requestId, payload: { reviewId: req.body?.reviewId || null, actor, evidence: req.body?.evidence || {}, strike: CONTENT_SUSPENSION_GATE.strikeProtocol } }); return res.status(result.ok ? 200 : 400).json(result); } catch (error) { return res.status(503).json({ ok: false, error: 'Content-suspension decision persistence unavailable', detail: error.message }); } });
+app.post('/api/governance/content-suspension/release', async (req, res) => { const token = String(req.get('authorization') || '').replace(/^Bearer\s+/i, ''); if (!token || token !== config.ADMIN_API_TOKEN) return res.status(401).json({ ok: false, error: 'Unauthorized' }); const actor = req.body?.actor || 'authorized-reviewer'; try { const result = await confirmContentEvidence(req.body?.reviewId, actor, req.body?.evidence || {}); if (result.ok) persistEventBestEffort({ eventType: 'content_suspension_release', requestId: req.requestId, payload: { reviewId: req.body?.reviewId || null, actor, evidence: req.body?.evidence || {}, strike: CONTENT_SUSPENSION_GATE.strikeProtocol } }); return res.status(result.ok ? 200 : 400).json(result); } catch (error) { return res.status(503).json({ ok: false, error: 'Content-suspension decision persistence unavailable', detail: error.message }); } });
 app.post('/api/governance/ai-fraud/review', async (req, res) => { const assessment = assessAiFraud(req.body || {}); const review = assessment.matched && !assessment.confirmed ? createFraudReview(req.body || {}, assessment) : null; if (review) { try { await persistFraudReview(review); } catch (error) { return res.status(503).json({ ok: false, error: 'AI-fraud review persistence unavailable', detail: error.message }); } } return res.status(assessment.matched ? 200 : 204).json(assessment.matched ? { ok: true, protocol: AI_FRAUD_RULE, assessment, review } : {}); });
 app.post('/api/governance/ai-fraud/decision', async (req, res) => { const token = String(req.get('authorization') || '').replace(/^Bearer\s+/i, ''); if (!token || token !== config.ADMIN_API_TOKEN) return res.status(401).json({ ok: false, error: 'Unauthorized' }); const actor = req.body?.actor || 'authorized-reviewer'; let result; try { result = req.body?.decision === 'confirm' ? await confirmFraudReview(req.body?.reviewId, actor) : await clearFraudReview(req.body?.reviewId, actor); } catch (error) { return res.status(503).json({ ok: false, error: 'AI-fraud decision persistence unavailable', detail: error.message }); } return res.status(result.ok ? 200 : 400).json(result); });
 app.post('/api/gate', (req, res) => {
