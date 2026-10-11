@@ -34,6 +34,7 @@ import { engineStatus as controlEngineStatus, runEngine } from './src/engine/ker
 import { runPersonalBot, personalBotStatus } from './src/agent/personal-bot.js';
 import { INNER_PROTECTOR_PROTOCOL, innerProtectorStatus, runInnerProtectorChore } from './src/governance/inner-state-protector.js';
 import { evaluateRequest as evaluateDominionRequest, authorizeProposal as authorizeDominionProposal, getGovernanceStatus as dominionGovernanceStatus } from './src/dominion-governance-engine.js';
+import { createAuthorizationMiddleware } from './src/governance/authorization-middleware.js';
 
 const app = express();
 app.disable('x-powered-by');
@@ -103,6 +104,29 @@ const requireAdminToken = (req) => {
   const expected = String(config.ADMIN_API_TOKEN || '').trim();
   return { ok: Boolean(expected && token === expected), configured: Boolean(expected) };
 };
+
+
+const requireEngineAuthorization = createAuthorizationMiddleware({
+  config,
+  resource: 'engine',
+  actionForRequest: (req) => req.body?.execute === true ? 'execute' : 'plan',
+});
+const requireDominionProposalAuthorization = createAuthorizationMiddleware({
+  config,
+  resource: 'governance',
+  actionForRequest: 'propose',
+});
+
+app.get('/api/governance/authorization/status', (_req, res) => res.json({
+  ok: true,
+  gate: 'identity-verification-authorization-v2',
+  enforcement: 'protected-routes-only',
+  identityConfigured: Boolean(String(process.env.MERCYSOUL_ADMIN_SUBJECT || '').trim()) && process.env.MERCYSOUL_ADMIN_IDENTITY_VERIFIED === 'true',
+  permissionsConfigured: String(process.env.MERCYSOUL_ADMIN_PERMISSIONS || '').split(',').map((value) => value.trim()).filter(Boolean).length > 0,
+  approvalStoreConfigured: false,
+  highRiskExecution: 'fail-closed-until-trusted-single-use-approval-store-is-integrated',
+  externalIdentityProviderIntegrated: false,
+}));
 app.get('/api/governance/dominion/status', (_req, res) => res.json({
   ok: true,
   mode: 'guarded-governance',
@@ -110,7 +134,7 @@ app.get('/api/governance/dominion/status', (_req, res) => res.json({
   governance: dominionGovernanceStatus(),
   engine: controlEngineStatus(),
 }));
-app.post('/api/governance/dominion/propose', (req, res) => {
+app.post('/api/governance/dominion/propose', requireDominionProposalAuthorization, (req, res) => {
   const auth = requireAdminToken(req);
   if (!auth.ok) return res.status(auth.configured ? 401 : 503).json({ ok: false, error: auth.configured ? 'Unauthorized' : 'ADMIN_API_TOKEN is not configured' });
   const command = String(req.body?.command || '').trim();
@@ -130,7 +154,7 @@ app.post('/api/governance/dominion/propose', (req, res) => {
   });
   return res.status(202).json({ ok: true, mode: 'guarded-governance', proposal, approvalRequired: true, executionPerformed: false });
 });
-app.post('/api/engine/run', async (req, res) => {
+app.post('/api/engine/run', requireEngineAuthorization, async (req, res) => {
   const auth = requireAdminToken(req);
   if (!auth.ok) return res.status(auth.configured ? 401 : 503).json({ ok: false, error: auth.configured ? 'Unauthorized' : 'ADMIN_API_TOKEN is not configured' });
   try {
