@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node agent-bootstrap.js",
     "test": "node --test src",
-    "check": "node --check server.js && node --check agent-bootstrap.js && node --check src/sealed-gate.js && node --check src/agent/mercysoul-graph.js && npm test"
+    "check": "node --check server.js && node --check agent-bootstrap.js && node --check src/sealed-gate.js && node --check src/agent/mercysoul-graph.js && node --check src/sensor-mandate.js && npm test"
   },
   "dependencies": {
     "@langchain/langgraph": "1.4.13",
