@@ -10,6 +10,8 @@
 - Returns a structured JSON-compatible result suitable for a UI, API route, or future agent workflow.
 
 ## Current implementation
+The engine is exposed by the existing Vercel API dispatcher at `POST /api/profound/reason`; `GET /api/profound/status` reports the engine version and its non-mutating mode. The reason endpoint accepts a JSON object containing `goal` (or `prompt`/`question`), optional `facts`, `assumptions`, `constraints`, `risks`, and `options`. It returns a structured reasoning brief and does not persist request content or execute external actions.
+
 The initial engine is deterministic and dependency-free. It is implemented in `src/profound-engine.js` and covered by `src/profound-engine.test.js`. It does not call an AI provider, read private data, mutate external systems, or claim that an action has been executed.
 
 ## Example
