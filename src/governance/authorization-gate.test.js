@@ -61,5 +61,7 @@ test("denies missing resource or action", () => {
 
 test("identifies high-risk actions", () => {
   assert.equal(isHighRiskAction("delete"), true);
+  assert.equal(isHighRiskAction("execute"), true);
+  assert.equal(isHighRiskAction("external_api_mutation"), true);
   assert.equal(isHighRiskAction("read"), false);
 });
