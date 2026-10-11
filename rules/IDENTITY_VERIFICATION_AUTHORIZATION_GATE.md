@@ -31,3 +31,16 @@ RECEIVE -> VERIFY IDENTITY -> VERIFY AUTHORITY -> CHECK RISK -> APPROVE -> EXECU
 ## Current scope and limitations
 
 This change establishes a reusable evaluator, tests, and policy documentation. It does not automatically protect existing API routes, change identity-provider settings, migrate database policies, or deploy to Vercel. Route-by-route integration must be reviewed and tested separately.
+
+
+## v2 route enforcement
+
+The v2 implementation adds server middleware to `POST /api/engine/run` and `POST /api/governance/dominion/propose`. The middleware validates the configured bearer token, requires an explicitly configured subject and identity-verification attestation, and requires exact permissions. Configure these deployment environment variables only after establishing a trusted identity-verification process:
+
+- `MERCYSOUL_ADMIN_SUBJECT`: stable operator subject identifier (not a secret).
+- `MERCYSOUL_ADMIN_IDENTITY_VERIFIED=true`: operator attestation that identity has been verified through a trusted process.
+- `MERCYSOUL_ADMIN_PERMISSIONS`: comma-separated exact grants, e.g. `engine:plan,governance:propose`. Add `engine:execute` only when a trusted approval adapter exists; execution remains denied without a trusted approval object.
+
+The bearer token is checked against the server's configured `ADMIN_API_TOKEN`. This is a configured operator identity model, not an integrated external IdP or MFA flow. Do not treat the environment attestation as a substitute for an actual identity-proofing process.
+
+The v2 middleware intentionally does not accept approvals from request bodies. High-risk execution therefore fails closed until a durable server-side approval store verifies subject/resource/action/expiry and atomically consumes each approval once. Existing routes outside the two named endpoints are not yet universally protected.
