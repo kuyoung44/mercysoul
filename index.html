@@ -108,6 +108,12 @@ body{height:100dvh;min-height:620px;background:radial-gradient(ellipse at top le
 @media(max-width:760px){.si-machine-grid{grid-template-columns:1fr}.si-camera-stage{aspect-ratio:4/3;min-height:200px}.si-machine{padding-top:16px}}
 @media(max-width:380px){.si-camera-controls .si-machine-btn{flex:1 1 100%}.si-sensor-actions{flex-direction:column}.si-sensor-row{gap:6px}}
 
+
+/* SI Machine visibility fix: let the full dashboard participate in normal page scrolling. */
+body{height:auto!important;min-height:100dvh;overflow-x:hidden;overflow-y:auto}
+.si-machine{flex:0 0 auto;width:100%;box-sizing:border-box}
+.chat-container{flex:0 0 auto;min-height:120px;max-height:35vh;overflow-y:auto}
+@media(max-width:720px){.si-machine{padding:16px 12px}.chat-container{max-height:30vh}.si-machine-grid{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
 <body>
@@ -131,41 +137,6 @@ body{height:100dvh;min-height:620px;background:radial-gradient(ellipse at top le
   </nav>
   <div class="si-system-line"><span class="si-status-dot" aria-hidden="true"></span><strong id="siSystemStatus">Checking service signal…</strong><span>·</span><span>Authorization required for consequential external changes</span></div>
 </section>
-<div class="document-bar"><label class="upload-label" for="pdfInput">Upload Document</label><input id="pdfInput" type="file" accept="application/pdf,.pdf" hidden><span id="fileName">No PDF selected</span></div>
-<div class="chat-container" id="chatBox"><div class="message bot gold-text">Welcome. I am the MercySoul Vision Brain. How can I assist you today?</div></div>
-<div class="input-area"><input type="text" id="userInput" placeholder="Describe what you need..."><button id="sendButton" type="button">Send</button></div>
-<div class="whatsapp-wrap"><a id="whatsappLink" href="#" target="_blank" rel="noopener noreferrer" class="whatsapp-btn gold-text">Chat on WhatsApp</a></div>
-<div class="preview-overlay" id="previewOverlay" role="dialog" aria-modal="true" aria-label="Service demo preview"><div class="preview-panel"><div class="preview-head"><span id="previewTitle">Service Demo</span><button class="preview-close" id="previewClose" type="button">Close</button></div><iframe class="preview-frame" id="previewFrame" title="Service demo preview" loading="lazy"></iframe><div class="preview-note">If the demo does not allow embedded preview, use <a id="previewOpen" class="preview-open" target="_blank" rel="noopener noreferrer">Open demo in new tab</a>.</div></div></div>
-<script>
-(function(){
-'use strict';
-const WHATSAPP_LINK = window.WHATSAPP_LINK || 'https://wa.me/2348135278110';
-const CATALOG_LINE_PATTERN=/^(?:💎|💻|🌐|🏰)\s.+→\s₦[\d,]+$/;
-const DEMO_LINKS={
-  'AI Chatbot (Customer Assistant)':'https://mercysoul-git-main-mercy-soul.vercel.app',
-  'Build Flash (Website Generator)':'https://mercy-build-flash-git-main-mercy-soul.vercel.app',
-  'News Gate (Company Website)':'https://mercy-news-git-main-mercy-soul.vercel.app',
-  'Enterprise Framework (Master AI System)':'https://mercy-framework-git-main-mercy-soul.vercel.app'
-};
-let selectedPdf=null;
-const pdfInput=document.getElementById('pdfInput'),fileName=document.getElementById('fileName'),chatBox=document.getElementById('chatBox'),input=document.getElementById('userInput'),sendButton=document.getElementById('sendButton'),whatsappLink=document.getElementById('whatsappLink'),previewOverlay=document.getElementById('previewOverlay'),previewFrame=document.getElementById('previewFrame'),previewTitle=document.getElementById('previewTitle'),previewClose=document.getElementById('previewClose'),previewOpen=document.getElementById('previewOpen');
-whatsappLink.href=WHATSAPP_LINK||'#';
-// Keep normal browser selection, copying, and context-menu behavior available to users.
-const siMode=document.getElementById('siMode');
-document.querySelectorAll('.si-action').forEach(button=>button.addEventListener('click',()=>{siMode.value=button.dataset.mode||'Concierge';input.value=button.dataset.prompt||'';input.focus();input.scrollIntoView({behavior:'smooth',block:'center'});}));
-const siSystemStatus=document.getElementById('siSystemStatus');
-fetch('/api/health',{headers:{accept:'application/json'}}).then(r=>r.ok?r.json():Promise.reject(new Error('health unavailable'))).then(data=>{siSystemStatus.textContent=data.status==='ok'||data.ok===true?'Service endpoint responding · AI readiness requires separate verification':'Service endpoint responding';}).catch(()=>{siSystemStatus.textContent='Live service signal unavailable · chat may still be usable';});
-pdfInput.addEventListener('change',()=>{selectedPdf=pdfInput.files&&pdfInput.files[0]||null;fileName.textContent=selectedPdf?selectedPdf.name:'No PDF selected';});
-function openPreview(service,url){previewTitle.textContent=service+' — Demo';previewFrame.src=url;previewOpen.href=url;previewOverlay.classList.add('active');}
-function closePreview(){previewOverlay.classList.remove('active');previewFrame.src='about:blank';}
-previewClose.addEventListener('click',closePreview);previewOverlay.addEventListener('click',e=>{if(e.target===previewOverlay)closePreview();});document.addEventListener('keydown',e=>{if(e.key==='Escape')closePreview();});
-function addDemoButtons(el){const wrap=document.createElement('div');wrap.className='demo-wrap';Object.entries(DEMO_LINKS).forEach(([service,url])=>{const button=document.createElement('a');button.className='demo-btn';button.href=url;button.target='_blank';button.rel='noopener noreferrer';button.textContent='Preview '+service.split(' (')[0];button.addEventListener('click',e=>{e.preventDefault();openPreview(service,url);});wrap.appendChild(button);});el.appendChild(wrap);}
-function append(type,text){const el=document.createElement('div');el.className='message '+type;if(type==='bot')el.classList.add('gold-text');if(type==='bot'&&String(text).split('\n').some(line=>CATALOG_LINE_PATTERN.test(line.trim()))){el.classList.add('catalog-blink');addDemoButtons(el);}el.textContent=text;chatBox.appendChild(el);chatBox.scrollTop=chatBox.scrollHeight;return el;}
-async function sendMessage(){const message=input.value.trim();if(!message)return;append('user',message);input.value='';sendButton.disabled=true;const loading=append('bot','MercySoul is thinking...');try{const form=new FormData();form.append('message',`[MercySoul SI mode: ${siMode.value}]\n${message}`);if(selectedPdf)form.append('file',selectedPdf,selectedPdf.name);const response=await fetch('/api/chat',{method:'POST',body:form});const data=await response.json().catch(()=>({}));loading.remove();if(!response.ok){append('bot',data.reply||data.error||`Chat request failed (${response.status}). Please try again. Aṣẹ.`);return;}append('bot',data.reply||data.error||'MercySoul did not return a response. Please try again. Aṣẹ.');}catch(error){loading.remove();append('bot','Unable to reach MercySoul chat right now. Please try again in a moment. Aṣẹ.');console.error('MercySoul chat error:',error);}finally{sendButton.disabled=false;input.focus();}}
-sendButton.addEventListener('click',sendMessage);input.addEventListener('keydown',e=>{if(e.key==='Enter')sendMessage();});
-})();
-</script>
-
 <section class="si-machine" aria-labelledby="siMachineTitle">
  <div class="si-machine-head">
   <div><div class="si-machine-kicker">4/4MS16 · Device-aware control surface</div><h2 class="si-machine-title" id="siMachineTitle">MercySoul SI Machine <span aria-hidden="true">👁</span></h2><p class="si-machine-copy">Live camera preview and browser-exposed sensor diagnostics. No background camera activation, hidden recording, or fabricated sensor readings.</p></div>
@@ -202,6 +173,43 @@ sendButton.addEventListener('click',sendMessage);input.addEventListener('keydown
  </section>
  </div>
 </section>
+
+<div class="document-bar"><label class="upload-label" for="pdfInput">Upload Document</label><input id="pdfInput" type="file" accept="application/pdf,.pdf" hidden><span id="fileName">No PDF selected</span></div>
+<div class="chat-container" id="chatBox"><div class="message bot gold-text">Welcome. I am the MercySoul Vision Brain. How can I assist you today?</div></div>
+<div class="input-area"><input type="text" id="userInput" placeholder="Describe what you need..."><button id="sendButton" type="button">Send</button></div>
+<div class="whatsapp-wrap"><a id="whatsappLink" href="#" target="_blank" rel="noopener noreferrer" class="whatsapp-btn gold-text">Chat on WhatsApp</a></div>
+<div class="preview-overlay" id="previewOverlay" role="dialog" aria-modal="true" aria-label="Service demo preview"><div class="preview-panel"><div class="preview-head"><span id="previewTitle">Service Demo</span><button class="preview-close" id="previewClose" type="button">Close</button></div><iframe class="preview-frame" id="previewFrame" title="Service demo preview" loading="lazy"></iframe><div class="preview-note">If the demo does not allow embedded preview, use <a id="previewOpen" class="preview-open" target="_blank" rel="noopener noreferrer">Open demo in new tab</a>.</div></div></div>
+<script>
+(function(){
+'use strict';
+const WHATSAPP_LINK = window.WHATSAPP_LINK || 'https://wa.me/2348135278110';
+const CATALOG_LINE_PATTERN=/^(?:💎|💻|🌐|🏰)\s.+→\s₦[\d,]+$/;
+const DEMO_LINKS={
+  'AI Chatbot (Customer Assistant)':'https://mercysoul-git-main-mercy-soul.vercel.app',
+  'Build Flash (Website Generator)':'https://mercy-build-flash-git-main-mercy-soul.vercel.app',
+  'News Gate (Company Website)':'https://mercy-news-git-main-mercy-soul.vercel.app',
+  'Enterprise Framework (Master AI System)':'https://mercy-framework-git-main-mercy-soul.vercel.app'
+};
+let selectedPdf=null;
+const pdfInput=document.getElementById('pdfInput'),fileName=document.getElementById('fileName'),chatBox=document.getElementById('chatBox'),input=document.getElementById('userInput'),sendButton=document.getElementById('sendButton'),whatsappLink=document.getElementById('whatsappLink'),previewOverlay=document.getElementById('previewOverlay'),previewFrame=document.getElementById('previewFrame'),previewTitle=document.getElementById('previewTitle'),previewClose=document.getElementById('previewClose'),previewOpen=document.getElementById('previewOpen');
+whatsappLink.href=WHATSAPP_LINK||'#';
+// Keep normal browser selection, copying, and context-menu behavior available to users.
+const siMode=document.getElementById('siMode');
+document.querySelectorAll('.si-action').forEach(button=>button.addEventListener('click',()=>{siMode.value=button.dataset.mode||'Concierge';input.value=button.dataset.prompt||'';input.focus();input.scrollIntoView({behavior:'smooth',block:'center'});}));
+const siSystemStatus=document.getElementById('siSystemStatus');
+fetch('/api/health',{headers:{accept:'application/json'}}).then(r=>r.ok?r.json():Promise.reject(new Error('health unavailable'))).then(data=>{siSystemStatus.textContent=data.status==='ok'||data.ok===true?'Service endpoint responding · AI readiness requires separate verification':'Service endpoint responding';}).catch(()=>{siSystemStatus.textContent='Live service signal unavailable · chat may still be usable';});
+pdfInput.addEventListener('change',()=>{selectedPdf=pdfInput.files&&pdfInput.files[0]||null;fileName.textContent=selectedPdf?selectedPdf.name:'No PDF selected';});
+function openPreview(service,url){previewTitle.textContent=service+' — Demo';previewFrame.src=url;previewOpen.href=url;previewOverlay.classList.add('active');}
+function closePreview(){previewOverlay.classList.remove('active');previewFrame.src='about:blank';}
+previewClose.addEventListener('click',closePreview);previewOverlay.addEventListener('click',e=>{if(e.target===previewOverlay)closePreview();});document.addEventListener('keydown',e=>{if(e.key==='Escape')closePreview();});
+function addDemoButtons(el){const wrap=document.createElement('div');wrap.className='demo-wrap';Object.entries(DEMO_LINKS).forEach(([service,url])=>{const button=document.createElement('a');button.className='demo-btn';button.href=url;button.target='_blank';button.rel='noopener noreferrer';button.textContent='Preview '+service.split(' (')[0];button.addEventListener('click',e=>{e.preventDefault();openPreview(service,url);});wrap.appendChild(button);});el.appendChild(wrap);}
+function append(type,text){const el=document.createElement('div');el.className='message '+type;if(type==='bot')el.classList.add('gold-text');if(type==='bot'&&String(text).split('\n').some(line=>CATALOG_LINE_PATTERN.test(line.trim()))){el.classList.add('catalog-blink');addDemoButtons(el);}el.textContent=text;chatBox.appendChild(el);chatBox.scrollTop=chatBox.scrollHeight;return el;}
+async function sendMessage(){const message=input.value.trim();if(!message)return;append('user',message);input.value='';sendButton.disabled=true;const loading=append('bot','MercySoul is thinking...');try{const form=new FormData();form.append('message',`[MercySoul SI mode: ${siMode.value}]\n${message}`);if(selectedPdf)form.append('file',selectedPdf,selectedPdf.name);const response=await fetch('/api/chat',{method:'POST',body:form});const data=await response.json().catch(()=>({}));loading.remove();if(!response.ok){append('bot',data.reply||data.error||`Chat request failed (${response.status}). Please try again. Aṣẹ.`);return;}append('bot',data.reply||data.error||'MercySoul did not return a response. Please try again. Aṣẹ.');}catch(error){loading.remove();append('bot','Unable to reach MercySoul chat right now. Please try again in a moment. Aṣẹ.');console.error('MercySoul chat error:',error);}finally{sendButton.disabled=false;input.focus();}}
+sendButton.addEventListener('click',sendMessage);input.addEventListener('keydown',e=>{if(e.key==='Enter')sendMessage();});
+})();
+</script>
+
+
 
 <div style="padding:18px;text-align:center;border-top:1px solid #333;background:#0d0d1a"><strong style="color:#FFD700">MercySoul Dominion Ecosystem</strong><p style="margin:8px 0;color:#aaa">Official properties: <a href="https://mercy-vision.vercel.app" style="color:#FFD700">Vision Brain</a> · <a href="https://mercy-build-flash.vercel.app" style="color:#FFD700">Build Flash</a> · <a href="https://mercy-news.vercel.app" style="color:#FFD700">News Gate</a></p></div>
 <script>
