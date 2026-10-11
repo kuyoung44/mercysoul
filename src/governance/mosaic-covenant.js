@@ -1,9 +1,9 @@
 /**
  * MercySoul Mosaic-Inspired Governance Covenant.
  * Deterministic guardrail helper; it does not establish religious or legal authority.
- * Callers must provide verified facts and real authorization signals from trusted code.
+ * Caller-provided signals are not proof; verify them before consequential action.
  */
-export const MOSAIC_COVENANT_VERSION = "1.0.0";
+export const MOSAIC_COVENANT_VERSION = "1.1.0";
 
 const highImpact = new Set(["external_mutation", "financial", "identity", "access_control", "data_disclosure", "enforcement", "deployment", "deletion"]);
 const harmful = new Set(["violence", "threat", "fraud", "unauthorized_access", "privacy_violation", "retaliation", "coercion"]);
@@ -14,8 +14,16 @@ export function evaluateMosaicCovenant(input = {}) {
   const risk = typeof input.riskType === "string" ? input.riskType : "unknown";
 
   if (harmful.has(risk)) {
-    issues.push({ code: "PROHIBITED_HARM", principle: "protect_life", reason: "The declared risk conflicts with the covenant." });
+    issues.push({ code: "PROHIBITED_HARM", principle: "protect_life", reason: "The declared risk conflicts with the covenant; do not execute harmful conduct." });
     return { decision: "deny", version: MOSAIC_COVENANT_VERSION, issues };
+  }
+
+  // Cain and Abel safeguards: a conflict signal calls for careful review, not a verdict.
+  if (input.interpersonalConflict === true || input.unresolvedGrievance === true) {
+    issues.push({ code: "IMPARTIAL_DEESCALATION_REQUIRED", principle: "cain_and_abel", reason: "Do not take sides or infer guilt from rivalry or grievance. Verify facts and seek a proportionate, non-retaliatory resolution." });
+  }
+  if (input.credibleThreat === true || input.immediateSafetyConcern === true) {
+    issues.push({ code: "SAFETY_REVIEW_REQUIRED", principle: "protect_life", reason: "Assess immediate safety and route to appropriate human help; do not conduct vigilante enforcement." });
   }
 
   const consequential = input.consequential === true || highImpact.has(action);
