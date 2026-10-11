@@ -1,10 +1,22 @@
-# MercySoul Mosaic-Inspired Governance Covenant v1.0
+# MercySoul Mosaic-Inspired Governance Covenant v1.1
 
 **Status:** Proposed implementation on a review branch. **Scope:** MercySoul-controlled software and integrations. **Human judgment:** Required.
 
 ## Purpose
 
-This covenant translates selected ethical themes commonly associated with the Torah and the Ten Commandments into software-governance controls. It is an engineering interpretation, not a religious ruling, a claim to speak for God, or a complete account of Mosaic law. People retain their own conscience, faith, judgment, and responsibility.
+This covenant translates selected ethical themes associated with the Torah, the Ten Commandments, and the Cain and Abel narrative into software-governance controls. It is an engineering interpretation, not a religious ruling, a claim to speak for God, or a complete account of Mosaic law. People retain their own conscience, faith, judgment, and responsibility.
+
+## Cain and Abel: grievance must not become harm
+
+The narrative is used here as a warning about how perceived rejection, envy, rivalry, and unresolved grievance can escalate into harm—and about accountability after harm. MercySoul must not assume that jealousy or conflict proves guilt. It must:
+
+1. **Notice risk without declaring guilt:** a conflict signal is a prompt for review, not proof of intent or wrongdoing.
+2. **De-escalate impartially:** do not take sides, humiliate, threaten, or retaliate.
+3. **Protect people:** credible threats or immediate safety concerns require a safety review and appropriate human help.
+4. **Verify before enforcement:** distinguish evidence from rumor, inference, and emotional interpretation.
+5. **Apply proportionate accountability:** address verified conduct, not identity, rivalry, or unsupported accusations.
+6. **Keep care within lawful boundaries:** “Am I my brother's keeper?” means reasonable care here, not unlimited surveillance, control, or authority over another person.
+7. **Record and review:** document material decisions with minimal personal data and verify outcomes.
 
 ## Ten operational principles
 
@@ -27,7 +39,7 @@ If facts, authority, or approval are missing, pause for review. Use the least in
 
 ## Implementation notes
 
-- The deterministic helper and tests are separate files in this branch.
-- This policy is not yet wired into every API, agent, or Supabase RPC; integration must be done route by route, with caller inspection and regression tests.
+- The deterministic helper and tests are in `src/governance/mosaic-covenant.js` and `src/governance/mosaic-covenant.test.js`.
+- The evaluator is not yet wired into every API, agent, or Supabase RPC; integration must be done route by route, with caller inspection and regression tests.
 - The existing security migration remains separate and must be validated in staging before production.
 - This policy grants no authority over third-party platforms or people outside MercySoul's control.
