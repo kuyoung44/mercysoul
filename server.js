@@ -126,7 +126,8 @@ app.get('/api/governance/authorization/status', (_req, res) => res.json({
   approvalStoreConfigured: false,
   highRiskExecution: 'fail-closed-until-trusted-single-use-approval-store-is-integrated',
   externalIdentityProviderIntegrated: false,
-}));app.get('/api/governance/dominion/status', (_req, res) => res.json({
+}));
+app.get('/api/governance/dominion/status', (_req, res) => res.json({
   ok: true,
   mode: 'guarded-governance',
   pattern: ['RECEIVE', 'ROUTE', 'THINK', 'PLAN', 'GUARDIAN', 'APPROVE', 'EXECUTE', 'VERIFY', 'RECOVER', 'RECORD'],
