@@ -1,10 +1,21 @@
 const HIGH_RISK_ACTIONS = new Set([
+  "execute",
+  "run",
   "deploy",
+  "publish",
   "delete",
   "transfer",
+  "send",
+  "charge",
+  "refund",
   "change_permissions",
+  "permission_change",
   "rotate_credentials",
+  "credential_change",
   "change_production_config",
+  "database_mutation",
+  "repository_mutation",
+  "external_api_mutation",
 ]);
 
 const nonEmptyString = (value) =>
