@@ -2,8 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { evaluateMosaicCovenant, MOSAIC_COVENANT_VERSION } from "./mosaic-covenant.js";
 
-test("reports an explicit version", () => {
-  assert.equal(MOSAIC_COVENANT_VERSION, "1.0.0");
+test("reports the covenant version", () => {
+  assert.equal(MOSAIC_COVENANT_VERSION, "1.1.0");
 });
 
 test("denies declared harmful or retaliatory risk", () => {
@@ -33,6 +33,18 @@ test("requires data minimization when privacy impact is declared", () => {
   assert.equal(evaluateMosaicCovenant({ actionType: "answer", privacyImpact: true, dataMinimized: true }).decision, "allow");
 });
 
-test("allows ordinary low-risk requests without forcing a consequential-action review", () => {
+test("routes rivalry and unresolved grievance to impartial de-escalation, not automatic punishment", () => {
+  const result = evaluateMosaicCovenant({ actionType: "answer", interpersonalConflict: true });
+  assert.equal(result.decision, "review");
+  assert.ok(result.issues.some(issue => issue.code === "IMPARTIAL_DEESCALATION_REQUIRED"));
+});
+
+test("routes credible threat and immediate safety concerns to safety review", () => {
+  const result = evaluateMosaicCovenant({ actionType: "answer", credibleThreat: true });
+  assert.equal(result.decision, "review");
+  assert.ok(result.issues.some(issue => issue.code === "SAFETY_REVIEW_REQUIRED"));
+});
+
+test("does not treat ordinary low-risk requests as consequential", () => {
   assert.equal(evaluateMosaicCovenant({ actionType: "answer", verifiedFacts: false }).decision, "allow");
 });
