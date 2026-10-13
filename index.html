@@ -78,6 +78,28 @@ body{overflow-x:hidden}
 button,a,input,select,textarea{touch-action:manipulation}
 button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #FFD700;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* Consent-first local gaze/presence and self-reflection monitor */
+.monitor-panel{padding:16px clamp(14px,3vw,28px);background:linear-gradient(135deg,#10091c,#080710);border-bottom:1px solid #3b2a4b}
+.monitor-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.monitor-title{margin:4px 0;color:#FFD700;font-size:clamp(1.05rem,2.5vw,1.4rem)}
+.monitor-note{margin:4px 0;color:#bdb2ca;font-size:12px;line-height:1.5;max-width:760px}
+.monitor-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin-top:14px}
+.monitor-card{padding:12px;border:1px solid #39264e;border-radius:12px;background:#0d0a15;min-width:0}
+.monitor-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.monitor-btn{border:1px solid #FFD700;border-radius:999px;padding:9px 13px;background:#FFD700;color:#17110a;font-weight:700;cursor:pointer}
+.monitor-btn.secondary{background:transparent;color:#FFD700}
+.monitor-btn:disabled{opacity:.5;cursor:not-allowed}
+#monitorVideo{display:block;width:100%;max-height:240px;aspect-ratio:4/3;object-fit:cover;background:#05040a;border:1px solid #342642;border-radius:8px;margin-top:10px}
+.monitor-status{font-size:12px;color:#d9cde8;margin-top:8px;line-height:1.5}
+.monitor-feed{list-style:none;margin:10px 0 0;padding:0;max-height:150px;overflow:auto}
+.monitor-feed li{font-size:12px;color:#d9cde8;border-top:1px solid #292033;padding:7px 0;overflow-wrap:anywhere}
+.monitor-field{display:block;width:100%;box-sizing:border-box;margin-top:8px;padding:10px;background:#100d1d;color:#fff;border:1px solid #70568b;border-radius:8px;font:inherit}
+.monitor-meter{height:7px;background:#282032;border-radius:99px;overflow:hidden;margin-top:9px}
+.monitor-meter span{display:block;height:100%;width:0;background:#FFD700;transition:width .25s}
+@media(max-width:640px){.monitor-grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.monitor-meter span{transition:none}}
+
 </style>
 </head>
 <body>
@@ -101,6 +123,36 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
   </nav>
   <div class="si-system-line"><span class="si-status-dot" aria-hidden="true"></span><strong id="siSystemStatus">Checking service signal…</strong><span>·</span><span>Authorization required for consequential external changes</span></div>
 </section>
+
+<section class="monitor-panel" aria-labelledby="monitorTitle">
+  <div class="monitor-head">
+    <div><div class="si-eyebrow">Local-only · consent required</div><h2 class="monitor-title" id="monitorTitle">👁 Gaze &amp; Soul Monitor</h2><p class="monitor-note">A visible camera-based presence/movement signal and a private self-reflection check-in. Camera starts only when you press Start, stays on this device, and is never uploaded by this panel. This is not verified eye tracking, emotion detection, or literal soul sensing.</p></div>
+    <span class="si-status-pill" id="monitorOverallStatus">Monitor off</span>
+  </div>
+  <div class="monitor-grid">
+    <div class="monitor-card">
+      <strong class="gold-text">👁 Gaze / visual signal</strong>
+      <video id="monitorVideo" autoplay muted playsinline aria-label="Your local camera preview"></video>
+      <div class="monitor-status" id="monitorCameraStatus" role="status" aria-live="polite">Camera is off. No camera access until you choose Start.</div>
+      <div class="monitor-meter" aria-label="Visual movement signal"><span id="monitorMeter"></span></div>
+      <div class="monitor-status" id="monitorSignal">Signal: unavailable</div>
+      <div class="monitor-actions"><button class="monitor-btn" id="monitorStart" type="button">Start camera</button><button class="monitor-btn secondary" id="monitorStop" type="button" disabled>Stop camera</button></div>
+      <p class="monitor-note">The signal compares low-resolution frames locally to estimate visual change. It cannot tell where your eyes are looking. A future eye-tracking model would need separate review and explicit consent.</p>
+    </div>
+    <div class="monitor-card">
+      <strong class="gold-text">✦ Soul check-in · self-reported</strong>
+      <p class="monitor-note">Your inner state belongs to you. Choose a check-in if it helps; the page does not infer your feelings or spiritual condition.</p>
+      <label for="soulState" class="monitor-status">How are you feeling right now?</label>
+      <select id="soulState" class="monitor-field"><option value="">Choose an optional check-in</option><option>Grounded</option><option>Focused</option><option>Curious</option><option>Tired</option><option>Overwhelmed</option><option>Hopeful</option><option>Prefer not to say</option></select>
+      <label for="soulIntention" class="monitor-status">Intention or note (optional)</label>
+      <textarea id="soulIntention" class="monitor-field" rows="3" placeholder="What would support you right now?"></textarea>
+      <div class="monitor-actions"><button class="monitor-btn" id="soulCheckin" type="button">Record check-in on this page</button><button class="monitor-btn secondary" id="monitorClear" type="button">Clear session log</button></div>
+      <div class="monitor-status" id="soulStatus" role="status" aria-live="polite">No check-in recorded. Nothing is sent to a server.</div>
+    </div>
+  </div>
+  <div class="monitor-card" style="margin-top:12px"><strong class="gold-text">Live changes</strong><p class="monitor-note">Recent monitor events are shown below while this page is open. The session log stays in page memory and clears on reload.</p><ul class="monitor-feed" id="monitorFeed" aria-live="polite"><li>Monitor ready · waiting for your choice.</li></ul></div>
+</section>
+
 <div class="document-bar"><label class="upload-label" for="pdfInput">Upload Document</label><input id="pdfInput" type="file" accept="application/pdf,.pdf" hidden><span id="fileName">No PDF selected</span></div>
 <div class="chat-container" id="chatBox"><div class="message bot gold-text">Welcome. I am the MercySoul Vision Brain. How can I assist you today?</div></div>
 <div class="input-area"><input type="text" id="userInput" placeholder="Describe what you need..."><button id="sendButton" type="button">Send</button></div>
@@ -123,6 +175,93 @@ whatsappLink.href=WHATSAPP_LINK||'#';
 // Keep normal browser selection, copying, and context-menu behavior available to users.
 const siMode=document.getElementById('siMode');
 document.querySelectorAll('.si-action').forEach(button=>button.addEventListener('click',()=>{siMode.value=button.dataset.mode||'Concierge';input.value=button.dataset.prompt||'';input.focus();input.scrollIntoView({behavior:'smooth',block:'center'});}));
+
+/* Gaze/presence monitor: explicit permission, visible preview, local-only frame sampling. */
+const monitorVideo=document.getElementById('monitorVideo');
+const monitorStart=document.getElementById('monitorStart');
+const monitorStop=document.getElementById('monitorStop');
+const monitorCameraStatus=document.getElementById('monitorCameraStatus');
+const monitorOverallStatus=document.getElementById('monitorOverallStatus');
+const monitorSignal=document.getElementById('monitorSignal');
+const monitorMeter=document.getElementById('monitorMeter');
+const monitorFeed=document.getElementById('monitorFeed');
+const soulState=document.getElementById('soulState');
+const soulIntention=document.getElementById('soulIntention');
+const soulStatus=document.getElementById('soulStatus');
+let monitorStream=null,monitorTimer=null,previousFrame=null,monitorCanvas=null,monitorContext=null;
+function monitorLog(message){
+  const item=document.createElement('li');
+  item.textContent=new Date().toLocaleTimeString()+' · '+message;
+  monitorFeed.prepend(item);
+  while(monitorFeed.children.length>8)monitorFeed.removeChild(monitorFeed.lastChild);
+}
+function stopLocalMonitor(reason){
+  if(monitorTimer!==null){clearInterval(monitorTimer);monitorTimer=null;}
+  if(monitorStream){monitorStream.getTracks().forEach(track=>track.stop());monitorStream=null;}
+  monitorVideo.pause();monitorVideo.srcObject=null;previousFrame=null;
+  monitorStart.disabled=false;monitorStop.disabled=true;
+  monitorOverallStatus.textContent='Monitor off';
+  monitorCameraStatus.textContent=reason||'Camera stopped. No frames are being processed.';
+  monitorSignal.textContent='Signal: unavailable';
+  monitorMeter.style.width='0%';
+}
+function sampleLocalFrame(){
+  if(!monitorStream||monitorVideo.readyState<2||!monitorContext)return;
+  try{
+    monitorContext.drawImage(monitorVideo,0,0,80,60);
+    const pixels=monitorContext.getImageData(0,0,80,60).data;
+    const gray=new Uint8Array(80*60);
+    for(let i=0,j=0;i<pixels.length;i+=4,j++)gray[j]=(pixels[i]*3+pixels[i+1]*6+pixels[i+2])/10;
+    if(previousFrame){
+      let diff=0;
+      for(let i=0;i<gray.length;i++)diff+=Math.abs(gray[i]-previousFrame[i]);
+      const score=Math.min(100,Math.round((diff/gray.length)/35*100));
+      monitorMeter.style.width=score+'%';
+      monitorSignal.textContent=score>18?'Signal: visual change detected ('+score+'/100)':'Signal: relatively still ('+score+'/100)';
+    }
+    previousFrame=gray;
+  }catch(error){monitorSignal.textContent='Signal paused: frame access unavailable.';}
+}
+monitorStart.addEventListener('click',async()=>{
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    monitorCameraStatus.textContent='Camera unavailable here. Use a supported browser on HTTPS and check camera permissions.';
+    monitorLog('Camera unavailable in this browser context.');return;
+  }
+  monitorStart.disabled=true;
+  monitorCameraStatus.textContent='Waiting for your browser camera permission…';
+  try{
+    monitorStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});
+    monitorVideo.srcObject=monitorStream;
+    await monitorVideo.play();
+    monitorCanvas=document.createElement('canvas');monitorCanvas.width=80;monitorCanvas.height=60;
+    monitorContext=monitorCanvas.getContext('2d',{willReadFrequently:true});
+    monitorStop.disabled=false;monitorOverallStatus.textContent='Camera active · local processing';
+    monitorCameraStatus.textContent='Camera active. Preview is visible; low-resolution visual-change sampling stays in this page.';
+    monitorSignal.textContent='Signal: calibrating…';
+    monitorTimer=setInterval(sampleLocalFrame,400);
+    monitorLog('Camera started by user; local visual-change signal active.');
+  }catch(error){
+    stopLocalMonitor('Camera permission denied or unavailable. No camera feed is active.');
+    monitorStart.disabled=false;
+    monitorLog('Camera did not start; permission or device unavailable.');
+  }
+});
+monitorStop.addEventListener('click',()=>{stopLocalMonitor('Camera stopped by you. No frames are being processed.');monitorLog('Camera stopped by user.');});
+monitorStream=null;
+window.addEventListener('pagehide',()=>{if(monitorTimer!==null)clearInterval(monitorTimer);if(monitorStream)monitorStream.getTracks().forEach(track=>track.stop());});
+document.getElementById('soulCheckin').addEventListener('click',()=>{
+  const state=soulState.value;
+  const note=soulIntention.value.trim();
+  if(!state&&!note){soulStatus.textContent='Choose a state or write a note first. This remains only in the current page session.';return;}
+  soulStatus.textContent='Check-in recorded in this page session: '+(state||'No state selected')+(note?' · Note: '+note:'')+'. Not uploaded or saved to a server.';
+  monitorLog('Self-reported check-in updated'+(state?' · '+state:'')+'.');
+});
+document.getElementById('monitorClear').addEventListener('click',()=>{
+  monitorFeed.replaceChildren();
+  soulState.value='';soulIntention.value='';soulStatus.textContent='Session check-in cleared.';
+  monitorLog('Session log cleared by user.');
+});
+
 const siSystemStatus=document.getElementById('siSystemStatus');
 fetch('/api/health',{headers:{accept:'application/json'}}).then(r=>r.ok?r.json():Promise.reject(new Error('health unavailable'))).then(data=>{siSystemStatus.textContent=data.status==='ok'||data.ok===true?'Service endpoint responding · AI readiness requires separate verification':'Service endpoint responding';}).catch(()=>{siSystemStatus.textContent='Live service signal unavailable · chat may still be usable';});
 pdfInput.addEventListener('change',()=>{selectedPdf=pdfInput.files&&pdfInput.files[0]||null;fileName.textContent=selectedPdf?selectedPdf.name:'No PDF selected';});
