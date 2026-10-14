@@ -34,6 +34,7 @@ import { engineStatus as controlEngineStatus, runEngine } from './src/engine/ker
 import { runPersonalBot, personalBotStatus } from './src/agent/personal-bot.js';
 import { INNER_PROTECTOR_PROTOCOL, innerProtectorStatus, runInnerProtectorChore } from './src/governance/inner-state-protector.js';
 import { evaluateRequest as evaluateDominionRequest, authorizeProposal as authorizeDominionProposal, getGovernanceStatus as dominionGovernanceStatus } from './src/dominion-governance-engine.js';
+import { evaluateAlwaysCovered } from './src/always-covered.js';
 
 const app = express();
 app.disable('x-powered-by');
@@ -148,7 +149,22 @@ app.post('/api/engine/run', async (req, res) => {
         persistEventBestEffort({ eventType: 'dominion_governance_execution_blocked', requestId: req.requestId, payload: { proposalId: proposal.proposalId || null, reasons: gate.reasons } });
         return res.status(403).json({ ok: false, execution: 'blocked', governance: gate, executionPerformed: false });
       }
-      persistEventBestEffort({ eventType: 'dominion_governance_authorized_handoff', requestId: req.requestId, payload: { proposalId: proposal.proposalId, approvalId: gate.approvalId, scope: proposal.scope } });
+      const alwaysCovered = evaluateAlwaysCovered({
+        action: 'execute',
+        scope: proposal.scope,
+        verified: true,
+        authorized: true,
+        humanApproval: true,
+        externalMutation: proposal.externalMutation === true,
+        permissionGranted: proposal.repoPermission === true,
+        permissionExpansion: false,
+      });
+      if (!alwaysCovered.ok) {
+        await persistEventBestEffort({ eventType: 'always_covered_execution_blocked', requestId: req.requestId, payload: { proposalId: proposal.proposalId || null, scope: proposal.scope, reasons: alwaysCovered.reasons } });
+        return res.status(403).json({ ok: false, execution: 'blocked', policy: alwaysCovered, executionPerformed: false });
+      }
+      await persistEventBestEffort({ eventType: 'always_covered_execution_authorized', requestId: req.requestId, payload: { policy: alwaysCovered.policy, version: alwaysCovered.version, proposalId: proposal.proposalId, approvalId: gate.approvalId, scope: proposal.scope } });
+            persistEventBestEffort({ eventType: 'dominion_governance_authorized_handoff', requestId: req.requestId, payload: { proposalId: proposal.proposalId, approvalId: gate.approvalId, scope: proposal.scope } });
     }
     const result = await runEngine(command, {
       execute: req.body?.execute === true,
@@ -163,7 +179,8 @@ app.post('/api/engine/run', async (req, res) => {
       governanceGate: req.body?.execute === true ? 'approved_for_handoff' : 'plan_only',
     });
   } catch (error) {
-    res.status(400).json({ ok: false, error: error instanceof Error ? error.message : 'Engine execution failed' });
+    await persistEventBestEffort({ eventType: 'always_covered_execution_error', requestId: req.requestId, payload: { message: error instanceof Error ? error.message : 'Engine execution failed', recovery: 'STOP_AND_REVIEW' } });
+    res.status(400).json({ ok: false, error: error instanceof Error ? error.message : 'Engine execution failed', recovery: 'STOP_AND_REVIEW' });
   }
 });
 
