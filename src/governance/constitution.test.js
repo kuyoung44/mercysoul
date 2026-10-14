@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { MERCYSOUL_CONSTITUTION, evaluateConstitution } from './constitution.js';
 
 test('constitution is version 3.0.0 with security-first precedence', () => {
-  assert.equal(MERCYSOUL_CONSTITUTION.version, '3.0.0');
+  assert.equal(MERCYSOUL_CONSTITUTION.version, '4.1.0');
   assert.equal(MERCYSOUL_CONSTITUTION.precedence[0], 'security');
   assert.ok(MERCYSOUL_CONSTITUTION.safeguards.includes('No safety bypass for administrators, rulers, or privileged accounts.'));
 });
