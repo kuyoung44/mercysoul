@@ -49,3 +49,19 @@ test('status is transparent that this is not infrastructure verification', () =>
   assert.equal(status.infrastructureVerified, false);
   assert.equal(status.externalPermissionsVerified, false);
 });
+
+test('failure handling stops first, then permits recovery only after evidence is supplied', () => {
+  const failed = evaluateAlwaysCovered({
+    action: 'execute', scope: 'engine.run:smoke-test',
+    verified: false, authorized: false, humanApproval: false
+  });
+  assert.equal(failed.ok, false);
+  assert.equal(failed.decision, 'stop-review');
+
+  const recovered = evaluateAlwaysCovered({
+    action: 'execute', scope: 'engine.run:smoke-test',
+    verified: true, authorized: true, humanApproval: true
+  });
+  assert.equal(recovered.ok, true);
+  assert.equal(recovered.scope, failed.scope);
+});
