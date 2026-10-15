@@ -143,6 +143,7 @@ export async function runContinuousToolBuild(inputMission, adapters) {
             mission.status = "awaiting_approval";
             mission.blockers.push({ type: "approval_required", action: "build", toolId: tool.id, workspaceId: mission.workspace.id });
             event(mission, "paused_for_approval", { toolId: tool.id });
+            mission.phase = "ANALYZE";
             return mission;
           }
           const built = await adapters.build({ project: clone(mission.project), workspace: clone(mission.workspace),
@@ -191,6 +192,7 @@ export async function runContinuousToolBuild(inputMission, adapters) {
           mission.status = "awaiting_approval";
           mission.blockers.push({ type: "approval_required", action: "integrate", workspaceId: mission.workspace.id });
           event(mission, "paused_for_approval", { action: "integrate" });
+          mission.phase = "ANALYZE";
           return mission;
         }
         const integrated = await adapters.integrate({ mission: clone(mission), tools: clone(mission.tools) });
