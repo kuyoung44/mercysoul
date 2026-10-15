@@ -87,6 +87,18 @@ Operational safeguards:
 
 Each milestone should include the date, repository or product, change made, evidence (such as a commit, test result, or working demonstration), known limitations, and next step. A deployment is not considered verified solely because a URL exists.
 
+## Terminology seal
+
+**Canonical brand terminology:** MercySoul SI — Super Intelligence.
+
+For MercySoul-owned public-facing branding, product descriptions, strategic documents, and interface copy, use **SI** as the brand's preferred terminology. Do not relabel MercySoul's identity as “AI.” Preserve established technical names and accurate references to third-party technologies where changing the term would make technical documentation misleading (for example, LLM as the name of a model category or an external API's official name).
+
+**Governance owner:** MercySoul founder / repository owner, `kuyoung44`.
+
+**Control rule:** RECEIVE → VERIFY → APPROVE → EXECUTE → TEST → RECORD. This terminology seal governs wording; it does not certify a product's technical readiness or authorize deployment, billing changes, credential changes, or other consequential actions.
+
+**Seal status:** Source terminology changes are committed and re-read from GitHub. Production deployment of the latest commits remains blocked/unconfirmed until Vercel build-rate limits clear and a deployment containing the exact commits is verified.
+
 ## Global commitment
 
 MercySoul's origin in Nigeria is part of its story, not a boundary on its ambition. The goal is to contribute useful technology to a connected world through disciplined engineering, responsible SI, customer value, and transparent evidence.
