@@ -1,6 +1,6 @@
 # MercySoul Host Provisioning Control Plane v1
 
-Status: implementation contract only; this document does not create provider resources.
+Status: guarded read-only plan engine and preflight endpoint added on the feature branch. Actual host creation, approval persistence, and deployment execution remain disabled.
 
 ## Initial scope
 - Provider: Vercel only.
@@ -8,6 +8,16 @@ Status: implementation contract only; this document does not create provider res
 - Default mode: read-only plan.
 - First operation: one named project per request.
 - Domain purchases, DNS changes, billing changes, and production environment changes are excluded unless separately scoped and approved.
+
+## Implemented preview endpoint
+
+- Route: `POST /api/host-provisioning`
+- Requires `ADMIN_API_TOKEN` as a Bearer token.
+- Requires `VERCEL_TOKEN` with read-only project access for preflight.
+- Optional `VERCEL_TEAM_ID` scopes the Vercel account; `GITHUB_TOKEN` enables private-repository checks.
+- Checks the selected GitHub repository/branch and Vercel project using read-only requests.
+- Returns a deterministic plan digest; never creates or deploys a project.
+- Required Vercel environment variables have not yet been configured for this project, so the endpoint is not yet operational end-to-end.
 
 ## Command shape
 ```json
