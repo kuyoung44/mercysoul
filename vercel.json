@@ -41,6 +41,10 @@
       "dest": "/api/index.js"
     },
     {
+      "src": "/si-bot/?",
+      "dest": "/index.html"
+    },
+    {
       "src": "/01/?",
       "dest": "/01.html"
     },
