@@ -6,9 +6,9 @@
 
 ## Global ambition
 
-MercySoul is being developed in Nigeria with a global ambition: to build useful, responsible AI and software products that help people create, build, innovate, and grow across borders.
+MercySoul is being developed in Nigeria with a global ambition: to build useful, responsible Super Intelligence (SI) and software products that help people create, build, innovate, and grow across borders.
 
-The long-term goal is an interconnected technology ecosystem spanning AI-assisted creativity, website and software development, model evaluation, and carefully governed automation. Global reach is an ambition, not a claim that every product, market, or milestone is already complete.
+The long-term goal is an interconnected technology ecosystem spanning SI-assisted creativity, website and software development, model evaluation, and carefully governed automation. Global reach is an ambition, not a claim that every product, market, or milestone is already complete.
 
 ## Mission
 
@@ -16,17 +16,17 @@ To make intelligent technology more useful and accessible by transforming ideas 
 
 ## Product areas
 
-- **MercySoul Vision Brain** — AI-assisted visual creativity, including artwork and digital creative assets.
+- **MercySoul Vision Brain** — SI-assisted visual creativity, including artwork and digital creative assets.
 - **MercySoul Build Flash** — tools intended to simplify website creation from business ideas, descriptions, and visual references.
 - **MercySoul OS** — modular application infrastructure and coordinated workflows with governance and verification.
-- **MercySoul LLM Evaluator** — evaluation of AI outputs for correctness, relevance, instruction-following, clarity, safety, and hallucination risk.
-- **MercySoul Command Center** — exploration of controlled AI-agent orchestration and development operations.
+- **MercySoul LLM Evaluator** — evaluation of SI outputs for correctness, relevance, instruction-following, clarity, safety, and hallucination risk.
+- **MercySoul Command Center** — exploration of controlled SI-agent orchestration and development operations.
 
 Project capabilities and readiness must be verified against each repository, live deployment, tests, and documentation. Planned functionality must not be presented as production-ready without evidence.
 
 ## Strategic pillars
 
-1. **Useful AI:** Build applications that address clear user needs.
+1. **Useful SI:** Build applications that address clear user needs.
 2. **Creative empowerment:** Help people translate imagination into visual and digital outcomes.
 3. **Accessible software creation:** Reduce barriers to building and publishing useful websites and tools.
 4. **Responsible automation:** Keep actions scoped, authorized, observable, and reversible where possible.
@@ -89,7 +89,7 @@ Each milestone should include the date, repository or product, change made, evid
 
 ## Global commitment
 
-MercySoul's origin in Nigeria is part of its story, not a boundary on its ambition. The goal is to contribute useful technology to a connected world through disciplined engineering, responsible AI, customer value, and transparent evidence.
+MercySoul's origin in Nigeria is part of its story, not a boundary on its ambition. The goal is to contribute useful technology to a connected world through disciplined engineering, responsible SI, customer value, and transparent evidence.
 
 **MERCYSOUL DOMINION**  
 *Global Vision. Intelligent Creation. Responsible Innovation. Lasting Legacy.*
