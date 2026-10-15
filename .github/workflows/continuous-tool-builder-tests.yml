@@ -1,0 +1,31 @@
+name: Continuous Tool Builder Tests
+
+on:
+  pull_request:
+    paths:
+      - "src/sovereign/continuous-tool-builder.js"
+      - "src/sovereign/continuous-tool-builder.test.js"
+      - "docs/CONTINUOUS-TOOL-BUILDER.md"
+      - ".github/workflows/continuous-tool-builder-tests.yml"
+  push:
+    branches: [main]
+    paths:
+      - "src/sovereign/continuous-tool-builder.js"
+      - "src/sovereign/continuous-tool-builder.test.js"
+      - "docs/CONTINUOUS-TOOL-BUILDER.md"
+      - ".github/workflows/continuous-tool-builder-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  focused-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node --test src/sovereign/continuous-tool-builder.test.js
