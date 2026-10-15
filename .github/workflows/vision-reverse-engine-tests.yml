@@ -1,0 +1,44 @@
+name: Vision Brain Reverse Engine Tests
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/sovereign/vision-reverse-engine.js"
+      - "src/sovereign/vision-reverse-engine.test.js"
+      - "src/sovereign/rea-adapter.js"
+      - "src/sovereign/rea-adapter.test.js"
+      - "src/sovereign/evidence-report.js"
+      - "src/sovereign/evidence-report.test.js"
+      - ".github/workflows/vision-reverse-engine-tests.yml"
+  push:
+    branches: [main, "feat/vision-brain-reverse-engine"]
+    paths:
+      - "src/sovereign/vision-reverse-engine.js"
+      - "src/sovereign/vision-reverse-engine.test.js"
+      - "src/sovereign/rea-adapter.js"
+      - "src/sovereign/rea-adapter.test.js"
+      - "src/sovereign/evidence-report.js"
+      - "src/sovereign/evidence-report.test.js"
+      - ".github/workflows/vision-reverse-engine-tests.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+      - name: Run focused reverse-engine tests
+        run: >-
+          node --test
+          src/sovereign/vision-reverse-engine.test.js
+          src/sovereign/rea-adapter.test.js
+          src/sovereign/evidence-report.test.js
