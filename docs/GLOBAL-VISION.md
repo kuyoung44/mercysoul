@@ -6,7 +6,7 @@
 
 ## Global ambition
 
-MercySoul is being developed in Nigeria with a global ambition: to build useful, responsible Super Intelligence (SI) and software products that help people create, build, innovate, and grow across borders.
+MercySoul is being developed in Nigeria with a global ambition: to build useful, responsible Soul Intelligence (SI) and software products that help people create, build, innovate, and grow across borders.
 
 The long-term goal is an interconnected technology ecosystem spanning SI-assisted creativity, website and software development, model evaluation, and carefully governed automation. Global reach is an ambition, not a claim that every product, market, or milestone is already complete.
 
@@ -89,9 +89,9 @@ Each milestone should include the date, repository or product, change made, evid
 
 ## Terminology seal
 
-**Canonical brand terminology:** MercySoul SI — Super Intelligence.
+**Canonical brand terminology:** MercySoul SI — Soul Intelligence.
 
-For MercySoul-owned public-facing branding, product descriptions, strategic documents, and interface copy, use **SI** as the brand's preferred terminology. Do not relabel MercySoul's identity as “AI.” Preserve established technical names and accurate references to third-party technologies where changing the term would make technical documentation misleading (for example, LLM as the name of a model category or an external API's official name).
+For MercySoul-owned public-facing branding, product descriptions, strategic documents, and interface copy, use **SI** to mean **Soul Intelligence**. Do not relabel MercySoul's identity as “AI.” Preserve established technical names and accurate references to third-party technologies where changing the term would make technical documentation misleading (for example, LLM as the name of a model category or an external API's official name). Soul Intelligence is MercySoul's chosen brand philosophy, not a claim that it is a scientifically established category of intelligence.
 
 **Governance owner:** MercySoul founder / repository owner, `kuyoung44`.
 
@@ -101,7 +101,7 @@ For MercySoul-owned public-facing branding, product descriptions, strategic docu
 
 ## Global commitment
 
-MercySoul's origin in Nigeria is part of its story, not a boundary on its ambition. The goal is to contribute useful technology to a connected world through disciplined engineering, responsible SI, customer value, and transparent evidence.
+MercySoul's origin in Nigeria is part of its story, not a boundary on its ambition. The goal is to contribute useful technology to a connected world through disciplined engineering, responsible Soul Intelligence, customer value, and transparent evidence.
 
 **MERCYSOUL DOMINION**  
 *Global Vision. Intelligent Creation. Responsible Innovation. Lasting Legacy.*
