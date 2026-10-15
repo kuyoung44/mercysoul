@@ -73,3 +73,25 @@ test("continuous mode is bounded by configured cycle and tool limits", () => {
   assert.equal(m.limits.maxTools, 30);
   assert.equal(m.limits.maxRepairAttempts, 3);
 });
+
+test("paused approval can resume after the scoped approval is recorded", async () => {
+  const first = await runContinuousToolBuild(mission(), adapters);
+  assert.equal(first.status, "awaiting_approval");
+  approveToolAction(first, { actor: "founder", action: "build", toolId: "test-runner", scope: "authorized-workspace", explicit: true });
+  const resumed = await runContinuousToolBuild(first, adapters);
+  assert.equal(resumed.status, "completed");
+});
+
+test("failed build is retried only within the configured cycle budget", async () => {
+  const m = mission({ limits: { maxCycles: 2 } });
+  recordToolRequirement(m, { id: "test-runner", capability: "test-runner", reason: "Run tests", risk: "low" });
+  approveToolAction(m, { actor: "founder", action: "build", toolId: "test-runner", scope: "authorized-workspace", explicit: true });
+  let attempts = 0;
+  const result = await runContinuousToolBuild(m, {
+    ...adapters,
+    build: async () => (++attempts === 1 ? { ok: false, error: "temporary compiler error" } : { ok: true, artifact: "test-runner.js" })
+  });
+  assert.equal(attempts, 2);
+  assert.equal(result.status, "completed");
+  assert.equal(result.cycle, 2);
+});
