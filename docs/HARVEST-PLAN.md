@@ -9,17 +9,26 @@
 
 Turn existing MercySoul products into a focused, measurable customer and revenue workflow before expanding the ecosystem. Prioritize customer value, verified delivery, security, and evidence over adding more unfinished infrastructure.
 
-## Initial offers
+## Moderated international starting prices (USD)
 
-The following are the founder's previously stated prices and must be reconfirmed against current business decisions before publishing as binding prices:
+These are proposed moderated starting prices, rounded for clear international presentation. They are not currency conversions guaranteed to match the current FX market, and they are not evidence of completed sales. Confirm the exact scope and final quote with each customer before chargeable work starts.
 
-| Offer | Reference price | Scope to define before sale |
+| Offer | Starting price | Pricing guardrail |
 |---|---:|---|
-| Vision Brain custom artwork | ₦5,000 per image | Brief, revisions, format, usage rights, delivery time |
-| Build Flash website generator / website project | ₦100,000 | Pages, forms, hosting/domain responsibilities, revisions, support |
-| Customer assistant setup | ₦150,000 | Channels, supported tasks, integrations, monitoring, maintenance |
+| Vision Brain custom digital artwork | **$5 per image** | Confirm brief, file format, revisions, and commercial usage rights. |
+| Build Flash small website project | **$99 per project** | Confirm pages, forms, hosting/domain responsibilities, integrations, revisions, and handover. |
+| MercySoul business assistant setup | **$149 per setup** | Confirm use cases, channels, authorized integrations, testing, maintenance, and third-party API costs. |
 
-Do not promise features that have not been tested. State whether hosting, domains, paid third-party APIs, maintenance, and taxes are included or excluded.
+### Soul Intelligence price moderation standard
+
+**UNDERSTAND → SCOPE → ESTIMATE → EXPLAIN → CUSTOMER APPROVES → DELIVER → VERIFY.**
+
+- Price in proportion to verified requirements and actual delivery effort; do not upsell features the customer does not need.
+- Show starting prices clearly; provide a written quote when requirements change the cost.
+- Disclose exclusions such as hosting, domains, taxes, paid API usage, extra revisions, and ongoing maintenance.
+- Do not promise revenue, business growth, perfect reliability, or features that have not been tested.
+- Do not begin chargeable work until the customer approves the written scope and quote.
+- Treat these prices as proposed starting points; review after real enquiries, delivery costs, customer feedback, and sustainable margins are measured.
 
 ## Customer-to-delivery workflow
 
@@ -43,8 +52,7 @@ Do not promise features that have not been tested. State whether hosting, domain
 - Do not change billing or weaken security to bypass a deployment limit.
 
 ### Day 2 — Package offers
-- Publish a clear scope and price for each offer only after the founder confirms it remains current.
-- Define delivery time, revisions, exclusions, refund/cancellation handling, and support.
+- Publish clear scope, starting prices, delivery time, revisions, exclusions, cancellation/refund handling, and support.
 - Make the enquiry and order route easy to use on mobile.
 
 ### Day 3 — Demonstrate
@@ -75,16 +83,7 @@ Do not promise features that have not been tested. State whether hosting, domain
 
 ## Weekly scorecard
 
-Track:
-- Qualified enquiries
-- Quotes sent
-- Paid orders verified
-- Completed deliveries
-- On-time delivery rate
-- Refunds and rework
-- Gross revenue and direct delivery costs
-- Repeat customers and referrals
-- Availability and production incidents
+Track qualified enquiries, quotes sent, verified paid orders, completed deliveries, on-time delivery, refunds/rework, gross revenue, direct delivery costs, repeat customers/referrals, and production incidents.
 
 ## Technical and governance gates
 
@@ -101,6 +100,6 @@ As of the latest inspection, the mercy-soul-brain-box production deployment is R
 
 ## Definition of harvest readiness
 
-An offer is ready to sell when its scope, price, demo, enquiry path, delivery process, security boundaries, and support expectations are explicit. The workflow is ready to scale only after actual customer transactions have been delivered and measured.
+An offer is ready to sell when its scope, starting price, demo, enquiry path, delivery process, security boundaries, and support expectations are explicit. The workflow is ready to scale only after actual customer transactions have been delivered and measured.
 
 **MERCYSOUL DOMINION — Aṣẹ.**
