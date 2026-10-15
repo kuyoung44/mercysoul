@@ -166,15 +166,8 @@ export async function runContinuousToolBuild(inputMission, adapters) {
         tool.status = resultOk(tested) ? "tested" : "repair_needed";
         event(mission, resultOk(tested) ? "tool_test_passed" : "tool_test_failed", { toolId: tool.id });
       }
-      transition(mission, "INDEPENDENT_VERIFY");
-      const verification = await adapters.verify({ mission: clone(mission), tools: clone(mission.tools) });
-      if (!resultOk(verification)) {
-        mission.status = "paused_verification_failed";
-        mission.blockers.push({ type: "independent_verification_failed", detail: String(verification?.reason ?? "No passing verification evidence").slice(0, 500) });
-        event(mission, "verification_failed");
-        return mission;
-      }
-      event(mission, "independent_verification_passed", { evidence: verification.evidence ?? null });
+      // Do not ask the independent verifier to approve a known failed artifact.
+      // Schedule a bounded repair cycle first; verify only after every tool passes tests.
       const failed = mission.tools.filter(t => t.status === "repair_needed");
       if (failed.length) {
         if (mission.cycle >= mission.limits.maxCycles) {
@@ -187,6 +180,15 @@ export async function runContinuousToolBuild(inputMission, adapters) {
         event(mission, "repair_cycle_scheduled", { unresolvedTools: failed.map(t => t.id) });
         continue;
       }
+      transition(mission, "INDEPENDENT_VERIFY");
+      const verification = await adapters.verify({ mission: clone(mission), tools: clone(mission.tools) });
+      if (!resultOk(verification)) {
+        mission.status = "paused_verification_failed";
+        mission.blockers.push({ type: "independent_verification_failed", detail: String(verification?.reason ?? "No passing verification evidence").slice(0, 500) });
+        event(mission, "verification_failed");
+        return mission;
+      }
+      event(mission, "independent_verification_passed", { evidence: verification.evidence ?? null });
       if (typeof adapters.integrate === "function") {
         if (!hasApproval(mission, "integrate", null)) {
           mission.status = "awaiting_approval";
