@@ -3,6 +3,9 @@
   "functions": {
     "api/index.js": {
       "maxDuration": 30
+    },
+    "api/host-provisioning.js": {
+      "maxDuration": 15
     }
   },
   "headers": [
@@ -29,6 +32,10 @@
     }
   ],
   "routes": [
+    {
+      "src": "/api/host-provisioning/?",
+      "dest": "/api/host-provisioning.js"
+    },
     {
       "src": "/api/(.*)",
       "dest": "/api/index.js"
