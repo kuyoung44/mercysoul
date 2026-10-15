@@ -30,6 +30,10 @@ These are proposed moderated starting prices, rounded for clear international pr
 - Do not begin chargeable work until the customer approves the written scope and quote.
 - Treat these prices as proposed starting points; review after real enquiries, delivery costs, customer feedback, and sustainable margins are measured.
 
+## Payment policy — cryptocurrency only
+
+**Accepted payment method: cryptocurrency only.** Do not advertise or accept bank transfers, cards, or fiat payment methods under this policy. Before a customer pays, issue a written invoice specifying the accepted asset, exact network, amount, and verified recipient address. Never invent or reuse an unverified wallet address. Confirm invoice authenticity through the official MercySoul contact route; crypto transfers may be irreversible. Mark an order paid only after independent transaction verification and required confirmations. This policy does not by itself configure a wallet, payment processor, webhook, or automatic payment verification.
+
 ## Customer-to-delivery workflow
 
 1. **Discover:** Explain the offer and show a real example or working demo.
