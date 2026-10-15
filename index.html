@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MercySoul Vision Brain | MercySoul Dominion</title>
+<title>MercySoul SI Bot | MercySoul Dominion</title>
 <meta name="description" content="MercySoul Vision Brain | MercySoul Dominion — Where Imagination Becomes Sacred Art. Explore AI-powered creative technology, digital art, business websites, and practical automation.">
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
 <meta name="google-site-verification" content="AEsP_-7ElKfCqDf7dFKSwXeJfpvUPzyzVpfNqF7BCFQ">
 <meta name="author" content="MercySoul Dominion">
-<meta name="application-name" content="MercySoul Vision Brain">
+<meta name="application-name" content="MercySoul SI Bot">
 <link rel="canonical" href="https://mercysoul.vercel.app/">
-<meta property="og:type" content="website"><meta property="og:url" content="https://mercysoul.vercel.app/"><meta property="og:title" content="MercySoul Vision Brain | MercySoul Dominion"><meta property="og:description" content="Where Imagination Becomes Sacred Art. Explore AI-powered creative technology, digital art, websites, and practical automation.">
+<meta property="og:type" content="website"><meta property="og:url" content="https://mercysoul.vercel.app/"><meta property="og:title" content="MercySoul SI Bot | MercySoul Dominion"><meta property="og:description" content="Where Imagination Becomes Sacred Art. Explore AI-powered creative technology, digital art, websites, and practical automation.">
 <meta property="og:site_name" content="MercySoul Dominion">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="MercySoul Vision Brain | MercySoul Dominion">
+<meta name="twitter:title" content="MercySoul SI Bot | MercySoul Dominion">
 <meta name="twitter:description" content="Where Imagination Becomes Sacred Art. Explore AI-powered creative technology, digital art, websites, and practical automation.">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"MercySoul Dominion","url":"https://mercysoul.vercel.app/","description":"A founder-led digital ecosystem connecting MercySoul creative technology, AI automation, digital art and business systems.","sameAs":["https://mercy-vision.vercel.app","https://mercy-build-flash.vercel.app","https://mercy-news.vercel.app","https://mercy-vision.vercel.app"],"brand":{"@type":"Brand","name":"MercySoul"}}</script>
 <style>
@@ -270,7 +270,7 @@ function closePreview(){previewOverlay.classList.remove('active');previewFrame.s
 previewClose.addEventListener('click',closePreview);previewOverlay.addEventListener('click',e=>{if(e.target===previewOverlay)closePreview();});document.addEventListener('keydown',e=>{if(e.key==='Escape')closePreview();});
 function addDemoButtons(el){const wrap=document.createElement('div');wrap.className='demo-wrap';Object.entries(DEMO_LINKS).forEach(([service,url])=>{const button=document.createElement('a');button.className='demo-btn';button.href=url;button.target='_blank';button.rel='noopener noreferrer';button.textContent='Preview '+service.split(' (')[0];button.addEventListener('click',e=>{e.preventDefault();openPreview(service,url);});wrap.appendChild(button);});el.appendChild(wrap);}
 function append(type,text){const el=document.createElement('div');el.className='message '+type;if(type==='bot')el.classList.add('gold-text');if(type==='bot'&&String(text).split('\n').some(line=>CATALOG_LINE_PATTERN.test(line.trim()))){el.classList.add('catalog-blink');addDemoButtons(el);}el.textContent=text;chatBox.appendChild(el);chatBox.scrollTop=chatBox.scrollHeight;return el;}
-async function sendMessage(){const message=input.value.trim();if(!message)return;append('user',message);input.value='';sendButton.disabled=true;const loading=append('bot','MercySoul is thinking...');try{const form=new FormData();form.append('message',`[MercySoul SI mode: ${siMode.value}]\n${message}`);if(selectedPdf)form.append('file',selectedPdf,selectedPdf.name);const response=await fetch('/api/chat',{method:'POST',body:form});const data=await response.json().catch(()=>({}));loading.remove();if(!response.ok){append('bot',data.reply||data.error||`Chat request failed (${response.status}). Please try again. Aṣẹ.`);return;}append('bot',data.reply||data.error||'MercySoul did not return a response. Please try again. Aṣẹ.');}catch(error){loading.remove();append('bot','Unable to reach MercySoul chat right now. Please try again in a moment. Aṣẹ.');console.error('MercySoul chat error:',error);}finally{sendButton.disabled=false;input.focus();}}
+async function sendMessage(){const message=input.value.trim();if(!message)return;append('user',message);input.value='';sendButton.disabled=true;const loading=append('bot','MercySoul is thinking...');try{const form=new FormData();form.append('message',`[MercySoul SI mode: ${siMode.value}]\n${message}`);if(selectedPdf)form.append('file',selectedPdf,selectedPdf.name);const response=await fetch('/api/chat',{method:'POST',body:form});const data=await response.json().catch(()=>({}));loading.remove();const reply=data?.data?.reply||data?.reply||data?.data?.message||data?.message||data?.error||data?.data?.error;if(!response.ok){append('bot',reply||`Chat request failed (${response.status}). Please try again. Aṣẹ.`);return;}append('bot',reply||'MercySoul did not return a response. Please try again. Aṣẹ.');}catch(error){loading.remove();append('bot','Unable to reach MercySoul chat right now. Please try again in a moment. Aṣẹ.');console.error('MercySoul chat error:',error);}finally{sendButton.disabled=false;input.focus();}}
 sendButton.addEventListener('click',sendMessage);input.addEventListener('keydown',e=>{if(e.key==='Enter')sendMessage();});
 })();
 </script>
