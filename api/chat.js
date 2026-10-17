@@ -61,12 +61,12 @@ const pdfUpload = multer({
 function parseMultipart(req){return new Promise((resolve,reject)=>pdfUpload.single('file')(req,{},error=>error?reject(error):resolve()));}
 function ensureAse(text){
   let cleaned=String(text||'').trim()||'Please tell me what business solution you need and I will be happy to help.';
-  cleaned=cleaned.replace(/https?:\\/\\/\\S+/gi,'').replace(/\\[([^\\]]+)\\]\\([^)]*\\)/g,'$1')
-    .replace(/^\\s*[-*•]\\s+/gm,'').replace(/^\\s*\\d+[.)]\\s+/gm,'')
-    .replace(/\\*\\*([^*]+)\\*\\*/g,'$1').replace(/__([^_]+)__/g,'$1')
-    .replace(/={2,}/g,'').replace(/\\bColor:\\s*/gi,'').replace(/\\n{3,}/g,'\\n\\n')
-    .replace(/Aṣẹ\\.?\\s*$/iu,'').trim();
-  return `${cleaned}\\n\\nAṣẹ.`;
+  cleaned=cleaned.replace(/https?:\/\/\S+/gi,'').replace(/\[([^\]]+)\]\([^)]*\)/g,'$1')
+    .replace(/^\s*[-*•]\s+/gm,'').replace(/^\s*\d+[.)]\s+/gm,'')
+    .replace(/\*\*([^*]+)\*\*/g,'$1').replace(/__([^_]+)__/g,'$1')
+    .replace(/={2,}/g,'').replace(/\bColor:\s*/gi,'').replace(/\n{3,}/g,'\n\n')
+    .replace(/Aṣẹ\.?\s*$/iu,'').trim();
+  return `${cleaned}\n\nAṣẹ.`;
 }
 function rateLimit(req,res){let allowed=true;chatRateLimit(req,res,()=>{allowed=true;});return allowed&&!res.headersSent;}
 function validateOrigin(req){const origin=String(req.headers?.origin||'').trim();return !origin||appConfig.ALLOWED_ORIGINS.includes('*')||appConfig.ALLOWED_ORIGINS.includes(origin);}
