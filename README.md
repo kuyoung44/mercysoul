@@ -1,3 +1,35 @@
+# MercySoul Vision Brain 🧠
+
+**Minimal visual structures designed to dominate.**  
+**Live:** [MercySoul Vision Brain](https://mercy-vision.vercel.app) · [MercySoul OS](https://mercysoul.vercel.app)  
+**Vision AI → Shipping daily**
+
+> We no dey beg for stars. We dey build systems.
+
+[![GitHub stars](https://img.shields.io/github/stars/kuyoung44/mercysoul?style=social)](https://github.com/kuyoung44/mercysoul/stargazers) · [Explore the code](https://github.com/kuyoung44/mercysoul) · [Open Vision Brain](https://mercy-vision.vercel.app)
+
+**Stack:** JavaScript · Vision AI · Vercel
+
+## Build in public: Code → Content → Code
+
+- **Build in Public — Ogbe Edition:** record a 7-second Vercel deployment clip with the MercySoul shield logo. On-screen hook: **“1 prompt = 1 universe. MercySoul Vision.”**
+- **Vision Drop:** share an AI artwork with a short, accurate build note, code sample, and repository link. Invite developers to explore or fork the project.
+- **Dominion Statement:** “MercySoul Dominion no be app. Na system. Vision shipping. GitHub: [kuyoung44](https://github.com/kuyoung44).”
+
+## Share the vision
+
+No long talk. MercySoul Vision Brain is building toward a daily Vision AI shipping rhythm.
+
+- **GitHub:** https://github.com/kuyoung44/mercysoul
+- **Vision Brain:** https://mercy-vision.vercel.app
+- **Main OS:** https://mercysoul.vercel.app
+
+`#MercySoulDominion #BuildInPublic #Vercel #VisionAI`
+
+> Note: add a recorded demo GIF at the top once the real screen recording is available; this repository currently has no verified demo GIF asset. Posting consistently and inviting genuine stars/forks can help discovery, but no specific GitHub ranking or reciprocal-star outcome is guaranteed.
+
+---
+
 # MercySoul OS
 
 MercySoul OS is the core orchestration layer for the MercySoul ecosystem — turning intent into structured, safe, actionable workflows.
