@@ -1,0 +1,12 @@
+# First MercySoul Vision Brain Language example
+MSVB 0.1;
+IDENTITY "LEGACY-44";
+POLICY human_judgment_required = true;
+POLICY externalMutation = false;
+POLICY verify_before_execute = true;
+FLOW main = "RECEIVE -> ROUTE -> THINK -> PLAN -> GUARDIAN -> APPROVE -> EXECUTE -> VERIFY -> RECOVER -> RECORD";
+
+TASK greet(name) {
+  SAY "Aṣẹ, " + name;
+  RETURN "ready";
+}
