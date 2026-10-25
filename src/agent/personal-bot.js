@@ -49,7 +49,16 @@ function fallback(message) {
 
   if (!text) return 'What would you like to work on?';
 
-  return 'I’m ready to help. Share the key details you have, and I’ll work from there.';
+  if (/\b(who are you|what are you|introduce yourself|what is msi|what is mercysoul intelligence)\b/.test(lower)) {
+    return 'I’m MSi — MercySoul Intelligence, a MercySoul Dominion assistant designed to make intelligence practical and understandable. I can help plan, explain, draft, and solve problems. Important: the AI model is not configured on this deployment right now, so my replies are limited until the service owner configures it.';
+  }
+
+  if (/\b(create|build|make|design|website|web site|online store|e-commerce|ecommerce)\b/.test(lower) &&
+      /\b(fashion|clothing|clothes|boutique|apparel|wears|garments|style|collection|store|shop|company|business)\b/.test(lower)) {
+    return 'I can help plan a fashion website, but the AI model is not configured on this deployment yet, so I can’t run the full design conversation here. To get the build ready, start with: (1) brand/company name, (2) products you sell, (3) WhatsApp or contact link, and (4) preferred colours. A useful first version can include a product catalogue, mobile-friendly gallery, About section, contact/WhatsApp button, and an order enquiry flow. Never send passwords or API keys in chat.';
+  }
+
+  return 'The MSi AI model is not configured on this deployment yet, so I can’t generate a full answer right now. The interface is online, but the intelligence service needs its server-side model API key configured. Please try again after the service is configured.';
 }
 
 export function personalBotStatus() {
