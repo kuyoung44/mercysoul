@@ -11,7 +11,7 @@
 </head>
 <body><main class="wrap">
 <header class="top"><div class="brand"><div class="seal" aria-hidden="true">☥</div><div><h1>MERCYSOUL DOMINION</h1><p>Vision Brain · Living Seal · Unified Control</p></div></div><div class="status" id="systemStatus"><span class="dot"></span> LOCAL CONTROL READY</div></header>
-<section class="hero"><div class="card"><span class="pill">44MS16 · GOVERNED MODE</span><h2 style="font-size:clamp(25px,4vw,38px);margin-top:12px">One vision. Many systems. One guarded path.</h2><p class="muted">A single responsive workspace for signal awareness, personal notes, publishing drafts, service links and system health checks.</p><div class="notice">Operating rule: STOP → VERIFY → PROTECT → AUTHORIZE → ACT → VERIFY → RECORD. No approval means no consequential execution.</div><p class="small muted">Updated on this device: <span id="lastUpdated">Not checked yet</span></p><div class="row"><button class="primary" id="refreshBtn">Refresh signals</button><button id="exportBtn">Export memory backup</button><button id="importBtn">Import backup</button><input id="importFile" type="file" accept="application/json" hidden></div></div><div class="card eyebox" aria-label="Decorative signal-monitoring eye"><div class="eye"><div class="iris"></div></div></div></section>
+<section class="hero"><div class="card"><span class="pill">44MS16 · GOVERNED MODE</span><h2 style="font-size:clamp(25px,4vw,38px);margin-top:12px">One vision. Many systems. One guarded path.</h2><p class="muted">A governed workspace for signal awareness, personal notes, publishing drafts, service links, system health checks, and the Seven Dominion Principles.</p><div class="notice">Operating rule: STOP → VERIFY → PROTECT → AUTHORIZE → ACT → VERIFY → RECORD. No approval means no consequential execution.</div><p class="small muted">Updated on this device: <span id="lastUpdated">Not checked yet</span></p><div class="row"><button class="primary" id="refreshBtn">Refresh signals</button><button id="exportBtn">Export memory backup</button><button id="importBtn">Import backup</button><input id="importFile" type="file" accept="application/json" hidden></div></div><div class="card eyebox" aria-label="Decorative signal-monitoring eye"><div class="eye"><div class="iris"></div></div></div></section>
 <h2>Separated signal channels</h2><p class="muted">These are technical and self-reported signals, not supernatural readings or a literal measurement of a person's soul.</p>
 <section class="signalgrid">
 <div class="signal"><strong>01 · Vision</strong><span class="muted small">Creative workspace</span><div class="value" id="sigVision">READY</div></div>
@@ -19,6 +19,21 @@
 <div class="signal"><strong>03 · Memory</strong><span class="muted small">Saved on this device</span><div class="value" id="sigMemory">0 ITEMS</div></div>
 <div class="signal"><strong>04 · Network</strong><span class="muted small">Connection status</span><div class="value" id="sigNetwork">CHECKING</div></div>
 <div class="signal"><strong>05 · API health</strong><span class="muted small">MercySoul endpoint</span><div class="value" id="sigApi">NOT CHECKED</div></div>
+</section>
+<section class="card" aria-labelledby="principlesTitle" style="margin:18px 0">
+<h2 id="principlesTitle">The Seven Dominion Principles</h2>
+<p class="muted">Arise and shine. Let light guide your vision; let wisdom guide your decisions; let character govern your power; let service define your legacy.</p>
+<div class="grid2">
+<div><strong style="color:var(--gold)">01 · LIGHT</strong><p class="muted">Seek truth, clarity, and the next practical step.</p></div>
+<div><strong style="color:var(--gold)">02 · PRINCIPLE</strong><p class="muted">Let discipline, integrity, patience, and good character govern ambition.</p></div>
+<div><strong style="color:var(--gold)">03 · CREATION</strong><p class="muted">Turn ideas into useful systems, art, services, and opportunities.</p></div>
+<div><strong style="color:var(--gold)">04 · MERCY</strong><p class="muted">Serve with compassion while respecting dignity and boundaries.</p></div>
+<div><strong style="color:var(--gold)">05 · SOVEREIGNTY</strong><p class="muted">Protect identity, accounts, intellectual property, and resources. Verify before acting.</p></div>
+<div><strong style="color:var(--gold)">06 · ABUNDANCE</strong><p class="muted">Create honest income by delivering real value through dependable systems.</p></div>
+<div><strong style="color:var(--gold)">07 · LEGACY</strong><p class="muted">Build things that remain useful and expand possibilities for others.</p></div>
+</div>
+<p><a href="/principles.html">Read the complete Seven Dominion Principles →</a></p>
+<p class="small muted"><b>Fi Ìlànà gbé mi ró.</b> — Let principle and discipline uphold me.</p>
 </section>
 <section class="grid2">
 <div class="card"><h2>Memory vault</h2><p class="muted">Add principles, project decisions, reminders, and useful notes. Changes auto-save to this browser as you type.</p><div class="field"><label for="memoryTitle">Memory title</label><input id="memoryTitle" maxlength="120" placeholder="e.g. Golden Path rule"></div><div class="field"><label for="memoryBody">Memory / decision</label><textarea id="memoryBody" maxlength="5000" placeholder="Write the detail you want to preserve on this device…"></textarea></div><div class="row"><button class="primary" id="saveMemory">Save memory</button><button id="clearForm">Clear form</button></div><div id="memoryList" class="memorylist"></div><p class="small muted">Privacy: this vault uses browser localStorage only. It does not sync to cloud, another device, or the MercySoul server. Export a backup before clearing browser data.</p></div>
