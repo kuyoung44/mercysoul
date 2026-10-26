@@ -5,11 +5,11 @@
 - Intelligence and creative engine: MercySoul Vision Brain
 - Canonical line: **MercySoul Vision Brain — Where Imagination Becomes Sacred Strategy.**
 - Supporting line: An AI-driven creative soul that turns your vision into sacred art, and your art into growth strategy. Brain reasons, Vision plans, Mercy keeps it honest.
-- Palette: Black `#000000`, Royal Gold `#FFD700`, Deep Purple `#1A0033`
+- Palette: Obsidian Black `#000000`, Royal Gold `#FFD700`, Charcoal `#151515`; Deep Purple `#1A0033` is legacy/accent only, not the dominant surface
 - Visual direction: premium, sacred-tech, modern, accessible, restrained; black-and-gold may lead for Dominion.
 - Primary mark: Golden Ankh / 44MS16 identity.
 
-## The Seven Dominion Principles
+## Integrated Symbolic Framework\n- **Ankh-inspired life symbol:** life, continuity, and renewal; used as an interpretive design reference, not a claim of supernatural power.\n- **Sacred geometry / circle:** unity, structure, and connected paths.\n- **The Twelve Universal Laws:** philosophical reflection prompts for interconnectedness, change, alignment, inspired action, consequence, contribution, perspective, polarity, cycles, and complementary forces. These are not presented as scientifically established laws or guarantees.\n- **Visual direction:** black and royal gold lead; silver/blue may appear only as subtle supporting references when relevant. Preserve the Golden Ankh / 44MS16 identity.\n\n## The Seven Dominion Principles
 1. **LIGHT — Arise and shine.** Seek truth, clarity, and the next practical step.
 2. **PRINCIPLE — Stand on what is right.** Let discipline, integrity, patience, and good character govern ambition.
 3. **CREATION — Turn vision into reality.** Make ideas useful through working systems, art, services, and opportunities.
