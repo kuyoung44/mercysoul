@@ -2,6 +2,20 @@
 
 MercySoul OS is the core orchestration layer for the MercySoul ecosystem — turning intent into structured, safe, actionable workflows.
 
+## Seven Dominion Principles
+
+MercySoul Dominion is the parent creative house; MercySoul Vision Brain is its intelligence and creative engine. The guiding declaration is: **Let light guide your vision. Let wisdom guide your decisions. Let character govern your power. Let service define your legacy.**
+
+1. **Light** — seek truth, clarity, and the next practical step.
+2. **Principle** — act with discipline, integrity, patience, and good character.
+3. **Creation** — turn ideas into useful systems, art, services, and opportunities.
+4. **Mercy** — serve with compassion while respecting dignity and boundaries.
+5. **Sovereignty** — protect identity, resources, and systems; verify before acting.
+6. **Abundance** — create honest income by delivering real value.
+7. **Legacy** — build things that remain useful and help others.
+
+Personal principle: *Fi Ìlànà gbé mi ró* — Let principle and discipline uphold me. These are operating values, not a guarantee of destiny or outcomes. They do not override authentication, consent, privacy, safety, or third-party authority. The full public-facing principles page is [`public/principles.html`](public/principles.html).
+
 ## Legacy Continuity Declaration
 
 MercySoul OS preserves its foundational Dominion protocols as **legacy governance layers**. Legacy status means the protocol remains part of the historical and architectural record even when newer releases extend, harden, or supersede implementation details. Legacy designation does not grant authority over external platforms, people, or the public internet.
