@@ -11,10 +11,12 @@ import cursorRouter from './src/cursor/routes.js';
 import { initializeAiFraudPersistence } from './src/ai-fraud-rule.js';
 import { mercySoulAiStatus, runMercySoulAI } from './src/ai/mercy-soul-ai.js';
 import linkProtectionRouter from './src/governance/link-protection-router.js';
+import { createMemoryRouter } from './src/agent/memory-service.js';
 
 app.use('/api', commandCenterRouter);
 app.use('/api', cursorRouter);
 app.use('/api', linkProtectionRouter);
+app.use('/api', createMemoryRouter((await import('express')).default));
 
 app.get('/api/bot/status', (_req, res) => res.json({ ok: true, bot: mercysoulBotStatus(), whatsapp: whatsappStatus() }));
 app.get('/api/ai/status', (_req, res) => res.json({ ok: true, ai: mercySoulAiStatus() }));
