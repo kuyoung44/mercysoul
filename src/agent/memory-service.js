@@ -4,7 +4,7 @@ import { canAgentReadMemory } from './memory-access.js';
 const AGENTS = Object.freeze(['vision', 'builder', 'business', 'research', 'marketing', 'guardian']);
 const SUPABASE_URL = String(process.env.SUPABASE_URL || '').replace(/\/$/, '');
 const SERVICE_KEY = String(process.env.SUPABASE_SERVICE_ROLE_KEY || '');
-const PUBLIC_KEY = String(process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || '');
+const PUBLIC_KEY = String(process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || SERVICE_KEY);
 
 function configured() {
   return Boolean(SUPABASE_URL && SERVICE_KEY && PUBLIC_KEY);
@@ -130,7 +130,7 @@ export async function recallForAgent({ accessToken, ownerId, agentId, projectId 
     limit: String(Math.max(1, Math.min(Number(limit) || 20, 50))),
     or: `(expires_at.is.null,expires_at.gt.${new Date().toISOString()})`,
   });
-  if (projectId) params.set('project_id', `eq.${projectId}`);
+  if (projectId) params.set('and', `(or(project_id.is.null,project_id.eq.${projectId}),or(expires_at.is.null,expires_at.gt.${new Date().toISOString()}))`);
   const response = await fetch(`${SUPABASE_URL}/rest/v1/ms_agent_memories?${params}`, { headers: dbHeaders() });
   if (!response.ok) return { ok: false, status: 502, error: 'Memory retrieval failed' };
   const rows = await response.json();
