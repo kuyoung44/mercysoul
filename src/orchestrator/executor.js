@@ -7,6 +7,17 @@ const ACTION_PATTERNS = [
   { match: /\bdeploy\b.*\bvercel\b|\bvercel\b.*\bdeploy\b/i, provider: 'vercel', action: 'deploy' },
   { match: /\bstatus\b|\bhealth\b|\bcheck\b/i, action: 'status' },
 ];
+export function assertActionAllowed(action) {
+  // This executor currently supports read-only status checks only. All writes,
+  // including unknown or newly introduced actions, remain denied by default.
+  if (action !== 'status') {
+    const error = new Error('External execution is disabled pending durable human approval.');
+    error.code = 'EXECUTION_DISABLED_PENDING_APPROVAL';
+    throw error;
+  }
+  return true;
+}
+
 function resolveActions(command, plan) {
   const explicit = ACTION_PATTERNS.find((rule) => rule.match.test(command));
   if (explicit?.provider) return [{ provider: explicit.provider, action: explicit.action }];
@@ -26,6 +37,7 @@ export async function executeOrchestrationTask(id, options = {}) {
   const results = [];
   for (let index = 0; index < actions.length; index += 1) {
     const step = actions[index];
+    assertActionAllowed(step.action);
     const adapter = getAdapter(step.provider);
     const progress = Math.round((index / actions.length) * 90);
     await updateCommandProgress(id, progress, { phase: 'executing', provider: step.provider, action: step.action, step: index + 1, total: actions.length });
