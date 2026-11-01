@@ -13,11 +13,11 @@ const DEFAULTS = Object.freeze({
 });
 
 const SENSITIVE = [
-  /\\b(api[_ -]?key|secret|password|passwd|bearer|private[_ -]?key)\\b\\s*[:=]\\s*\\S+/i,
-  /\\bsk-[A-Za-z0-9_-]{12,}\\b/,
+  /\b(api[_ -]?key|secret|password|passwd|bearer|private[_ -]?key)\b\s*[:=]\s*\S+/i,
+  /\bsk-[A-Za-z0-9_-]{12,}\b/,
   /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/i,
 ];
-const PRIVATE_MARKERS = /<private>[\\s\\S]*?<\\/private>/i;
+const PRIVATE_MARKERS = /<private>[\s\S]*?<\/private>/i;
 const cache = new Map();
 const usageByDay = new Map();
 
