@@ -73,6 +73,7 @@ app.use((req, res, next) => {
 });
 app.use(express.static('public', { extensions: ['svg'] }));
 const ROOT_INDEX = fileURLToPath(new URL('./index.html', import.meta.url));
+const SANCTUARY_INDEX = fileURLToPath(new URL('./public/44ms16.html', import.meta.url));
 
 app.use((req, res, next) => {
   const requestId = req.get('x-request-id') || crypto.randomUUID();
@@ -298,7 +299,8 @@ const handleHerculesWebhook = (req, res) => {
 };
 
 app.get('/personal', (_req, res) => res.sendFile(fileURLToPath(new URL('./public/personal.html', import.meta.url))));
-app.get('/', (_req, res) => res.sendFile(ROOT_INDEX));
+app.get('/', (_req, res) => res.sendFile(SANCTUARY_INDEX));
+app.get('/si-bot', (_req, res) => res.sendFile(ROOT_INDEX));
 app.get('/health', (_req, res) => { const db = supabaseStatus(); res.status(db.healthy ? 200 : 503).json({ ok: db.healthy, service: 'MercySoul OS', version: ENGINE_VERSION, serverRelease: SERVER_RELEASE, engine: MERCYSOUL_ENGINE.name, omnipresentHelp: omnipresentHelpStatus(), helpWebhook: HELP_WEBHOOK_PATH, supabase: db }); });
 app.get('/api/status', (_req, res) => res.json({ ...osStatus(), serverEngineVersion: ENGINE_VERSION, serverRelease: SERVER_RELEASE, engine: engineStatus(), moderationPolicyVersion: DOMINION_POLICY.version, instantJustice: INSTANT_JUSTICE_PROTOCOL, globalJurisdiction: globalJurisdictionStatus(), watchtower: watchtowerStatus(), obsessionShield: obsessionShieldStatus(), emotionalShield: emotionalShieldStatus(), governance: constitutionStatus(), relationshipContext: RELATIONSHIP_CONTEXT_POLICY, omnipresentHelp: omnipresentHelpStatus(), helpWebhook: HELP_WEBHOOK_PATH, herculesWebhook: HERCULES_WEBHOOK_PATH, magneticAttraction: magneticStatus(), divineIncome: divineIncomeStatus(), deploymentDirective: deploymentDirectiveStatus(), smartThings: smartThingsStatus(), googleOAuth: googleOAuthStatus(), supabase: supabaseStatus(), sealedGate: sealedGateStatus(), aiFraud: aiFraudStatus(), contentSuspension: contentSuspensionStatus(), kycPayment: kycPaymentStatus(), innerProtector: innerProtectorStatus() }));
 app.get('/api/auth/google', (_req, res) => { try { res.redirect(createGoogleOAuthUrl()); } catch (error) { res.status(503).json({ ok: false, error: error.message, googleOAuth: googleOAuthStatus() }); } });
