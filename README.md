@@ -1,5 +1,16 @@
 # MercySoul OS
 
+**MercySoul Dominion — founder-led AI and software engineering project**
+
+MercySoul OS is the JavaScript orchestration and governance codebase within the MercySoul Dominion ecosystem. Its engineering focus includes command routing, provider-adapter workflows, server-side authorization guards, and approval/verification tests.
+
+- **Founder & Builder:** Anuoluwapo Adeoye
+- **Repository:** https://github.com/kuyoung44/mercysoul
+- **Project website:** https://mercysoul.vercel.app
+- **[AI Engineering Portfolio](docs/AI_ENGINEERING_PORTFOLIO.md)** — selected source files, tests, development instructions, and evidence boundaries.
+
+> Portfolio accuracy: repository source and test cases are documented separately from live deployment, configured model integrations, and test runs. A capability is not described as production-verified without corresponding evidence.
+
 MercySoul OS is the core orchestration layer for the MercySoul ecosystem — turning intent into structured, safe, actionable workflows.
 
 ## Seven Dominion Principles
