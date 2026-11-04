@@ -27,17 +27,6 @@ async function persist(store, task, type, detail = {}) {
   return task;
 }
 
-function validateApproval(approval, task, step) {
-  return Boolean(
-    approval &&
-    approval.decision === 'approve' &&
-    approval.actor &&
-    approval.taskId === task.taskId &&
-    approval.stepId === step.id &&
-    approval.scope === step.tool
-  );
-}
-
 /**
  * Deterministic, adapter-driven multi-agent workflow kernel.
  *
@@ -53,6 +42,7 @@ export async function runAutonomousTask(input, adapters, options = {}) {
   const planner = adapters?.planner;
   const executor = adapters?.executor;
   const reviewer = adapters?.reviewer;
+  const approvalVerifier = adapters?.approvalVerifier;
 
   for (const [name, value] of Object.entries({ store, planner, executor, reviewer })) {
     if (!value) throw new Error(`missing adapter: ${name}`);
@@ -117,9 +107,25 @@ export async function runAutonomousTask(input, adapters, options = {}) {
     });
 
     const approvals = Array.isArray(input.approvals) ? input.approvals : [];
-    const pending = steps.filter(step =>
-      step.risk !== 'low' && !approvals.some(approval => validateApproval(approval, task, step))
-    );
+    const pending = [];
+    for (const step of steps) {
+      if (step.risk === 'external') {
+        task.status = 'blocked';
+        await persist(store, task, 'external_action_blocked', { stepId: step.id, tool: step.tool });
+        return { ok: false, task: clone(task) };
+      }
+      if (step.risk === 'low') continue;
+      let approved = false;
+      if (approvalVerifier && typeof approvalVerifier.verify === 'function') {
+        for (const token of approvals) {
+          if (await approvalVerifier.verify({ token, task: clone(task), step: clone(step) })) {
+            approved = true;
+            break;
+          }
+        }
+      }
+      if (!approved) pending.push(step);
+    }
     if (pending.length) {
       await persist(store, task, 'approval_required', { stepIds: pending.map(step => step.id) });
       task.updatedAt = now();
