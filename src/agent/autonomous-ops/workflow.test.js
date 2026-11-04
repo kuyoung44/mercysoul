@@ -79,4 +79,10 @@ test('retries a failed worker within a fixed bound', async () => {
   assert.equal(attempts, 2);
 });
 
-test('blocks external-risk actions even when the tool is allowlisted', async () => {\n  const a = adapters({ planner: { async plan() { return { steps: [{ id: 'send-email', tool: 'external.email', risk: 'external' }] }; } } });\n  const result = await runAutonomousTask(input, a, { allowedTools: ['external.email'] });\n  assert.equal(result.ok, false);\n  assert.equal(result.task.status, 'blocked');\n  assert.equal(result.task.events.at(-1).type, 'external_action_blocked');\n});\n
+test('blocks external-risk actions even when the tool is allowlisted', async () => {
+  const a = adapters({ planner: { async plan() { return { steps: [{ id: 'send-email', tool: 'external.email', risk: 'external' }] }; } } });
+  const result = await runAutonomousTask(input, a, { allowedTools: ['external.email'] });
+  assert.equal(result.ok, false);
+  assert.equal(result.task.status, 'blocked');
+  assert.equal(result.task.events.at(-1).type, 'external_action_blocked');
+});
