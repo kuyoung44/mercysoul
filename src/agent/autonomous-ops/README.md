@@ -16,11 +16,11 @@ The kernel is provider-neutral. A future adapter can call LangGraph, Claude, Ope
 
 - Duplicate requests with the same idempotency key return the stored task instead of starting a second run.
 - Tools must be explicitly allowlisted.
-- Any step above low risk pauses until it receives an approval bound to the task, step, actor and tool scope.
+- Any step above low risk pauses until an injected server-side approval verifier validates a token bound to the task, step, actor and tool scope. The kernel does not trust raw approval claims supplied by a client.
 - Worker retries are bounded (two retries after the first attempt).
 - Reviewer failure prevents a task from being marked complete.
 - The workflow records ordered lifecycle events.
-- No external mutation is performed by the kernel itself.
+- External-risk steps are blocked outright in this v1. No external mutation is performed by the kernel itself.
 
 ## Important limitations
 
@@ -28,7 +28,7 @@ The kernel is provider-neutral. A future adapter can call LangGraph, Claude, Ope
 - A production store must implement atomic idempotency-key reservation, durable task writes and append-only event persistence (for example PostgreSQL with unique constraints and transactions).
 - Tool adapters must enforce the supplied idempotency key at the external system. A process crash after an external side effect but before recording its result can otherwise cause duplicate effects on retry.
 - This foundation does not yet implement distributed leases, worker heartbeats, dead-letter queues, replay, backpressure, multi-region failover, enterprise integrations or production SLOs.
-- Approval records must be created by an authenticated server-side approval service. Never trust approvals supplied directly by an untrusted client request.
+- Approval tokens must be created and verified by an authenticated server-side approval service injected as `approvalVerifier.verify()`. The client may submit a token, but the kernel never trusts raw approval claims or a client-provided actor/scope object.
 - Model outputs and tool results are untrusted data. Adapters must validate schemas and treat retrieved content as data, not instructions.
 
 ## Run tests
