@@ -48,10 +48,10 @@ test('pauses medium and higher-risk steps until exact scoped approval exists', a
 
 test('accepts only task-, step-, actor- and tool-scoped approval', async () => {
   const a = adapters({
-    planner: { async plan() { return { steps: [{ id: 'write-note', tool: 'internal.write', risk: 'medium' }] }; } }
+    planner: { async plan() { return { steps: [{ id: 'write-note', tool: 'internal.write', risk: 'medium' }] }; } },
+    approvalVerifier: { async verify({ token, task, step }) { return token === 'valid-approval' && task.taskId === 'task-1' && step.id === 'write-note' && step.tool === 'internal.write'; } }
   });
-  const approval = { decision: 'approve', actor: 'founder', taskId: 'task-1', stepId: 'write-note', scope: 'internal.write' };
-  const result = await runAutonomousTask({ ...input, approvals: [approval] }, a, { allowedTools: ['internal.write'] });
+  const result = await runAutonomousTask({ ...input, approvals: ['valid-approval'] }, a, { allowedTools: ['internal.write'] });
   assert.equal(result.ok, true);
   assert.equal(result.task.status, 'completed');
 });
@@ -78,3 +78,5 @@ test('retries a failed worker within a fixed bound', async () => {
   assert.equal(result.ok, true);
   assert.equal(attempts, 2);
 });
+
+test('blocks external-risk actions even when the tool is allowlisted', async () => {\n  const a = adapters({ planner: { async plan() { return { steps: [{ id: 'send-email', tool: 'external.email', risk: 'external' }] }; } } });\n  const result = await runAutonomousTask(input, a, { allowedTools: ['external.email'] });\n  assert.equal(result.ok, false);\n  assert.equal(result.task.status, 'blocked');\n  assert.equal(result.task.events.at(-1).type, 'external_action_blocked');\n});\n
