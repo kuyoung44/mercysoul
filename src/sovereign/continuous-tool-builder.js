@@ -159,6 +159,18 @@ export async function runContinuousToolBuild(inputMission, adapters) {
           event(mission, "tool_built", { toolId: tool.id, artifact: tool.artifact });
         }
       }
+      const buildFailures = mission.tools.filter(t => t.status === "repair_needed");
+      if (buildFailures.length) {
+        if (mission.cycle >= mission.limits.maxCycles) {
+          mission.status = "paused_cycle_limit";
+          mission.blockers.push({ type: "cycle_limit", unresolvedTools: buildFailures.map(t => t.id) });
+          event(mission, "cycle_limit_reached");
+          return mission;
+        }
+        mission.phase = "ANALYZE";
+        event(mission, "repair_cycle_scheduled", { unresolvedTools: buildFailures.map(t => t.id) });
+        continue;
+      }
       transition(mission, "TEST");
       for (const tool of mission.tools.filter(t => t.status === "built" || t.status === "tested")) {
         const tested = await adapters.test({ tool: clone(tool), project: clone(mission.project) });
