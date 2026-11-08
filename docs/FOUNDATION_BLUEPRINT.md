@@ -233,9 +233,17 @@ The working branch now includes an initial fail-closed hardening of the orchestr
 
 ### CI blockers observed on this branch
 
-The first pull-request CI run did not pass:
+The first pull-request CI run identified a pre-existing bounded-retry defect in `src/sovereign/continuous-tool-builder.js`: a failed build was sent to independent verification before a repair cycle could retry it. The branch now schedules a bounded repair cycle before testing/verification when a build attempt fails. The dedicated Continuous Tool Builder workflow subsequently passed.
 
-1. The test suite completed with **110 passing and 1 failing test**. The failure is in the existing `src/sovereign/continuous-tool-builder.test.js:94` test (expected `2`, received `1`). The new orchestrator regression tests passed.
-2. The security workflow stopped during `npm ci`: `package.json` and `package-lock.json` are out of sync. npm reported missing lock entries including `ai@6.0.296`, `openai@7.53.0`, and related AI SDK dependencies. It also warned that the resolved OpenAI package requires Node 22 while the CI workflow selects Node 20.
+Latest observed CI evidence for commit `c67395c96d79e9f1e8cf3dacb8adf6a159986054`:
 
-These blockers must be resolved and the complete workflow rerun before merge. No production deployment or Supabase mutation has been performed.
+- **MercySoul CI:** passed.
+- **MercySoul OS — Build, Verify & Report:** passed.
+- **Continuous Tool Builder Tests:** passed.
+- **Security Hardening:** failed during `npm ci` because `package.json` and `package-lock.json` are out of sync. npm reported missing lock entries including `ai@6.0.296`, `openai@7.53.0`, and related AI SDK dependencies. It also warned that the resolved OpenAI package requires Node 22 while the workflow selects Node 20.
+- **MercySoul OS Build/Test Report:** build and tests passed, but its security gate failed on four dependency advisories (three high, one moderate): `body-parser`, `multer`, `qs`, and `zod`.
+- **Block Illegal Content:** failed because the scanner interpreted the public WhatsApp contact number as a possible 13–19 digit payment-card number. This is a scanner false positive requiring a safer, Luhn-aware payment-number detector or a narrowly scoped documented exception; do not disable the scan broadly.
+
+The latest Vercel preview deployment for the branch reports `READY` and is tied to the commit above. Its target is `null`, so it is a preview, not production. A live endpoint smoke test could not be completed through the available browser verification path.
+
+The remaining security/dependency and scanner issues must be resolved before merge. No production deployment or Supabase mutation has been performed.
