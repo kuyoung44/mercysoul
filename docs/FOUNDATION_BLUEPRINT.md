@@ -217,3 +217,25 @@ Start Phase 1 with the orchestrator approval gate. Build a regression test that 
 **Operating sequence:** RECEIVE → ROUTE → THINK → PLAN → GUARDIAN → APPROVE → EXECUTE → VERIFY → RECOVER → RECORD.
 
 **MercySoul Dominion:** build useful systems, protect people and data, preserve founder control, and prove every consequential claim.
+
+
+## 9. Branch implementation and CI evidence update
+
+The working branch now includes an initial fail-closed hardening of the orchestrator:
+
+- `routeCommand` recognizes a narrow set of explicit read-only request openings. Unknown or mutation-like requests against write-capable providers default to approval-required.
+- `evaluateExecutionGate` blocks mutation plans even when `execute: true` is supplied.
+- Read-only provider checks require an explicit `execute: true`; plan requests alone do not execute.
+- Task-control mutations are held until a scoped approval handoff is implemented.
+- Seven focused regression tests were added across the execution gate and command classifier. The observed CI test log shows all seven new tests passing.
+
+**Important limitation:** this is a temporary safety hold, not the completed scoped-approval implementation. Provider mutations remain unavailable through this orchestration route until proposal binding, approver identity, expiry, one-time consumption, provider permission checks, and durable audit verification are implemented.
+
+### CI blockers observed on this branch
+
+The first pull-request CI run did not pass:
+
+1. The test suite completed with **110 passing and 1 failing test**. The failure is in the existing `src/sovereign/continuous-tool-builder.test.js:94` test (expected `2`, received `1`). The new orchestrator regression tests passed.
+2. The security workflow stopped during `npm ci`: `package.json` and `package-lock.json` are out of sync. npm reported missing lock entries including `ai@6.0.296`, `openai@7.53.0`, and related AI SDK dependencies. It also warned that the resolved OpenAI package requires Node 22 while the CI workflow selects Node 20.
+
+These blockers must be resolved and the complete workflow rerun before merge. No production deployment or Supabase mutation has been performed.
