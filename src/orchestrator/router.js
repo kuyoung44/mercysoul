@@ -21,15 +21,24 @@ const RULES = [
   { match: /connect|disconnect|permission|plugin/i, tools: ['plugin-management'] },
 ];
 
+const MUTATION_INTENT = /\b(deploy|publish|create|update|delete|remove|write|commit|merge|checkpoint|migrate|migration|alter|drop|insert|refund|charge|send|grant|revoke|pause|resume|provision|execute|change|rotate|enable|disable)\b/i;
+const READ_ONLY_START = /^\s*(?:(?:please|can you|could you|would you)\s+)?(?:check|show|list|read|inspect|view|get|find|search|fetch|compare|audit|review|what|which|how|status|health)\b/i;
+
+export function isExplicitReadOnlyIntent(command) {
+  const text = String(command || '').trim();
+  return Boolean(text && READ_ONLY_START.test(text) && !MUTATION_INTENT.test(text));
+}
+
 export function routeCommand(command) {
   const text = String(command || '').trim();
   const matched = new Set();
   for (const rule of RULES) if (rule.match.test(text)) rule.tools.forEach(id => matched.add(id));
   const selected = [...matched].map(findTool).filter(Boolean);
+  const writeCapableProviderSelected = selected.some(tool => ['write','high-write','financial-write'].includes(tool.risk));
   return {
     command: text,
     selectedTools: selected,
-    requiresApproval: selected.some(tool => ['write','high-write','financial-write'].includes(tool.risk)),
+    requiresApproval: writeCapableProviderSelected && !isExplicitReadOnlyIntent(text),
     plan: selected.map(tool => ({ tool: tool.id, provider: tool.provider, capabilities: tool.capabilities })),
     availableToolCount: listTools().length,
   };
