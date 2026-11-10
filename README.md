@@ -291,3 +291,26 @@ not retaliation. Verified signals still require authorization before mutation.
 API:
 - `GET /api/governance/inner-protector` — protector state and invariants.
 - Authorized `POST /api/governance/inner-protector/chore` — run the maintenance chore.
+
+
+## Private Founder Command Centre
+
+The mobile-first founder workspace is available at `/founder`. It includes local tracking for funding opportunities, client leads, collaborator prospects, founder tasks, projects, and a plan-only approval queue.
+
+### Secure configuration
+
+Before enabling access on Vercel, configure a separate environment variable:
+
+- `FOUNDER_DASHBOARD_PASSWORD`: generate a unique random password of at least 16 characters. Do **not** reuse `ADMIN_API_TOKEN`, a Supabase key, or any other service credential.
+
+The sign-in endpoint issues a 30-minute HMAC-signed, HttpOnly, Secure (on HTTPS), SameSite=Strict cookie. The password is not stored in the browser. The dashboard page itself contains no private records; every session check is server-side.
+
+### Data and governance boundaries
+
+- Workspace records are stored in the current browser profile's localStorage only. They are not synced to Supabase or another server, and clearing browser data removes them. Do not use this first release on a shared or untrusted device.
+- The dashboard does not submit applications, send messages, publish posts, deploy code, spend money, or mutate production data.
+- The Guardian queue records review notes only; marking a proposal reviewed is not an execution authorization.
+- No production SQL, schema, migration, RLS, grant, or permission changes are included.
+- The separate founder password is not an admin API credential and grants no backend admin permissions.
+
+After setting the environment variable, deploy the reviewed branch through the normal approval-controlled release process.
