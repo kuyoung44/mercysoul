@@ -6,7 +6,7 @@ import { runPersonalBot, personalBotStatus } from '../src/agent/personal-bot.js'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const HOMEPAGE = path.join(ROOT, 'public', 'index.html');
-const FOUNDER_PAGE = path.join(ROOT, 'public', 'founder.html');
+const FOUNDER_PAGE = path.join(ROOT, 'founder.html');
 const FOUNDER_COOKIE = 'ms_founder_session';
 const founderLoginAttempts = new Map();
 
