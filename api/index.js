@@ -15,7 +15,7 @@ function safeEqual(a, b) {
   const right = Buffer.from(String(b || ''));
   return left.length === right.length && left.length > 0 && timingSafeEqual(left, right);
 }
-function founderSecret() { return String(process.env.ADMIN_API_TOKEN || '').trim(); }
+function founderSecret() { return String(process.env.FOUNDER_DASHBOARD_PASSWORD || '').trim(); }
 function founderSignature(expires) {
   return createHmac('sha256', founderSecret()).update(`mercysoul-founder:${expires}`).digest('hex');
 }
