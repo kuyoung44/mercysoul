@@ -15,14 +15,15 @@ function safeEqual(a, b) {
   const right = Buffer.from(String(b || ''));
   return left.length === right.length && left.length > 0 && timingSafeEqual(left, right);
 }
-function founderSecret() { return String(process.env.FOUNDER_DASHBOARD_PASSWORD || '').trim(); }
+function founderSecret() { const value = String(process.env.FOUNDER_DASHBOARD_PASSWORD || '').trim(); return value.length >= 16 ? value : ''; }
 function founderSignature(expires) {
   return createHmac('sha256', founderSecret()).update(`mercysoul-founder:${expires}`).digest('hex');
 }
 function parseCookies(header = '') {
   return Object.fromEntries(String(header).split(';').map(part => part.trim()).filter(Boolean).map(part => {
     const index = part.indexOf('=');
-    return index < 0 ? [part, ''] : [part.slice(0, index), decodeURIComponent(part.slice(index + 1))];
+    if (index < 0) return [part, ''];
+    try { return [part.slice(0, index), decodeURIComponent(part.slice(index + 1))]; } catch { return [part.slice(0, index), '']; }
   }));
 }
 function founderSessionValid(req) {
@@ -55,7 +56,7 @@ function sameOrigin(req) {
   try {
     const parsed = new URL(origin);
     const host = String(req.headers?.host || '').toLowerCase();
-    return parsed.host.toLowerCase() === host || ['mercysoul.vercel.app', 'localhost:3000', 'localhost:3001'].includes(parsed.host.toLowerCase());
+    return parsed.host.toLowerCase() === host;
   } catch { return false; }
 }
 let appPromise;
