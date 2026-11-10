@@ -41,6 +41,10 @@
       "dest": "/api/index.js"
     },
     {
+      "src": "/founder/?",
+      "dest": "/founder.html"
+    },
+    {
       "src": "/si-bot/?",
       "dest": "/index.html"
     },
