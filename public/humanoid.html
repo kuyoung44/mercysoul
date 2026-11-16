@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#09070f">
+<title>MercySoul Humanoid — Dominion Interface</title>
+<meta name="description" content="Meet the MercySoul digital human interface: a voice-ready, responsive AI companion governed by MercySoul Vision Brain.">
+<style>
+:root{color-scheme:dark;--bg:#09070f;--panel:#15111f;--panel2:#1d1729;--gold:#d9b75c;--muted:#a9a1b4;--line:#332b43;--text:#f7f2e8;--green:#77d6a1}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% 0%,#241735 0%,var(--bg) 56%);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+.shell{width:min(1120px,100%);margin:auto;padding:20px;min-height:100vh;display:grid;grid-template-rows:auto 1fr auto;gap:18px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding:8px 0 16px}
+.brand{font-weight:800;letter-spacing:.13em;color:var(--gold);font-size:.9rem}.sub{color:var(--muted);font-size:.82rem}
+.status{font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:7px}.dot{width:8px;height:8px;border-radius:50%;background:#9b8eaa}.dot.ready{background:var(--green);box-shadow:0 0 12px #77d6a177}
+main{display:grid;grid-template-columns:minmax(280px,.85fr) minmax(320px,1.15fr);gap:20px;align-items:stretch}
+.stage,.console{background:linear-gradient(155deg,#191424,#100d18);border:1px solid var(--line);border-radius:24px;overflow:hidden;min-height:590px}
+.stage{display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:26px 18px;position:relative}
+.stage:before{content:"";position:absolute;width:300px;height:300px;border:1px solid #d9b75c22;border-radius:50%;top:100px;box-shadow:0 0 70px #9e70c322,inset 0 0 50px #9e70c311}
+.eyebrow{color:var(--gold);letter-spacing:.18em;font-size:.7rem;text-transform:uppercase;z-index:1}
+.avatar{width:230px;height:350px;position:relative;display:flex;align-items:center;flex-direction:column;justify-content:flex-start;z-index:1;filter:drop-shadow(0 15px 35px #0008)}
+.halo{position:absolute;top:12px;width:190px;height:190px;border:1px solid #d9b75c66;border-radius:50%;box-shadow:0 0 35px #d9b75c22}
+.head{position:relative;margin-top:35px;width:112px;height:128px;border-radius:48% 48% 43% 43%;background:linear-gradient(135deg,#e9d5b4,#a98769 60%,#594b54);border:2px solid #f4dba8;z-index:2;box-shadow:inset -13px -9px 20px #382b39}
+.head:before{content:"";position:absolute;left:18px;right:18px;top:55px;height:3px;background:#3b2634;border-radius:4px;box-shadow:0 0 9px #f7d98a}
+.head:after{content:"";position:absolute;left:30px;right:30px;top:81px;height:2px;background:#704b4a;border-radius:4px}
+.neck{width:42px;height:34px;background:linear-gradient(90deg,#79604f,#d8b999,#6c554d);margin-top:-3px;z-index:1}
+.body{width:166px;height:155px;margin-top:-1px;border-radius:48% 48% 20% 20%;background:linear-gradient(110deg,#211a2b,#4a354b 50%,#171320);border:1px solid #d9b75c88;position:relative}
+.body:before{content:"";position:absolute;left:50%;top:15px;transform:translateX(-50%);width:42px;height:42px;border-radius:50%;border:1px solid var(--gold);box-shadow:0 0 18px #d9b75c66}
+.body:after{content:"MSi";position:absolute;left:0;right:0;top:68px;text-align:center;letter-spacing:.2em;color:var(--gold);font-size:.85rem}
+.avatar.thinking .halo{animation:pulse 1.5s ease-in-out infinite}.avatar.speaking .head:before{animation:talk .22s alternate infinite}
+@keyframes pulse{50%{transform:scale(1.06);box-shadow:0 0 65px #d9b75c55}}@keyframes talk{to{transform:scaleY(3)}}
+.identity{text-align:center;z-index:1}.identity h1{margin:4px 0;font-size:1.5rem}.identity p{margin:0;color:var(--muted);font-size:.85rem}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;z-index:1}.chip{border:1px solid var(--line);border-radius:99px;padding:6px 10px;color:#d5ccdc;font-size:.72rem}
+.console{display:flex;flex-direction:column}.console-head{padding:20px;border-bottom:1px solid var(--line)}.console-head h2{margin:0;font-size:1.1rem}.console-head p{margin:4px 0 0;color:var(--muted);font-size:.82rem}
+.messages{padding:18px;display:flex;flex-direction:column;gap:12px;overflow:auto;flex:1;min-height:300px;max-height:440px}
+.msg{max-width:90%;padding:11px 14px;border-radius:16px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem}.bot{align-self:flex-start;background:var(--panel2);border:1px solid var(--line)}.user{align-self:flex-end;background:var(--gold);color:#20190c}
+.composer{padding:14px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr auto auto;gap:8px}
+input{min-width:0;background:#0c0a12;border:1px solid #4b405b;border-radius:14px;padding:13px;color:var(--text);font:inherit;outline:none}button{border:1px solid #6e5b35;background:var(--gold);color:#20190c;border-radius:14px;padding:0 16px;font-weight:750;cursor:pointer}button.secondary{background:#211a2c;color:var(--text);border-color:var(--line)}button:disabled{opacity:.45;cursor:not-allowed}
+.disclaimer{padding:0 18px 16px;color:var(--muted);font-size:.72rem}.foot{text-align:center;color:var(--muted);font-size:.75rem}
+@media(max-width:760px){.shell{padding:12px;gap:12px}main{grid-template-columns:1fr}.stage{min-height:430px;padding:18px}.avatar{transform:scale(.82);transform-origin:top center;height:290px;margin-bottom:-40px}.stage:before{top:60px;width:240px;height:240px}.console{min-height:520px}.messages{max-height:340px}.composer{grid-template-columns:1fr auto}.composer .voice{grid-column:1/-1;min-height:42px}header{align-items:flex-start;flex-direction:column}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body><div class="shell">
+<header><div><div class="brand">MERCYSOUL DOMINION</div><div class="sub">The digital human interface · Vision Brain</div></div><div class="status"><span class="dot" id="dot"></span><span id="status">Checking assistant service…</span></div></header>
+<main>
+<section class="stage" aria-label="Digital human avatar">
+<div class="eyebrow">Human-centred intelligence</div>
+<div class="avatar" id="avatar" role="img" aria-label="Stylized digital human avatar"><div class="halo"></div><div class="head"></div><div class="neck"></div><div class="body"></div></div>
+<div class="identity"><h1>MercySoul Humanoid</h1><p>Digital presence · MSi interface</p></div>
+<div class="chips"><span class="chip">Voice-ready</span><span class="chip">Agent-connected design</span><span class="chip">Human approval first</span></div>
+</section>
+<section class="console" aria-label="Conversation console">
+<div class="console-head"><h2>Talk with your Dominion assistant</h2><p>Ask a question, request a plan, or explore what your agents can help with.</p></div>
+<div class="messages" id="messages" aria-live="polite"><div class="msg bot">Hello. I’m the MercySoul digital interface. I can help you think, plan and create. What shall we work on?</div></div>
+<form class="composer" id="form"><input id="prompt" maxlength="4000" autocomplete="off" placeholder="Write a message…" aria-label="Your message"><button id="send" type="submit">Send</button><button class="secondary voice" id="voice" type="button">Use voice</button></form>
+<div class="disclaimer">Prototype interface. Voice support depends on your browser. Consequential actions are not available from this interface; human approval remains mandatory.</div>
+</section>
+</main>
+<footer class="foot">Fi Ìlànà gbé mi ró · Let principle and discipline uphold me.</footer>
+</div>
+<script>
+const $=s=>document.querySelector(s),messages=$('#messages'),form=$('#form'),prompt=$('#prompt'),send=$('#send'),avatar=$('#avatar');
+function add(role,text){const el=document.createElement('div');el.className='msg '+role;el.textContent=text;messages.append(el);messages.scrollTop=messages.scrollHeight;return el}
+function setState(state){avatar.classList.remove('thinking','speaking');if(state)avatar.classList.add(state)}
+async function serviceStatus(){try{const r=await fetch('/api/ai/status');const j=await r.json();const d=j.data||j;const ai=d.ai||d;const ready=ai.enabled===true&&ai.model&&ai.model!=='not-configured';$('#status').textContent=ready?'Assistant service configured':'Interface ready · AI model not confirmed';$('#dot').classList.toggle('ready',ready)}catch{$('#status').textContent='Interface ready · service status unavailable'}}
+form.addEventListener('submit',async e=>{e.preventDefault();const message=prompt.value.trim();if(!message)return;add('user',message);prompt.value='';send.disabled=true;setState('thinking');const wait=add('bot','Thinking…');try{const r=await fetch('/api/ai/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message})});const j=await r.json();const d=j.data||j;wait.remove();const answer=d.response||d.error||j.error||'I could not complete that request.';add('bot',answer);if(d.response){setState('speaking');if('speechSynthesis'in window){const utterance=new SpeechSynthesisUtterance(d.response);utterance.rate=1;utterance.onend=()=>setState('');speechSynthesis.cancel();speechSynthesis.speak(utterance)}else setState('')}else setState('')}catch{wait.remove();add('bot','I cannot reach the assistant service right now. Please try again later.');setState('')}finally{send.disabled=false;prompt.focus()}});
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+$('#voice').disabled=!SpeechRecognition;
+if(SpeechRecognition){$('#voice').addEventListener('click',()=>{const rec=new SpeechRecognition();rec.lang='en-NG';rec.interimResults=false;rec.maxAlternatives=1;$('#voice').textContent='Listening…';rec.onresult=e=>{prompt.value=e.results[0][0].transcript;prompt.focus()};rec.onerror=()=>add('bot','Voice input was unavailable. You can type your message instead.');rec.onend=()=>$('#voice').textContent='Use voice';rec.start()})}
+serviceStatus();
+</script></body></html>
