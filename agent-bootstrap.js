@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { createOpenAIProvider, createVisionBrain, visionBrainStatus } from './src/vision-brain-foundation/brain.js';
 import app from './server.js';
 import { runMercySoulAgent, mercysoulGraphStatus } from './src/agent/mercysoul-graph.js';
 import { runDeepResearch, deepResearchStatus } from './src/deep-research.js';
@@ -18,6 +19,34 @@ app.use('/api', linkProtectionRouter);
 
 app.get('/api/bot/status', (_req, res) => res.json({ ok: true, bot: mercysoulBotStatus(), whatsapp: whatsappStatus() }));
 app.get('/api/ai/status', (_req, res) => res.json({ ok: true, ai: mercySoulAiStatus() }));
+
+app.get('/api/vision-brain/status', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json({ ok: true, brain: visionBrainStatus() });
+});
+
+app.post('/api/vision-brain/chat', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  const requestId = req.get('x-request-id') || crypto.randomUUID();
+  const configuredToken = process.env.MERCYSOUL_BRAIN_API_TOKEN || '';
+  const suppliedToken = String(req.get('authorization') || '').replace(/^Bearer\\s+/i, '');
+  const tokenMatches = configuredToken.length > 0 && suppliedToken.length === configuredToken.length &&
+    crypto.timingSafeEqual(Buffer.from(suppliedToken), Buffer.from(configuredToken));
+  if (!tokenMatches) return res.status(401).json({ ok: false, requestId, code: 'UNAUTHORIZED', error: 'Valid Brain API access token required.' });
+  try {
+    const brain = createVisionBrain({ provider: createOpenAIProvider() });
+    const result = await brain.respond({ message: req.body?.message, context: req.body?.context });
+    return res.status(result.ok ? 200 : 422).json({ ...result, requestId });
+  } catch (error) {
+    const missingConfig = /OPENAI_API_KEY/.test(error instanceof Error ? error.message : '');
+    return res.status(missingConfig ? 503 : 502).json({
+      ok: false, requestId,
+      code: missingConfig ? 'MODEL_NOT_CONFIGURED' : 'MODEL_PROVIDER_ERROR',
+      error: missingConfig ? 'Vision Brain model provider is not configured.' : 'Vision Brain could not complete this request.',
+    });
+  }
+});
+
 app.post('/api/ai/chat', async (req, res) => {
   const requestId = req.get('x-request-id') || crypto.randomUUID();
   try {
