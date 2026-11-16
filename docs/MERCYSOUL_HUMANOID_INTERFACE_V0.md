@@ -1,43 +1,63 @@
-# MercySoul Humanoid Interface — v0.1
+# MercySoul Humanoid Interface — 3D + Realtime Voice v0.2
 
 ## Product decision
 - Appearance: human-form digital character.
-- Communication: both text and voice.
-- Product role: public-facing digital human interface for MercySoul Vision Brain / MercySoul AI.
+- Communication: text and full-duplex voice.
+- Product role: human-facing interface for MercySoul Dominion and Vision Brain.
+- Development branch: `feature/mercysoul-humanoid-interface-v0`.
 
-## Implemented
-- Responsive mobile and desktop layout.
-- Human-form illustrated avatar with face, hair, eyes, expression states, and subtle MercySoul styling.
-- Text conversation using the verified existing `POST /api/ai/chat` endpoint.
-- Service status using the verified existing `GET /api/ai/status` endpoint.
-- Browser speech recognition where supported; voice input transcribes into the composer and requires the user to press Send.
-- Browser speech synthesis for assistant replies, with a stop-voice control.
-- Loading, listening, speaking, and error states.
-- Accessible labels, live message region, and reduced-motion support.
-- No credentials in browser code.
+## Implemented in this isolated branch
 
-## Runtime and governance
-- Static page: `public/humanoid.html`.
-- Serve at `/humanoid.html` using the existing Express static hosting configuration.
-- The page uses existing MercySoul AI API routes. It does not add new server routes.
-- The AI backend applies its existing preflight and human-judgment policy.
-- The interface does not expose tools or execution adapters. No consequential action can be performed from this page.
-- Browser speech recognition and synthesis depend on browser/device support and may require microphone permission and HTTPS.
+### 3D avatar
+- `public/humanoid-3d.js` renders a procedural 3D human-form character with Three.js/WebGL.
+- Includes a head, face details, hair, neck, shoulders, torso, arms, gold identity elements, lighting, idle motion, blink, and speaking/listening/thinking states.
+- Responsive canvas sizing and a simple accessible fallback when WebGL or the external Three.js module is unavailable.
+- Uses a pinned Three.js CDN module; a production build should vendor/pin the dependency locally after bundle and performance checks.
+- This is a stylized procedural 3D character, not a photorealistic scan, imported rigged human model, or physical robot. Mouth movement currently follows the speaking state, not phoneme-level lip sync.
 
-## Honest limitations
-- The current face is a CSS illustration, not a photorealistic human or 3D model.
-- It is a digital interface, not a physical robot; no sensors, locomotion, or real-world actuation.
-- Conversation currently uses ordinary HTTP request/response, not streaming real-time audio.
-- Speech synthesis uses the browser's available voice and is not a cloned or custom MercySoul voice.
-- No persistent user memory, multi-agent delegation, live lip-sync, or durable avatar identity is added in this release.
-- Actual live operation depends on the existing server being deployed and `MERCYSOUL_AI_MODEL` being configured.
+### Text-to-Brain connection
+- Text messages now call `POST /api/vision/async`.
+- The existing Vision Brain Responses API flow is used instead of the older generic `/api/ai/chat` endpoint.
+- The UI reads `outputText` and falls back to structured output text when necessary.
 
-## Next engineering stages
-1. Test the page on the actual Vercel preview / Express host, including mobile microphone permission and API response behavior.
-2. Select a licensed or generated human avatar asset and a 3D renderer (e.g. Three.js/WebGL) after deciding face, voice, and performance targets.
-3. Add a low-latency audio transport and streaming speech pipeline with visible listening/consent controls.
-4. Add secure session identity, privacy/retention controls, and rate limiting before public rollout.
-5. Add agent delegation behind a typed, allowlisted tool gateway. Consequential actions require explicit, scope-bound human approval and independent authorization checks.
+### Realtime voice-to-Brain connection
+- `src/vision-brain/realtime-session.js` creates a Realtime WebRTC answer using the server-side `OPENAI_API_KEY`.
+- `POST /api/vision/realtime/session` accepts a bounded SDP offer, builds the Realtime session server-side, and returns the SDP answer. The standard API key is never sent to the browser.
+- Realtime session model: `gpt-realtime-2.1`; voice: `marin`.
+- The Realtime session exposes one function only: `vision_brain_turn`.
+- The voice model is instructed to call that function for each user turn. The browser forwards the utterance to `POST /api/vision/async`, then returns the Brain response to the Realtime session for spoken delivery.
+- The Realtime endpoint has an in-memory limit of five session starts per IP per ten-minute window.
+- The microphone is requested only after the user presses Start voice. End voice closes the peer connection and releases local microphone tracks.
+- No external-action tool is available in the Realtime session.
 
-## Verification note
-The interface files are committed on `feature/mercysoul-humanoid-interface-v0` and fetched back from GitHub. Browser/runtime tests and deployment verification have not yet been run.
+## Governance boundary
+- Voice and text are interfaces, not execution authority.
+- The voice model has no tools for deployments, payments, messages, database writes, device control, or other external mutations.
+- The only exposed function routes a request to the existing Vision Brain status/reasoning workflow.
+- Existing Vision Brain async tool allowlist remains limited to read-only MercySoul status retrieval.
+- No production database schema, RLS, grants, secrets, or deployment settings were changed.
+- No merge or deployment was performed.
+- Existing deterministic Vision Brain foundation `src/vision-brain/index.js` remains separate from the model-backed async route; this iteration connects the humanoid to the existing model-backed Vision Brain route, not to a new orchestration of the deterministic foundation.
+
+## Required runtime configuration
+- Node.js 20+.
+- `OPENAI_API_KEY` configured server-side for Realtime voice and the existing Vision Brain async agent.
+- `VISION_BRAIN_OPENAI_MODEL` configured or its repository default accepted.
+- HTTPS and a browser/device that supports WebRTC, microphone capture, and audio playback.
+- Network access to the pinned Three.js CDN module for the 3D renderer.
+
+## Verification status
+- Added automated tests for Realtime session rate limiting and status disclosure.
+- Source files were committed to the isolated feature branch and must be fetched back for verification.
+- Browser/WebRTC end-to-end tests, mobile microphone tests, provider billing checks, and full `npm test` / `npm run check` have not yet been run in a live runtime.
+- Public operation is not confirmed until the branch is previewed with the required environment configuration.
+
+## Next verification steps
+1. Run `npm test` and `npm run check` in a Node 20+ checkout.
+2. Test the avatar on a low-memory mobile device and verify CDN availability and reduced-motion behavior.
+3. Test microphone permission, WebRTC connection, interruption, reconnect, audio output, and tool-call failure paths.
+4. Add authenticated user/session identity, persistent rate limiting, privacy disclosures, and spend limits before public release.
+5. Evaluate a licensed rigged human model and phoneme-level lip sync as a separate quality milestone.
+
+## Deployment policy
+This branch is a development artifact only. Do not merge or deploy without the founder's explicit approval.
