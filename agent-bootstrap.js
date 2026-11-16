@@ -11,6 +11,7 @@ import cursorRouter from './src/cursor/routes.js';
 import { initializeAiFraudPersistence } from './src/ai-fraud-rule.js';
 import { mercySoulAiStatus, runMercySoulAI } from './src/ai/mercy-soul-ai.js';
 import linkProtectionRouter from './src/governance/link-protection-router.js';
+import { allowRealtimeSession, createVisionRealtimeAnswer, visionRealtimeStatus } from './src/vision-brain/realtime-session.js';
 
 app.use('/api', commandCenterRouter);
 app.use('/api', cursorRouter);
@@ -18,6 +19,29 @@ app.use('/api', linkProtectionRouter);
 
 app.get('/api/bot/status', (_req, res) => res.json({ ok: true, bot: mercysoulBotStatus(), whatsapp: whatsappStatus() }));
 app.get('/api/ai/status', (_req, res) => res.json({ ok: true, ai: mercySoulAiStatus() }));
+
+app.get('/api/vision/realtime/status', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json({ ok: true, realtime: visionRealtimeStatus() });
+});
+
+app.post('/api/vision/realtime/session', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  const limit = allowRealtimeSession(req.ip || req.socket?.remoteAddress || 'unknown');
+  if (!limit.allowed) {
+    res.setHeader('Retry-After', String(limit.retryAfterSeconds));
+    return res.status(429).json({ ok: false, error: 'Voice session rate limit reached. Please wait before reconnecting.' });
+  }
+  try {
+    const sdp = await createVisionRealtimeAnswer(req.body?.sdp);
+    res.type('application/sdp').status(201).send(sdp);
+  } catch (error) {
+    res.status(502).json({
+      ok: false,
+      error: error instanceof Error ? error.message : 'Unable to create the real-time voice session.',
+    });
+  }
+});
 app.post('/api/ai/chat', async (req, res) => {
   const requestId = req.get('x-request-id') || crypto.randomUUID();
   try {
