@@ -2,7 +2,7 @@ name: MercySoul CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, fix/vision-brain-foundation-reliability]
   pull_request:
     branches: [main]
 
@@ -20,11 +20,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Syntax and test checks
         run: npm run check
