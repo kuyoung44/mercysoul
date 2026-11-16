@@ -1,27 +1,43 @@
-# MercySoul Humanoid Interface — v0
+# MercySoul Humanoid Interface — v0.1
 
-## What this is
-A responsive, browser-based digital human interface for MercySoul Dominion. It provides a stylized human-like avatar, a conversation console, service-status display, optional browser speech input, and speech synthesis for assistant replies.
+## Product decision
+- Appearance: human-form digital character.
+- Communication: both text and voice.
+- Product role: public-facing digital human interface for MercySoul Vision Brain / MercySoul AI.
 
-## Current integration
-- Static page: `public/humanoid.html`
-- Open locally at `/humanoid.html` when the existing Express static server is running.
-- Uses existing `GET /api/ai/status` for service status.
-- Uses existing `POST /api/ai/chat` for text conversations.
-- The existing AI service has a governance prompt and does not expose tool execution in this UI.
-- The browser uses native SpeechRecognition when available and SpeechSynthesis where available. Browser and device support varies.
+## Implemented
+- Responsive mobile and desktop layout.
+- Human-form illustrated avatar with face, hair, eyes, expression states, and subtle MercySoul styling.
+- Text conversation using the verified existing `POST /api/ai/chat` endpoint.
+- Service status using the verified existing `GET /api/ai/status` endpoint.
+- Browser speech recognition where supported; voice input transcribes into the composer and requires the user to press Send.
+- Browser speech synthesis for assistant replies, with a stop-voice control.
+- Loading, listening, speaking, and error states.
+- Accessible labels, live message region, and reduced-motion support.
+- No credentials in browser code.
 
-## Explicit limitations
-- The avatar is a CSS prototype, not a photorealistic 3D human.
-- It is not a physical robot and has no body, sensors, locomotion, or real-world control.
-- It does not yet have persistent identity, long-term memory, lip-synced animation, streaming speech, or agent delegation.
-- AI availability depends on the existing server model configuration.
-- No production route, database, secrets, deployment, or existing source files were changed.
+## Runtime and governance
+- Static page: `public/humanoid.html`.
+- Serve at `/humanoid.html` using the existing Express static hosting configuration.
+- The page uses existing MercySoul AI API routes. It does not add new server routes.
+- The AI backend applies its existing preflight and human-judgment policy.
+- The interface does not expose tools or execution adapters. No consequential action can be performed from this page.
+- Browser speech recognition and synthesis depend on browser/device support and may require microphone permission and HTTPS.
 
-## Next stages
-1. Run local UI and endpoint checks on this feature branch.
-2. Add a real-time conversation transport (WebSocket or WebRTC) only after selecting the hosting/runtime constraints.
-3. Add a 3D avatar renderer and expressive animation, with accessible reduced-motion behavior.
-4. Connect approved agent capabilities through a typed, allowlisted tool gateway. Each consequential action must require explicit scoped human approval.
-5. Add optional voice streaming and synchronized lip movement.
-6. Evaluate privacy, retention, rate limits, abuse prevention, latency, and operating cost before public launch.
+## Honest limitations
+- The current face is a CSS illustration, not a photorealistic human or 3D model.
+- It is a digital interface, not a physical robot; no sensors, locomotion, or real-world actuation.
+- Conversation currently uses ordinary HTTP request/response, not streaming real-time audio.
+- Speech synthesis uses the browser's available voice and is not a cloned or custom MercySoul voice.
+- No persistent user memory, multi-agent delegation, live lip-sync, or durable avatar identity is added in this release.
+- Actual live operation depends on the existing server being deployed and `MERCYSOUL_AI_MODEL` being configured.
+
+## Next engineering stages
+1. Test the page on the actual Vercel preview / Express host, including mobile microphone permission and API response behavior.
+2. Select a licensed or generated human avatar asset and a 3D renderer (e.g. Three.js/WebGL) after deciding face, voice, and performance targets.
+3. Add a low-latency audio transport and streaming speech pipeline with visible listening/consent controls.
+4. Add secure session identity, privacy/retention controls, and rate limiting before public rollout.
+5. Add agent delegation behind a typed, allowlisted tool gateway. Consequential actions require explicit, scope-bound human approval and independent authorization checks.
+
+## Verification note
+The interface files are committed on `feature/mercysoul-humanoid-interface-v0` and fetched back from GitHub. Browser/runtime tests and deployment verification have not yet been run.
