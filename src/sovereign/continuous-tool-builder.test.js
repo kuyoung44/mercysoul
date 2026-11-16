@@ -82,6 +82,21 @@ test("paused approval can resume after the scoped approval is recorded", async (
   assert.equal(resumed.status, "completed");
 });
 
+
+test("failed build stops at the configured cycle limit", async () => {
+  const m = mission({ limits: { maxCycles: 1 } });
+  recordToolRequirement(m, { id: "test-runner", capability: "test-runner", reason: "Run tests", risk: "low" });
+  approveToolAction(m, { actor: "founder", action: "build", toolId: "test-runner", scope: "authorized-workspace", explicit: true });
+  let attempts = 0;
+  const result = await runContinuousToolBuild(m, {
+    ...adapters,
+    build: async () => { attempts += 1; return { ok: false, error: "persistent compiler error" }; }
+  });
+  assert.equal(attempts, 1);
+  assert.equal(result.status, "paused_cycle_limit");
+  assert.equal(result.blockers[0].type, "cycle_limit");
+});
+
 test("failed build is retried only within the configured cycle budget", async () => {
   const m = mission({ limits: { maxCycles: 2 } });
   recordToolRequirement(m, { id: "test-runner", capability: "test-runner", reason: "Run tests", risk: "low" });
