@@ -1,7 +1,7 @@
 # MercySoul Dominion — Brain Foundation
 
 **Status:** Stage 1 foundation / isolated prototype  
-**Branch:** feat/dominion-brain-foundation  
+**Branch:** `feat/dominion-brain-foundation` plus isolated reliability repair  
 **Production impact:** none
 
 ## Purpose
@@ -47,12 +47,14 @@ Human / App / Voice / Future Robot
 
 Lifecycle: RECEIVE -> ROUTE -> THINK -> PLAN -> GUARDIAN -> APPROVE -> EXECUTE -> VERIFY -> RECOVER -> RECORD.
 
-1. Default is plan-only.
-2. External mutations are always held for explicit, current, scoped human approval.
-3. A proposal is not an authorization; an authorization is not execution.
-4. Approval never bypasses identity, permission, expiry, or provider-state checks.
-5. This prototype has **no execution adapter**, no provider credentials, and no database writes.
-6. Production SQL, schema, RLS, grants, migrations, deployments, and customer data remain locked pending separate founder approval.
+1. Default is plan-only for explicitly recognized read and planning actions.
+2. Known mutations and unknown action verbs are restricted and held for explicit, current, scoped human approval.
+3. Restricted proposals require a unique proposal ID and complete scope, objective, owner, and evidence.
+4. Approval validation checks proposal ID, scope, action, objective, owner, approver label, approval reference, and expiry.
+5. Approval validation is **not authentication**. A future trusted server-side adapter must authenticate the approver and re-check permissions and proposal integrity.
+6. A proposal is not an authorization; an authorization is not execution.
+7. This prototype has **no execution adapter**, no provider credentials, and no database writes.
+8. Production SQL, schema, RLS, grants, migrations, deployments, and customer data remain locked pending separate founder approval.
 
 ## Initial agent roles
 
@@ -74,7 +76,7 @@ Lifecycle: RECEIVE -> ROUTE -> THINK -> PLAN -> GUARDIAN -> APPROVE -> EXECUTE -
 
 ## Build stages
 
-1. **Foundation (this branch):** architecture, deterministic policy engine, test suite, isolated browser lab.
+1. **Foundation:** architecture, deterministic policy engine, test suite, isolated browser lab.
 2. Model adapter: connect a provider behind a stable interface; secrets remain server-side.
 3. Agent registry and trace/evaluation pipeline.
 4. Explicit memory and tenant isolation design; database proposal only.
@@ -84,9 +86,9 @@ Lifecycle: RECEIVE -> ROUTE -> THINK -> PLAN -> GUARDIAN -> APPROVE -> EXECUTE -
 
 ## Acceptance criteria for this foundation
 
-- Every proposal is plan-only or pending approval.
-- Mutating actions cannot be marked executable by this module.
-- Approval validation is separate from execution.
+- Every recognized read/planning proposal is plan-only.
+- Known mutations and unknown verbs require approval and cannot be marked executable by this module.
+- Approval validation is separate from authentication and execution.
 - Invalid, missing, mismatched, or expired approvals are rejected.
 - Tests run with Node's built-in test runner.
 - Browser lab works without API keys, network calls, or database access.
