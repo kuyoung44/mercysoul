@@ -13,7 +13,7 @@ if (canvas && stage) {
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
-    camera.position.set(0, 1.0, 8.8);
+    camera.position.set(0, -0.45, 9.7);
 
     scene.add(new THREE.HemisphereLight(0xffe9d1, 0x171020, 2.1));
     const key = new THREE.DirectionalLight(0xffdfb0, 3.1);
@@ -107,6 +107,7 @@ if (canvas && stage) {
     let state = "idle";
     window.setMercyAvatarState = (next) => { state = next || "idle"; };
     const clock = new THREE.Clock();
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
     let blinkAt = 3.4;
     let blinkUntil = 0;
     const resize = () => {
@@ -114,7 +115,7 @@ if (canvas && stage) {
       const height = Math.max(320, stage.clientHeight);
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
-      camera.position.z = width < 460 ? 9.7 : 8.8;
+      camera.position.z = width < 460 ? 10.4 : 9.7;
       camera.updateProjectionMatrix();
     };
     const observer = new ResizeObserver(resize);
@@ -124,11 +125,11 @@ if (canvas && stage) {
     function animate() {
       requestAnimationFrame(animate);
       const t = clock.getElapsedTime();
-      avatar.rotation.y = Math.sin(t * 0.32) * 0.09;
-      avatar.position.y = Math.sin(t * 0.8) * 0.035;
-      head.rotation.y = Math.sin(t * 0.48) * 0.055;
-      head.rotation.x = Math.sin(t * 0.7) * 0.018;
-      halo.rotation.z = t * 0.08;
+      avatar.rotation.y = reduceMotion ? 0 : Math.sin(t * 0.32) * 0.09;
+      avatar.position.y = reduceMotion ? 0 : Math.sin(t * 0.8) * 0.035;
+      head.rotation.y = reduceMotion ? 0 : Math.sin(t * 0.48) * 0.055;
+      head.rotation.x = reduceMotion ? 0 : Math.sin(t * 0.7) * 0.018;
+      halo.rotation.z = reduceMotion ? 0 : t * 0.08;
       const talking = state === "speaking";
       mouth.scale.y = talking ? 0.035 + Math.abs(Math.sin(t * 13)) * 0.09 : 0.035;
       mouth.scale.x = talking ? 0.18 + Math.abs(Math.sin(t * 9)) * 0.035 : 0.18;
