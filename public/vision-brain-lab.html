@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080808">
+<title>Vision Brain Lab | MercySoul Dominion</title>
+<meta name="description" content="An isolated, local-only MercySoul Vision Brain policy prototype.">
+<style>
+:root{color-scheme:dark;--bg:#090909;--panel:#141414;--line:#333;--gold:#e3bd61;--text:#f5f1e8;--muted:#aaa49a;--red:#e49b8c;--green:#a8d8ad}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 90% 0,#33270e,transparent 35%),var(--bg);color:var(--text);font:15px/1.5 system-ui,sans-serif}.wrap{max-width:980px;width:calc(100% - 30px);margin:auto}header{padding:22px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:center}.brand{font-weight:850;letter-spacing:.12em}.brand span{color:var(--gold)}.tag{font-size:11px;border:1px solid #6a5529;color:var(--gold);padding:5px 9px;border-radius:99px}.hero{padding:38px 0 22px}.eyebrow{color:var(--gold);letter-spacing:.2em;font-size:10px;font-weight:800}.hero h1{font-size:clamp(32px,6vw,54px);line-height:1.04;margin:10px 0}.hero p{color:var(--muted);max-width:700px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.panel{background:linear-gradient(145deg,#191919,#101010);border:1px solid var(--line);border-radius:17px;padding:18px}.panel h2{font-size:17px;margin:0 0 4px}.muted{color:var(--muted);font-size:12px;margin:0 0 15px}label{display:block;font-size:12px;color:var(--gold);margin:12px 0 5px}input,textarea,select{width:100%;border:1px solid #45413a;border-radius:9px;background:#090909;color:var(--text);padding:11px;font:inherit}textarea{min-height:80px;resize:vertical}.btn{border:1px solid var(--gold);border-radius:10px;background:var(--gold);color:#17130a;padding:11px 15px;font-weight:800;margin-top:14px;width:100%}.result{white-space:pre-wrap;overflow-wrap:anywhere;background:#090909;border:1px solid #39342a;border-radius:12px;padding:14px;min-height:190px;font:12px/1.6 ui-monospace,monospace;color:#e8dfca}.statusgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:14px}.stat{border:1px solid var(--line);border-radius:10px;padding:10px}.stat b{display:block;font-size:12px}.stat small{color:var(--muted)}.warning{color:var(--red)}.good{color:var(--green)}footer{padding:25px 0;color:var(--muted);font-size:11px}@media(max-width:680px){.grid{grid-template-columns:1fr}header{align-items:flex-start}.tag{white-space:nowrap}}
+</style></head>
+<body><div class="wrap">
+<header><div class="brand"><span>MS</span> MERCYSOUL DOMINION</div><div class="tag">ISOLATED LAB · 0.1.0</div></header>
+<section class="hero"><div class="eyebrow">VISION BRAIN / FOUNDATION</div><h1>Think clearly.<br><span style="color:var(--gold)">Act with permission.</span></h1><p>A local-only prototype of the MercySoul intelligence policy. It can classify a request, produce a proposal, and check a sample approval. It cannot call an AI model, access your accounts, save data, or execute actions.</p></section>
+<div class="grid">
+<section class="panel"><h2>Request a plan</h2><p class="muted">Try a safe planning request or a mutation such as deploy, publish, send, or delete.</p>
+<label for="action">Action</label><select id="action"><option>analyze</option><option>research</option><option>write</option><option>publish</option><option>deploy</option><option>send</option><option>delete</option><option>device_command</option></select>
+<label for="scope">Scope</label><input id="scope" value="isolated preview branch only">
+<label for="objective">Objective</label><textarea id="objective">Prepare a plan to strengthen the MercySoul Vision Brain without changing production.</textarea>
+<label for="owner">Responsible owner</label><input id="owner" value="founder">
+<label for="evidence">Evidence / assumptions (one per line)</label><textarea id="evidence">Development branch is isolated
+No production deployment is authorized</textarea>
+<button class="btn" id="build">Generate governed proposal</button></section>
+<section class="panel"><h2>Proposal output</h2><p class="muted">All results are generated in this browser session only.</p><div class="result" id="output" aria-live="polite">No proposal generated yet.</div><div class="statusgrid"><div class="stat"><b class="good">Plan only by default</b><small>Default behavior</small></div><div class="stat"><b class="warning">No execution adapter</b><small>External actions disabled</small></div><div class="stat"><b>Model disconnected</b><small>Demo does not imply live AI</small></div><div class="stat"><b>Memory disconnected</b><small>No persistence</small></div></div></section>
+</div>
+<footer>MercySoul Dominion · LEGACY-44 · Build from Oyan. Create for the world.<br>Prototype only. No network requests, database writes, account access, or physical device control.</footer>
+</div>
+<script>
+const mutations=new Set(["write","publish","deploy","send","delete","device_command","charge","refund","update","permission_change","credential_change","database_mutation","repository_mutation","external_api_mutation"]);
+const val=id=>document.getElementById(id).value.trim();
+document.getElementById("build").addEventListener("click",()=>{
+ const action=val("action").toLowerCase(),scope=val("scope"),objective=val("objective"),owner=val("owner");
+ const evidence=val("evidence").split("\n").map(x=>x.trim()).filter(Boolean);
+ const mutation=mutations.has(action),missing=[];
+ if(!scope)missing.push("scope");if(!objective)missing.push("objective");if(!owner)missing.push("owner");if(!evidence.length)missing.push("evidence_or_explicit_assumption");
+ const proposal={version:"0.1.0",proposalId:"browser-demo-"+Date.now(),action,scope,objective,owner,evidence,status:missing.length?"blocked_missing_information":mutation?"pending_human_approval":"plan_only",externalMutation:mutation,requiresApproval:mutation,executionAllowed:false,missing,lifecycle:["RECEIVE","ROUTE","THINK","PLAN","GUARDIAN"],nextStep:missing.length?"REQUEST_MISSING_INFORMATION":mutation?"REQUEST_FOUNDER_APPROVAL":"REVIEW_PLAN",note:"Proposal only. No execution adapter exists in this demo."};
+ document.getElementById("output").textContent=JSON.stringify(proposal,null,2);
+});
+</script></body></html>
