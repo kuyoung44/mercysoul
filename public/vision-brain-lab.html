@@ -26,14 +26,14 @@ No production deployment is authorized</textarea>
 <footer>MercySoul Dominion · LEGACY-44 · Build from Oyan. Create for the world.<br>Prototype only. No network requests, database writes, account access, or physical device control.</footer>
 </div>
 <script>
-const mutations=new Set(["write","publish","deploy","send","delete","device_command","charge","refund","update","permission_change","credential_change","database_mutation","repository_mutation","external_api_mutation"]);
+const mutations=new Set(["write","publish","deploy","send","delete","device_command","charge","refund","update","permission_change","credential_change","database_mutation","repository_mutation","external_api_mutation"]);\nconst safeReadOrPlan=new Set(["analyze","classify","draft","estimate","explain","inspect","plan","read","research","review","simulate","summarize"]);
 const val=id=>document.getElementById(id).value.trim();
 document.getElementById("build").addEventListener("click",()=>{
  const action=val("action").toLowerCase(),scope=val("scope"),objective=val("objective"),owner=val("owner");
  const evidence=val("evidence").split("\n").map(x=>x.trim()).filter(Boolean);
- const mutation=mutations.has(action),missing=[];
+ const mutation=mutations.has(action),requiresReview=mutation||!safeReadOrPlan.has(action),classification=mutation?"mutation":safeReadOrPlan.has(action)?"read_or_plan":"unknown_restricted",missing=[];
  if(!scope)missing.push("scope");if(!objective)missing.push("objective");if(!owner)missing.push("owner");if(!evidence.length)missing.push("evidence_or_explicit_assumption");
- const proposal={version:"0.1.0",proposalId:"browser-demo-"+Date.now(),action,scope,objective,owner,evidence,status:missing.length?"blocked_missing_information":mutation?"pending_human_approval":"plan_only",externalMutation:mutation,requiresApproval:mutation,executionAllowed:false,missing,lifecycle:["RECEIVE","ROUTE","THINK","PLAN","GUARDIAN"],nextStep:missing.length?"REQUEST_MISSING_INFORMATION":mutation?"REQUEST_FOUNDER_APPROVAL":"REVIEW_PLAN",note:"Proposal only. No execution adapter exists in this demo."};
+ const proposal={version:"0.1.0",proposalId:"browser-demo-"+Date.now(),action,scope,objective,owner,evidence,status:missing.length?"blocked_missing_information":requiresReview?"pending_human_approval":"plan_only",externalMutation:mutation,classification,requiresApproval:requiresReview,executionAllowed:false,missing,lifecycle:["RECEIVE","ROUTE","THINK","PLAN","GUARDIAN"],nextStep:missing.length?"REQUEST_MISSING_INFORMATION":requiresReview?"REQUEST_FOUNDER_APPROVAL":"REVIEW_PLAN",note:"Proposal only. No execution adapter exists in this demo."};
  document.getElementById("output").textContent=JSON.stringify(proposal,null,2);
 });
 </script></body></html>
