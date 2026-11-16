@@ -48,8 +48,9 @@
 
 ## Verification status
 - Added automated tests for Realtime session rate limiting and status disclosure.
-- Source files were committed to the isolated feature branch and must be fetched back for verification.
-- Browser/WebRTC end-to-end tests, mobile microphone tests, provider billing checks, and full `npm test` / `npm run check` have not yet been run in a live runtime.
+- Focused Node test run passed: 9/9 deterministic Vision Brain foundation and Realtime guardrail tests.
+- JavaScript syntax check passed for the Realtime session module and the initial 3D renderer draft.
+- Browser/WebRTC end-to-end tests, mobile microphone tests, provider billing checks, and full repository `npm test` / `npm run check` have not yet been run in the project runtime.
 - Public operation is not confirmed until the branch is previewed with the required environment configuration.
 
 ## Next verification steps
