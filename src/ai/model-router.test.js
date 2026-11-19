@@ -1,6 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { selectMercySoulModel, mercySoulModelRouterStatus } from './model-router.js';
+import {
+  classifyMercySoulTask,
+  selectMercySoulModel,
+  mercySoulModelRouterStatus,
+} from './model-router.js';
 
 test('selects the configured primary model for general work', () => {
   const result = selectMercySoulModel({ env: { MERCYSOUL_MODEL_PRIMARY: 'google/gemini-test' } });
@@ -21,13 +25,22 @@ test('selects a task-specific model profile', () => {
   assert.equal(result.source, 'task_profile:coding');
 });
 
-test('allows an explicit model override without changing configuration', () => {
+test('classifies coding, research, creative, reasoning and short greetings', () => {
+  assert.equal(classifyMercySoulTask('Debug this JavaScript API'), 'coding');
+  assert.equal(classifyMercySoulTask('Research the market and provide sources'), 'research');
+  assert.equal(classifyMercySoulTask('Create a brand identity and advertisement'), 'creative');
+  assert.equal(classifyMercySoulTask('Compare these options and recommend a strategy'), 'reasoning');
+  assert.equal(classifyMercySoulTask('Good morning'), 'fast');
+  assert.equal(classifyMercySoulTask('Help me understand this topic'), 'general');
+});
+
+test('unknown task labels fail safely to the general profile', () => {
   const result = selectMercySoulModel({
-    requestedModel: 'anthropic/claude-test',
+    task: 'provider_override',
     env: { MERCYSOUL_MODEL_PRIMARY: 'google/gemini-test' },
   });
-  assert.equal(result.model, 'anthropic/claude-test');
-  assert.equal(result.source, 'request_override');
+  assert.equal(result.task, 'general');
+  assert.equal(result.model, 'google/gemini-test');
 });
 
 test('fails closed when no model is configured', () => {
@@ -48,7 +61,7 @@ test('fallback is reported but never invoked automatically', () => {
   assert.equal(result.automaticFallback, false);
 });
 
-test('status does not expose credentials', () => {
+test('status does not expose credentials and grants no execution authority', () => {
   const status = mercySoulModelRouterStatus({
     MERCYSOUL_MODEL_PRIMARY: 'google/gemini-test',
     GEMINI_API_KEY: 'never-return-this',
