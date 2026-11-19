@@ -18,16 +18,38 @@ function configuredModels(env = process.env) {
   };
 }
 
+/** Classify work into a configured profile; never accepts a provider/model from user text. */
+export function classifyMercySoulTask(text = '') {
+  const value = clean(text).toLowerCase();
+  if (!value) return 'general';
+
+  if (/\b(debug|refactor|code|coding|program|javascript|typescript|python|sql|api|repository|github|deploy|compile|test suite|stack trace)\b/.test(value)) {
+    return 'coding';
+  }
+  if (/\b(research|sources|citations|literature review|investigate|evidence|market analysis|competitor analysis)\b/.test(value)) {
+    return 'research';
+  }
+  if (/\b(design|creative|artwork|image prompt|brand identity|story|poem|advert|advertisement|campaign|visual concept)\b/.test(value)) {
+    return 'creative';
+  }
+  if (/\b(analyze|analyse|compare|evaluate|strategy|architecture|roadmap|plan|reason|root cause|trade.?off|decision)\b/.test(value)) {
+    return 'reasoning';
+  }
+  if (value.length <= 120 && /^(hi|hello|hey|thanks|thank you|good morning|good afternoon|good evening)[!. ]*$/.test(value)) {
+    return 'fast';
+  }
+  return 'general';
+}
+
 /**
  * Selects a model identifier for the existing AI SDK / Vercel AI Gateway path.
  * This module never calls a provider, retries a request, or executes a tool.
  */
-export function selectMercySoulModel({ task = 'general', requestedModel = '', env = process.env } = {}) {
+export function selectMercySoulModel({ task = 'general', env = process.env } = {}) {
   const models = configuredModels(env);
   const normalizedTask = TASK_CLASSES.has(task) ? task : 'general';
-  const requested = clean(requestedModel);
+  const model = models[normalizedTask] || models.primary;
 
-  const model = requested || models[normalizedTask] || models.primary;
   if (!model) {
     return {
       ok: false,
@@ -41,7 +63,9 @@ export function selectMercySoulModel({ task = 'general', requestedModel = '', en
     ok: true,
     model,
     task: normalizedTask,
-    source: requested ? 'request_override' : (models[normalizedTask] ? `task_profile:${normalizedTask}` : 'primary'),
+    source: models[normalizedTask] && models[normalizedTask] !== models.primary
+      ? `task_profile:${normalizedTask}`
+      : 'primary',
     fallbackConfigured: Boolean(models.fallback),
     fallbackModel: models.fallback || null,
     automaticFallback: false,
@@ -52,10 +76,10 @@ export function mercySoulModelRouterStatus(env = process.env) {
   const models = configuredModels(env);
   return {
     enabled: Boolean(models.primary),
-    mode: 'policy-based model selection',
+    mode: 'task-classified model selection via AI SDK',
     primaryConfigured: Boolean(models.primary),
     profiles: Object.fromEntries(
-      [...TASK_CLASSES].map((task) => [task, Boolean(models[task] || models.primary)]),
+      [...TASK_CLASSES].map((task) => [task, Boolean(models[task])]),
     ),
     fallbackConfigured: Boolean(models.fallback),
     automaticFallback: false,
