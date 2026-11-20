@@ -182,7 +182,7 @@ app.post('/api/os/execute', async (req, res) => { try { const result = await exe
 app.get('/api/vision-brain/demo/status', (_req, res) => res.json({ ok: true, ...visionBrainDemoStatus() }));
 
 app.post('/api/vision-brain/demo', chatRateLimit, async (req, res) => {
-  const result = await runVisionBrainDemo(req.body?.input);
+  const result = await runVisionBrainDemo(req.body?.input, { mode: req.body?.mode });
   if (!result.ok) {
     const status = result.code === 'INVALID_INPUT' ? 400 : result.code === 'MODEL_NOT_CONFIGURED' ? 503 : 502;
     return res.status(status).json(result);
