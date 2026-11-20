@@ -33,7 +33,7 @@ export async function runVisionBrainDemo(input, options = {}) {
   });
   try {
     const client = await createClient(apiKey);
-    const response = await client.responses.create({ model, instructions: buildVisionBrainInstructions(), input: normalized.input });
+    const response = await client.responses.create({ model, instructions: buildVisionBrainInstructions(), input: normalized.input, max_output_tokens: 1200 });
     const outputText = String(response?.output_text || '').trim();
     if (!outputText) return { ok: false, code: 'EMPTY_MODEL_RESPONSE', error: 'The model returned no text. Please try again.' };
     return { ok: true, mode: 'live', provider: 'OpenAI', model, responseId: response.id || null, outputText, externalMutation: false };
