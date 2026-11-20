@@ -29,6 +29,7 @@ import { omnipresentHelpStatus, evaluateHelpSignal } from './src/omnipresent-hel
 import { isBlockedIp, gateResponse, recordGateViolation, sealedGateStatus } from './src/sealed-gate.js';
 import { operatingSystemStatus, executeOperatingSystem } from './src/mercyos-operating-system.js';
 import { startVisionBrainTurn, executeVisionBrainTool, continueVisionBrainTurn, visionBrainAsyncStatus } from './src/vision-brain/async-agent.js';
+import { runVisionBrainDemo, visionBrainDemoStatus } from './src/vision-brain/demo.js';
 import orchestratorRouter from './src/orchestrator/http.js';
 import { engineStatus as controlEngineStatus, runEngine } from './src/engine/kernel.js';
 import { runPersonalBot, personalBotStatus } from './src/agent/personal-bot.js';
@@ -177,6 +178,17 @@ let smartThingsTokens = null;
 
 app.get('/api/os/status', (_req, res) => res.json(operatingSystemStatus()));
 app.post('/api/os/execute', async (req, res) => { try { const result = await executeOperatingSystem(req.body || {}, { requestId: req.requestId }); res.status(200).json(result); } catch (error) { res.status(400).json({ ok: false, requestId: req.requestId, error: error instanceof Error ? error.message : 'OS execution failed' }); } });
+
+app.get('/api/vision-brain/demo/status', (_req, res) => res.json({ ok: true, ...visionBrainDemoStatus() }));
+
+app.post('/api/vision-brain/demo', healthRateLimit, async (req, res) => {
+  const result = await runVisionBrainDemo(req.body?.input);
+  if (!result.ok) {
+    const status = result.code === 'INVALID_INPUT' ? 400 : result.code === 'MODEL_NOT_CONFIGURED' ? 503 : 502;
+    return res.status(status).json(result);
+  }
+  return res.status(200).json(result);
+});
 
 app.get('/api/vision/async/status', (_req, res) => res.json({ ok: true, visionBrain: visionBrainAsyncStatus() }));
 
