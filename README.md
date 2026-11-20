@@ -11,6 +11,17 @@ MercySoul OS is the JavaScript orchestration and governance codebase within the 
 
 > Portfolio accuracy: repository source and test cases are documented separately from live deployment, configured model integrations, and test runs. A capability is not described as production-verified without corresponding evidence.
 
+## Public identity and proof of work
+
+**MercySoul Dominion** is an independent AI and creative technology initiative founded in Oyan, Osun State, Nigeria. Its evolving ecosystem includes MercySoul OS, MercySoul Intelligence (MSi), and MercySoul Vision Brain.
+
+- [AI Engineering Portfolio](docs/AI_ENGINEERING_PORTFOLIO.md) — repository-backed work and evidence boundaries.
+- [30-Day Proof-of-Work Roadmap](docs/30_DAY_EXECUTION_ROADMAP.md) — foundation, evidence, visibility, and opportunity milestones.
+- [Founder Story](docs/FOUNDER_STORY.md) — origin narrative and reviewed social-post draft.
+- [Vision Brain Public Demo Specification](docs/VISION_BRAIN_PUBLIC_DEMO.md) — scope and verification criteria for a mobile-first demo.
+
+
+
 MercySoul OS is the core orchestration layer for the MercySoul ecosystem — turning intent into structured, safe, actionable workflows.
 
 ## Seven Dominion Principles
