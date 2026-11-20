@@ -10,6 +10,7 @@ import commandCenterRouter from './src/command-center/routes.js';
 import cursorRouter from './src/cursor/routes.js';
 import { initializeAiFraudPersistence } from './src/ai-fraud-rule.js';
 import { mercySoulAiStatus, runMercySoulAI } from './src/ai/mercy-soul-ai.js';
+import { runVisionBrainTurn, visionBrainStatus } from './src/vision-brain/core.js';
 import linkProtectionRouter from './src/governance/link-protection-router.js';
 
 app.use('/api', commandCenterRouter);
@@ -18,6 +19,16 @@ app.use('/api', linkProtectionRouter);
 
 app.get('/api/bot/status', (_req, res) => res.json({ ok: true, bot: mercysoulBotStatus(), whatsapp: whatsappStatus() }));
 app.get('/api/ai/status', (_req, res) => res.json({ ok: true, ai: mercySoulAiStatus() }));
+app.get('/api/vision-brain/status', (_req, res) => res.json({ ok: true, visionBrain: visionBrainStatus() }));
+app.post('/api/vision-brain/think', async (req, res) => {
+  const requestId = req.get('x-request-id') || crypto.randomUUID();
+  try {
+    const result = await runVisionBrainTurn(req.body || {}, { requestId });
+    res.status(result.ok ? 200 : 422).json(result);
+  } catch (error) {
+    res.status(502).json({ ok: false, requestId, decision: 'review', error: error instanceof Error ? error.message : 'Vision Brain failed', executionAllowed: false });
+  }
+});
 app.post('/api/ai/chat', async (req, res) => {
   const requestId = req.get('x-request-id') || crypto.randomUUID();
   try {
