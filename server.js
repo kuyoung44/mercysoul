@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import express from 'express';
 import { config } from './config.js';
 import { requestLogging } from './middleware/requestLogging.js';
-import { healthRateLimit } from './middleware/rateLimit.js';
+import { healthRateLimit, chatRateLimit } from './middleware/rateLimit.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { osStatus, processInput } from './src/os-core.js';
 import { DOMINION_POLICY } from './src/dominion-moderation.js';
@@ -181,7 +181,7 @@ app.post('/api/os/execute', async (req, res) => { try { const result = await exe
 
 app.get('/api/vision-brain/demo/status', (_req, res) => res.json({ ok: true, ...visionBrainDemoStatus() }));
 
-app.post('/api/vision-brain/demo', healthRateLimit, async (req, res) => {
+app.post('/api/vision-brain/demo', chatRateLimit, async (req, res) => {
   const result = await runVisionBrainDemo(req.body?.input);
   if (!result.ok) {
     const status = result.code === 'INVALID_INPUT' ? 400 : result.code === 'MODEL_NOT_CONFIGURED' ? 503 : 502;
