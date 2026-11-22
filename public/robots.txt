@@ -1,4 +1,9 @@
 User-agent: *
 Allow: /
 
+# DuckDuckGo crawler. The wildcard rule above already permits crawling;
+# this explicit stanza documents the intended access policy.
+User-agent: DuckDuckBot
+Allow: /
+
 Sitemap: https://mercysoul.vercel.app/sitemap.xml
