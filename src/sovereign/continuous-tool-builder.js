@@ -166,6 +166,20 @@ export async function runContinuousToolBuild(inputMission, adapters) {
         tool.status = resultOk(tested) ? "tested" : "repair_needed";
         event(mission, resultOk(tested) ? "tool_test_passed" : "tool_test_failed", { toolId: tool.id });
       }
+      const failed = mission.tools.filter(t => t.status === "repair_needed");
+      if (failed.length) {
+        if (mission.cycle >= mission.limits.maxCycles) {
+          mission.status = "paused_cycle_limit";
+          mission.blockers.push({ type: "cycle_limit", unresolvedTools: failed.map(t => t.id) });
+          event(mission, "cycle_limit_reached");
+          return mission;
+        }
+        // A failed build or test is a repair condition, not an independent-verification
+        // failure. Retry within the configured cycle budget before final verification.
+        mission.phase = "ANALYZE";
+        event(mission, "repair_cycle_scheduled", { unresolvedTools: failed.map(t => t.id) });
+        continue;
+      }
       transition(mission, "INDEPENDENT_VERIFY");
       const verification = await adapters.verify({ mission: clone(mission), tools: clone(mission.tools) });
       if (!resultOk(verification)) {
@@ -175,18 +189,6 @@ export async function runContinuousToolBuild(inputMission, adapters) {
         return mission;
       }
       event(mission, "independent_verification_passed", { evidence: verification.evidence ?? null });
-      const failed = mission.tools.filter(t => t.status === "repair_needed");
-      if (failed.length) {
-        if (mission.cycle >= mission.limits.maxCycles) {
-          mission.status = "paused_cycle_limit";
-          mission.blockers.push({ type: "cycle_limit", unresolvedTools: failed.map(t => t.id) });
-          event(mission, "cycle_limit_reached");
-          return mission;
-        }
-        mission.phase = "ANALYZE";
-        event(mission, "repair_cycle_scheduled", { unresolvedTools: failed.map(t => t.id) });
-        continue;
-      }
       if (typeof adapters.integrate === "function") {
         if (!hasApproval(mission, "integrate", null)) {
           mission.status = "awaiting_approval";
