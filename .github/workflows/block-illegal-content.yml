@@ -57,7 +57,32 @@ jobs:
 
           echo
           echo "3/3 Credential/payment-data pattern scan"
-          if git grep -I -n -E '(^|[^0-9])([0-9]{13,19})([^0-9]|$)|CVV[^A-Za-z0-9]*[=:][^A-Za-z0-9]*[0-9]{3,4}' -- ':!*.md' ':!*.txt' ':!.git/*' ':!node_modules/*' ':!vendor/*' ':!dist/*' ':!build/*' ':!.next/*' ':!coverage/*' ':!*.lock' ':!package-lock.json' ':!yarn.lock' ':!pnpm-lock.yaml' ':!*.csv' ':!public/acceptable-use.html' ':!public/cookie-policy.html' ':!public/privacy-policy.html' ':!public/terms.html'; then
+          # Detect explicit CVV assignments directly. For long digit strings, require
+          # a Luhn-valid 13-19 digit candidate to avoid flagging ordinary phone numbers.
+          if git grep -I -n -E 'CVV[^A-Za-z0-9]*[=:][^A-Za-z0-9]*[0-9]{3,4}' -- ':!*.md' ':!*.txt' ':!.git/*' ':!node_modules/*' ':!vendor/*' ':!dist/*' ':!build/*' ':!.next/*' ':!coverage/*' ':!*.lock' ':!package-lock.json' ':!yarn.lock' ':!pnpm-lock.yaml' ':!*.csv' ':!public/acceptable-use.html' ':!public/cookie-policy.html' ':!public/privacy-policy.html' ':!public/terms.html'; then
+            FOUND=1
+          fi
+
+          CARD_CANDIDATES="$(git grep -I -n -E '(^|[^0-9])[0-9]{13,19}([^0-9]|$)' -- ':!*.md' ':!*.txt' ':!.git/*' ':!node_modules/*' ':!vendor/*' ':!dist/*' ':!build/*' ':!.next/*' ':!coverage/*' ':!*.lock' ':!package-lock.json' ':!yarn.lock' ':!pnpm-lock.yaml' ':!*.csv' ':!public/acceptable-use.html' ':!public/cookie-policy.html' ':!public/privacy-policy.html' ':!public/terms.html' || true)"
+          if printf '%s\\n' "$CARD_CANDIDATES" | python3 -c '
+          import re, sys
+          found = False
+          for line in sys.stdin:
+              for value in re.findall(r"(?<![0-9])[0-9]{13,19}(?![0-9])", line):
+                  digits = [int(ch) for ch in value]
+                  total = 0
+                  for index, digit in enumerate(reversed(digits)):
+                      if index % 2 == 1:
+                          digit *= 2
+                          if digit > 9:
+                              digit -= 9
+                      total += digit
+                  if total % 10 == 0:
+                      print(line.rstrip())
+                      found = True
+          sys.exit(0 if found else 1)
+          '; then
+            echo "❌ Luhn-valid payment-card number candidate detected."
             FOUND=1
           fi
 
