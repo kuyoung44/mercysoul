@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080808">
+<meta name="description" content="MercySoul Vision Brain — a governed AI workspace for research, creativity, universe exploration and practical intelligence.">
+<title>MercySoul Vision Brain | Origin 44</title>
+<style>
+:root{color-scheme:dark;--bg:#070707;--panel:#111;--panel2:#17140c;--gold:#ffd700;--gold2:#b99526;--ink:#f7f1dc;--muted:#aaa28b;--line:#3b3218;--green:#a8d5a2}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(ellipse at 50% -15%,#29200b 0%,#0a0907 40%,#050505 78%);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,textarea{font:inherit}button{cursor:pointer}a{color:var(--gold)}
+.shell{max-width:1440px;margin:auto;min-height:100dvh;display:grid;grid-template-columns:250px minmax(0,1fr)}
+.sidebar{padding:24px 16px;border-right:1px solid var(--line);background:#080808eF;display:flex;flex-direction:column;gap:20px}
+.brand{display:flex;align-items:center;gap:12px;padding:4px 8px}.seal{width:42px;height:42px;border:1px solid var(--gold);border-radius:50%;display:grid;place-items:center;color:var(--gold);font-size:22px;box-shadow:0 0 22px #ffd70022}
+.brand strong{display:block;letter-spacing:.08em;font-size:12px;color:var(--gold)}.brand small{color:var(--muted);font-size:10px;letter-spacing:.16em}
+.kicker{font-size:10px;color:var(--gold2);letter-spacing:.2em;text-transform:uppercase;padding:0 9px}
+.nav{display:grid;gap:6px}.nav button,.domain{width:100%;border:1px solid transparent;background:transparent;color:#c9c1a8;text-align:left;padding:11px 12px;border-radius:10px;font-size:13px}
+.nav button.active,.nav button:hover,.domain.active,.domain:hover{background:#1c180c;border-color:#5c4b17;color:var(--gold)}
+.nav button span{display:inline-block;width:25px;color:var(--gold)}.domain-list{display:grid;gap:3px}
+.sidebar-foot{margin-top:auto;border-top:1px solid var(--line);padding:14px 8px;color:var(--muted);font-size:11px;line-height:1.6}
+main{min-width:0;padding:26px clamp(16px,4vw,48px) 36px}.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.eyebrow{font-size:10px;letter-spacing:.22em;color:var(--gold);text-transform:uppercase}.topbar h1{font-size:clamp(24px,4vw,38px);margin:7px 0 5px;letter-spacing:-.04em}.sub{color:var(--muted);font-size:13px;margin:0}
+.status{border:1px solid var(--line);border-radius:999px;padding:8px 12px;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:8px}.dot{width:7px;height:7px;border-radius:50%;background:#9b873f;box-shadow:0 0 9px currentColor}
+.hero{margin:24px 0 20px;border:1px solid #5b4916;border-radius:18px;padding:clamp(20px,4vw,34px);background:radial-gradient(ellipse at 78% 40%,#4a390f66,transparent 40%),linear-gradient(120deg,#17140c,#090909 70%);position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;width:220px;height:220px;border:1px solid #ffd7002b;border-radius:50%;right:7%;top:-70px;box-shadow:0 0 0 22px #ffd70009,0 0 0 48px #ffd70007}
+.hero h2{font-size:clamp(22px,4vw,36px);max-width:680px;margin:10px 0}.hero p{color:#c9c0a6;line-height:1.7;max-width:650px;font-size:13px}.hero .gold{color:var(--gold)}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.tile{border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,#15130d,#0c0c0c);padding:16px;min-height:122px;text-align:left;color:var(--ink);transition:.18s}.tile:hover{border-color:var(--gold);transform:translateY(-2px)}.tile .ico{font-size:21px}.tile strong{display:block;color:var(--gold);font-size:12px;letter-spacing:.08em;margin:10px 0 5px}.tile small{color:var(--muted);font-size:11px;line-height:1.5}
+.section-head{display:flex;justify-content:space-between;gap:12px;align-items:end;margin:28px 0 12px}.section-head h3{font-size:15px;margin:0}.section-head p{font-size:11px;color:var(--muted);margin:5px 0 0}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:14px;margin-top:22px}.chat{border:1px solid var(--line);border-radius:16px;background:#0b0b0b;overflow:hidden;min-width:0}.chat-head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px}.chat-head strong{font-size:12px;color:var(--gold)}.chat-head small{font-size:10px;color:var(--muted)}
+.messages{padding:16px;min-height:250px;max-height:430px;overflow:auto;display:flex;flex-direction:column;gap:12px}.msg{max-width:88%;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6;font-size:13px;padding:12px 14px;border-radius:13px}.msg.bot{align-self:flex-start;background:#17140c;border:1px solid #3b3218}.msg.user{align-self:flex-end;background:#d5b52d;color:#171307}
+.composer{padding:12px;border-top:1px solid var(--line);display:flex;gap:8px}.composer textarea{resize:vertical;min-height:48px;max-height:130px;flex:1;min-width:0;border:1px solid #4a3c16;background:#080808;color:var(--ink);border-radius:12px;padding:12px;outline:none}.composer textarea:focus{border-color:var(--gold)}.send,.primary{border:1px solid var(--gold);background:var(--gold);color:#171307;border-radius:11px;padding:0 17px;font-weight:800;font-size:12px}.send:disabled{opacity:.5}
+.sidecard{border:1px solid var(--line);border-radius:16px;padding:16px;background:#0d0c09}.sidecard h4{margin:0 0 10px;color:var(--gold);font-size:12px}.sidecard p,.sidecard li{color:var(--muted);font-size:11px;line-height:1.6}.sidecard ul{padding-left:17px;margin:8px 0}
+.pills{display:flex;gap:6px;flex-wrap:wrap}.pill{border:1px solid var(--line);border-radius:999px;padding:7px 9px;color:#d5c99e;background:#0b0b0b;font-size:10px}
+.view{display:none}.view.active{display:block}
+.orbit{height:235px;border:1px solid var(--line);border-radius:16px;background:radial-gradient(circle at center,#d5a51d22 0 5%,transparent 6%),radial-gradient(ellipse at center,#17130b,#060606 70%);display:grid;place-items:center;overflow:hidden;position:relative}
+.sun{width:38px;height:38px;border-radius:50%;background:radial-gradient(circle,#fff4ae,#dca91d 55%,#7a4a06);box-shadow:0 0 35px #ffd700aa;z-index:2}
+.orbit-ring{position:absolute;width:140px;height:140px;border:1px solid #b9952666;border-radius:50%;animation:spin 12s linear infinite}.orbit-ring.two{width:205px;height:205px;animation-duration:20s}.planet{position:absolute;width:10px;height:10px;border-radius:50%;background:#a9c9d8;top:8px;left:50%;box-shadow:0 0 10px #a9c9d8}
+@keyframes spin{to{transform:rotate(360deg)}}
+.callout{border:1px solid var(--line);border-radius:12px;padding:13px;background:#0d0c09;color:var(--muted);font-size:11px;line-height:1.6;margin-top:12px}
+.mode{width:100%;background:#0a0a0a;color:var(--gold);border:1px solid var(--line);padding:9px;border-radius:9px;margin:8px 0 12px}
+footer{border-top:1px solid var(--line);margin-top:28px;padding-top:16px;color:#80785f;font-size:10px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+@media(max-width:950px){.shell{grid-template-columns:210px minmax(0,1fr)}.workspace{grid-template-columns:1fr}.sidecard{display:grid;grid-template-columns:1fr 1fr;gap:12px}.sidecard h4{grid-column:1/-1}}
+@media(max-width:680px){.shell{display:block}.sidebar{position:sticky;top:0;z-index:10;padding:10px 12px;border-right:0;border-bottom:1px solid var(--line);flex-direction:row;align-items:center;justify-content:space-between}.brand{padding:0}.seal{width:34px;height:34px}.brand small{display:none}.sidebar .kicker,.domain-list,.sidebar-foot{display:none}.nav{display:flex;gap:4px}.nav button{padding:8px;font-size:11px}.nav button span{display:none}main{padding:20px 14px 28px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.tile{min-height:112px;padding:12px}.hero:after{right:-100px}.sidecard{display:block}.messages{min-height:210px;max-height:390px}.msg{max-width:95%}}
+@media(max-width:380px){.brand strong{font-size:10px}.nav button{padding:7px 6px}.grid{grid-template-columns:1fr 1fr}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+  <div class="brand"><div class="seal">☥</div><div><strong>MERCYSOUL</strong><small>VISION BRAIN · ORIGIN 44</small></div></div>
+  <div class="kicker">Workspace</div>
+  <nav class="nav">
+    <button class="active" data-view="home"><span>⌂</span>Home</button>
+    <button data-view="research"><span>⌕</span>Research</button>
+    <button data-view="universe"><span>◎</span>Universe</button>
+  </nav>
+  <div class="kicker">Seven intelligence domains</div>
+  <div class="domain-list" id="domains"></div>
+  <div class="sidebar-foot">MERCYSOUL DOMINION<br>Build from phone. Dominate from Oyan.<br><b style="color:var(--gold)">Aṣẹ · LEGACY-44</b></div>
+</aside>
+<main>
+<header class="topbar"><div><div class="eyebrow">44MS16 · Intelligence workspace</div><h1>MercySoul Vision Brain</h1><p class="sub">Where imagination becomes sacred strategy.</p></div><div class="status"><i class="dot"></i><span id="serviceStatus">Checking AI connection…</span></div></header>
+<section class="view active" id="view-home">
+  <div class="hero"><div class="eyebrow">MERCYSOUL INTELLIGENCE · MSi</div><h2>Your vision, made <span class="gold">sacred</span> — and strategic.</h2><p>One governed workspace for research, creative thinking, practical problem-solving and universe exploration. <b class="gold">Brain reasons. Vision plans. Mercy keeps it honest.</b></p><div class="pills"><span class="pill">Human-guided</span><span class="pill">Evidence-aware</span><span class="pill">Approval-gated actions</span></div></div>
+  <div class="section-head"><div><h3>Seven intelligence domains</h3><p>Choose a domain to focus the Brain.</p></div></div>
+  <div class="grid" id="domainTiles"></div>
+  <div class="section-head"><div><h3>Talk to Vision Brain</h3><p>Ask a question, explore an idea or plan a project.</p></div></div>
+  <div class="workspace"><section class="chat"><div class="chat-head"><div><strong>VISION BRAIN CONVERSATION</strong><br><small id="chatModeLabel">General intelligence · Human in control</small></div><button id="clearChat" class="pill" type="button">Clear chat</button></div><div class="messages" id="messages" aria-live="polite"><div class="msg bot">Welcome to MercySoul Vision Brain. What would you like to understand, create or build today? I will distinguish verified information from uncertainty and will not claim an action has happened unless it has been verified.</div></div><form class="composer" id="chatForm"><textarea id="prompt" rows="2" placeholder="Ask MercySoul Vision Brain…" aria-label="Message to Vision Brain"></textarea><button class="send" id="send" type="submit">Send ↗</button></form></section>
+  <aside class="sidecard"><h4>Guardian protocol</h4><p>Research and planning can happen in chat. External actions, publishing, spending, production changes and database mutations remain approval-gated.</p><ul><li>Receive → Route → Think</li><li>Plan → Guardian → Approve</li><li>Execute → Verify → Record</li></ul><h4>Quick prompts</h4><div class="pills"><button class="pill quick" type="button" data-prompt="Explain the origin and evolution of the observable universe. Separate established science from open questions.">Universe origin</button><button class="pill quick" type="button" data-prompt="Help me design a practical AI product for MercySoul Dominion that can earn revenue. Start with the smallest useful version.">Build a product</button><button class="pill quick" type="button" data-prompt="Research this idea carefully. State what is known, what is uncertain, and what sources would verify it.">Research an idea</button></div></aside></div>
+</section>
+<section class="view" id="view-research"><div class="hero"><div class="eyebrow">Knowledge discipline</div><h2>Research with clarity. <span class="gold">Reason with evidence.</span></h2><p>Use Vision Brain to structure questions, compare explanations, identify assumptions and separate established knowledge from open questions and speculation.</p></div><div class="grid"><button class="tile quick" data-prompt="Create a research brief on the current scientific understanding of dark matter. Include established evidence, competing hypotheses and uncertainties."><span class="ico">✦</span><strong>Scientific brief</strong><small>Evidence, models and uncertainty.</small></button><button class="tile quick" data-prompt="Build a structured research plan for a new technology idea, including questions, sources, experiments and risks."><span class="ico">⌘</span><strong>Research plan</strong><small>Questions, sources and validation.</small></button><button class="tile quick" data-prompt="Compare two competing explanations of a topic. Identify evidence, limitations and what would change the conclusion."><span class="ico">⇄</span><strong>Compare theories</strong><small>Reasoned comparison without false certainty.</small></button></div><div class="callout">Research note: the AI model can make mistakes. Verify important claims against primary sources before relying on them.</div><button class="primary" style="padding:12px 16px;margin-top:16px" data-jump-chat>Open research conversation</button></section>
+<section class="view" id="view-universe"><div class="hero"><div class="eyebrow">ORIGIN 44 · Cosmic explorer</div><h2>Explore the <span class="gold">architecture</span> of the universe.</h2><p>A conceptual entry point into cosmic systems. This first release includes a simple illustrative orbital model, not an astronomical ephemeris or physically complete simulation.</p></div><div class="orbit" aria-label="Illustrative orbital animation"><div class="sun"></div><div class="orbit-ring"><div class="planet"></div></div><div class="orbit-ring two"><div class="planet"></div></div></div><div class="grid" style="margin-top:14px"><button class="tile quick" data-prompt="Explain how gravity shapes planetary orbits. Include a simple conceptual example and clearly state the assumptions."><span class="ico">◉</span><strong>Gravity & orbits</strong><small>Explore orbital mechanics.</small></button><button class="tile quick" data-prompt="Explain the cosmic web: how galaxies form filaments and clusters across large scales."><span class="ico">✧</span><strong>Cosmic web</strong><small>Explore large-scale structure.</small></button><button class="tile quick" data-prompt="Explain the life cycle of a star from nebula to its possible final states."><span class="ico">☼</span><strong>Stellar life cycle</strong><small>From star formation to remnants.</small></button></div></section>
+<div class="section-head"><div><h3>System boundaries</h3><p>What this application does — and does not — claim.</p></div></div><div class="callout"><b style="color:var(--gold)">AI service:</b> conversation uses the configured MercySoul Vision Brain API when available. <b style="color:var(--gold)">No configured model:</b> the interface remains available but cannot generate AI answers. <b style="color:var(--gold)">No autonomous authority:</b> this app does not publish, spend, deploy or modify production systems.</div>
+<footer><span>© MercySoul Dominion · LEGACY-44 · Oyan, Nigeria</span><span>MercySoul Vision Brain · Origin 44</span></footer>
+</main></div>
+<script>
+const domains=[
+ {id:"origin",name:"ORIGIN",icon:"✧",desc:"Cosmology, space-time, matter and the early universe.",prompt:"Explain the scientific account of the early universe. Separate established evidence from open questions."},
+ {id:"cosmos",name:"COSMOS",icon:"☼",desc:"Galaxies, stars, planets and cosmic structures.",prompt:"Explore the structure of the cosmos, from stars and galaxies to the cosmic web."},
+ {id:"life",name:"LIFE",icon:"❋",desc:"Biology, evolution, ecosystems and living systems.",prompt:"Explain how life evolves and how ecosystems maintain interconnected systems."},
+ {id:"mind",name:"CONSCIOUSNESS",icon:"◉",desc:"Cognition, memory, perception and intelligence.",prompt:"What does neuroscience currently tell us about consciousness? Identify unresolved questions."},
+ {id:"civilization",name:"CIVILIZATION",icon:"⌂",desc:"History, culture, engineering and human cooperation.",prompt:"Explore how knowledge, culture and technology shape human civilization."},
+ {id:"intelligence",name:"INTELLIGENCE",icon:"⌘",desc:"AI, computation, mathematics and future technologies.",prompt:"Explain how modern AI systems work, including capabilities, limitations and safety."},
+ {id:"legacy",name:"LEGACY",icon:"∞",desc:"Ethics, wisdom, preservation and future generations.",prompt:"Help formulate an ethical framework for building technology that benefits future generations."}
+];
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+let selectedDomain="general",busy=false;
+function setDomain(id){const d=domains.find(x=>x.id===id);if(!d)return;selectedDomain=id;$("#chatModeLabel").textContent=d.name+" domain · Human in control";$("#prompt").value=d.prompt;$("#prompt").focus();$$(".domain").forEach(b=>b.classList.toggle("active",b.dataset.domain===id));}
+$("#domains").innerHTML=domains.map(d=>'<button class="domain" type="button" data-domain="'+d.id+'">'+d.icon+' &nbsp; '+d.name+'</button>').join("");
+$("#domainTiles").innerHTML=domains.map(d=>'<button class="tile" type="button" data-domain="'+d.id+'"><span class="ico">'+d.icon+'</span><strong>'+d.name+'</strong><small>'+d.desc+'</small></button>').join("");
+document.addEventListener("click",e=>{const d=e.target.closest("[data-domain]");if(d){setDomain(d.dataset.domain);showView("home");}const q=e.target.closest(".quick");if(q){showView("home");$("#prompt").value=q.dataset.prompt;$("#prompt").focus();}if(e.target.closest("[data-jump-chat]"))showView("home");});
+function showView(id){$$(".view").forEach(v=>v.classList.toggle("active",v.id==="view-"+id));$$(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===id));}
+$$(".nav button").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.view)));
+function addMessage(role,text){const el=document.createElement("div");el.className="msg "+role;el.textContent=text;$("#messages").appendChild(el);$("#messages").scrollTop=$("#messages").scrollHeight;return el;}
+async function checkStatus(){try{const r=await fetch("/api/vision/async/status",{headers:{accept:"application/json"}});const j=await r.json();const ok=r.ok&&(j.configured===true||j.visionBrain?.configured===true||j.data?.visionBrain?.configured===true);$("#serviceStatus").textContent=ok?"AI service configured":"AI setup required";}catch{ $("#serviceStatus").textContent="Service status unavailable";}}
+async function sendMessage(text){const value=(text??$("#prompt").value).trim();if(!value||busy)return;busy=true;$("#send").disabled=true;addMessage("user",value);$("#prompt").value="";const loading=addMessage("bot","Vision Brain is considering your request…");try{const response=await fetch("/api/vision/async",{method:"POST",headers:{"content-type":"application/json","accept":"application/json"},body:JSON.stringify({input:[{role:"user",content:"Active domain: "+selectedDomain+". "+value}]})});const data=await response.json().catch(()=>({}));if(!response.ok||data.ok===false||data.success===false){loading.textContent=data.error||data.message||data.data?.error||"The AI service is not ready. Check model configuration on the server. No action was executed.";return;}const answer=data.outputText||data.data?.outputText||data.output?.map(x=>x.content?.map(c=>c.text||"").join("")).join("\n")||data.data?.reply||"The model returned no readable text. Please try again.";loading.textContent=answer;}catch(err){loading.textContent="Unable to reach the Vision Brain service. Please try again when the server is available.";}finally{busy=false;$("#send").disabled=false;$("#prompt").focus();}}
+$("#chatForm").addEventListener("submit",e=>{e.preventDefault();sendMessage();});
+$("#prompt").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();}});
+$("#clearChat").addEventListener("click",()=>{$("#messages").replaceChildren();addMessage("bot","Conversation cleared on this device. Start a new question whenever you are ready.");});
+checkStatus();
+</script>
+</body></html>
