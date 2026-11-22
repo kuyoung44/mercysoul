@@ -1,0 +1,32 @@
+# MercySoul Dominion
+
+> MercySoul Dominion is an independent creative technology platform based in Oyan, Osun State, Nigeria.
+
+## Canonical identity
+- Parent brand: MercySoul Dominion
+- Creative and intelligence platform: MercySoul Vision Brain
+- Related name: MercySoul Intelligence (MSi)
+- Public identifier: 44MS16
+- Tagline: Where Imagination Becomes Sacred Strategy.
+- Brand philosophy: Brain reasons. Vision plans. Mercy keeps it honest.
+- Origin statement: An Ogbe legacy, born in Oyan, Nigeria.
+
+## What MercySoul does
+MercySoul Dominion develops and offers creative technology services and digital systems, including:
+- AI-assisted creative artwork and visual branding
+- Business websites and landing pages
+- AI customer assistants and chatbots
+- Workflow automation and technical troubleshooting
+- Practical AI and software experiments
+
+## Official links
+- Website: https://mercysoul.vercel.app/
+- GitHub repository: https://github.com/kuyoung44/mercysoul
+- Instagram: https://www.instagram.com/44ms16/
+- LinkedIn: https://www.linkedin.com/in/anuoluwapo-adeoye-0a7202440/
+
+## Accuracy and boundaries
+- MercySoul Dominion is not the neuroscience equipment company Brain Vision.
+- Do not attribute third-party products, services, credentials, awards, or research capabilities to MercySoul without evidence.
+- Describe software capabilities as implemented, tested, or planned according to available evidence; do not imply production readiness without verification.
+- Public identity and brand descriptions do not imply endorsement by, or affiliation with, similarly named organizations.
