@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Interactive portfolio dashboard exploring Nigeria's internet-use indicator from 2000 to 2024 using World Bank WDI data sourced from ITU.">
+<title>Nigeria Internet Adoption | Data Analytics Portfolio</title>
+<style>
+:root{color-scheme:light;--ink:#172033;--muted:#657187;--line:#e3e8ef;--gold:#b78622;--blue:#315d9b;--bg:#f5f7fa;--card:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:1100px;margin:auto;padding:28px 20px 44px}.top{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;flex-wrap:wrap}
+h1{font-size:clamp(25px,4vw,36px);line-height:1.15;margin:0 0 8px}.sub{color:var(--muted);max-width:680px;margin:0}
+.tag{font-size:12px;border:1px solid #d9dee7;border-radius:999px;padding:6px 10px;background:#fff;color:#4b5567}
+.controls{display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin:24px 0 16px;padding:14px 16px;background:#fff;border:1px solid var(--line);border-radius:14px}
+label{display:grid;gap:5px;color:var(--muted);font-size:12px;font-weight:650}select{min-width:112px;border:1px solid #cbd3df;border-radius:8px;padding:9px 10px;background:#fff;color:var(--ink);font:inherit}
+button{border:1px solid #cbd3df;background:#fff;color:var(--ink);border-radius:8px;padding:9px 12px;font:inherit;cursor:pointer}button:focus-visible,select:focus-visible{outline:3px solid #d5b66e;outline-offset:2px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:14px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
+.kpi-label{color:var(--muted);font-size:12px;font-weight:650}.kpi-value{font-size:clamp(22px,3vw,30px);font-weight:750;letter-spacing:-.04em;margin-top:7px}.kpi-note{font-size:12px;color:var(--muted);margin-top:3px}
+.grid{display:grid;grid-template-columns:1.6fr 1fr;gap:12px;margin-top:12px}.card h2{font-size:16px;margin:0 0 4px}.hint{font-size:12px;color:var(--muted);margin:0 0 10px}
+svg{width:100%;height:auto;display:block;overflow:visible}.axis{stroke:#dce2ea;stroke-width:1}.axis-text{fill:#68758a;font-size:11px}.line{fill:none;stroke:var(--blue);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.dot{fill:var(--gold);stroke:#fff;stroke-width:2}.bar{fill:#c69b46}.zero{stroke:#9aa5b5;stroke-dasharray:4 4}
+.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}th,td{text-align:right;padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap}th:first-child,td:first-child{text-align:left}th{color:var(--muted);font-weight:650}
+.note{margin-top:14px;padding:14px 16px;border-left:3px solid var(--gold);background:#fff;border-radius:0 10px 10px 0;color:#465166;font-size:13px}
+footer{color:var(--muted);font-size:12px;margin-top:18px}a{color:#244f8e} .empty{color:var(--muted);padding:20px;text-align:center}
+@media(max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr}main{padding:22px 14px 34px}}
+@media(max-width:380px){.kpis{grid-template-columns:1fr 1fr}.kpi-value{font-size:22px}}
+</style>
+</head>
+<body>
+<main>
+<header class="top">
+ <div><h1>Nigeria Internet Adoption</h1><p class="sub">Individuals using the internet (% of population) · Annual series, 2000–2024 · Interactive portfolio dashboard</p></div>
+ <span class="tag">World Bank WDI · ITU source</span>
+</header>
+<section class="controls" aria-label="Dashboard filters">
+ <label>Start year<select id="start"></select></label>
+ <label>End year<select id="end"></select></label>
+ <button id="reset" type="button">Reset range</button>
+ <span id="range" class="hint" aria-live="polite"></span>
+</section>
+<section class="kpis" aria-label="Summary indicators">
+ <article class="card"><div class="kpi-label">Latest selected value</div><div class="kpi-value" id="latest">—</div><div class="kpi-note" id="latestNote">—</div></article>
+ <article class="card"><div class="kpi-label">Change over selected period</div><div class="kpi-value" id="change">—</div><div class="kpi-note">Percentage points</div></article>
+ <article class="card"><div class="kpi-label">Average across selected years</div><div class="kpi-value" id="average">—</div><div class="kpi-note">Unweighted annual mean</div></article>
+ <article class="card"><div class="kpi-label">Largest annual increase</div><div class="kpi-value" id="largest">—</div><div class="kpi-note" id="largestNote">—</div></article>
+</section>
+<section class="grid">
+ <article class="card"><h2>Internet use over time</h2><p class="hint">Share of Nigeria's population · percent</p><div id="trend"></div></article>
+ <article class="card"><h2>Annual change</h2><p class="hint">Year-on-year difference · percentage points</p><div id="growth"></div></article>
+</section>
+<section class="card" style="margin-top:12px"><h2>Annual observations</h2><p class="hint">Values are rounded to two decimal places in the source extract.</p><div class="table-wrap"><table><thead><tr><th>Year</th><th>Internet users (%)</th><th>Annual change (pp)</th></tr></thead><tbody id="rows"></tbody></table></div></section>
+<aside class="note"><strong>Interpretation:</strong> This indicator describes internet use, not broadband subscriptions, affordability, connection quality, or equal access. A rising national share does not establish the cause of the change or show how access is distributed across regions or population groups.</aside>
+<footer>Source: World Bank, World Development Indicators, <a href="https://data.worldbank.org/indicator/IT.NET.USER.ZS?locations=NG" target="_blank" rel="noopener">IT.NET.USER.ZS — Nigeria</a>; underlying source: International Telecommunication Union (ITU). Indicator definition: individuals who used the internet from any location during the previous three months. <a href="https://databank.worldbank.org/metadataglossary/world-development-indicators/series/IT.NET.USER.ZS" target="_blank" rel="noopener">Metadata</a>. Portfolio extract: 2000–2024; values rounded to two decimals. Recheck the source for revisions before external policy use.</footer>
+</main>
+<script>
+"use strict";
+const DATA=[
+[2000,.06],[2001,.09],[2002,.32],[2003,.56],[2004,1.29],[2005,3.55],[2006,5.55],[2007,6.77],[2008,8],[2009,9.3],[2010,11.5],[2011,13.8],[2012,16.1],[2013,19.1],[2014,21],[2015,22.51],[2016,24.14],[2017,25.88],[2018,27.74],[2019,29.74],[2020,31.89],[2021,35.51],[2022,39.15],[2023,40.06],[2024,41.21]
+].map(([year,value],i)=>({year,value,change:i?+(value-DATA_RAW[i-1][1]).toFixed(2):null}));
+const DATA_RAW=[[2000,.06],[2001,.09],[2002,.32],[2003,.56],[2004,1.29],[2005,3.55],[2006,5.55],[2007,6.77],[2008,8],[2009,9.3],[2010,11.5],[2011,13.8],[2012,16.1],[2013,19.1],[2014,21],[2015,22.51],[2016,24.14],[2017,25.88],[2018,27.74],[2019,29.74],[2020,31.89],[2021,35.51],[2022,39.15],[2023,40.06],[2024,41.21]];
+const $=id=>document.getElementById(id), fmt=n=>Number(n).toFixed(2);
+const start=$("start"),end=$("end");
+DATA.forEach(d=>{start.add(new Option(d.year,d.year));end.add(new Option(d.year,d.year));});
+start.value="2000";end.value="2024";
+function svgLine(data){
+ const W=680,H=300,L=54,R=18,T=18,B=38,vals=data.map(d=>d.value),min=0,max=Math.max(10,Math.ceil(Math.max(...vals)/10)*10);
+ const x=i=>L+i*(W-L-R)/Math.max(1,data.length-1),y=v=>H-B-(v-min)*(H-T-B)/(max-min);
+ let s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Line chart of internet use percentage by year">';
+ for(let v=0;v<=max;v+=10){s+='<line class="axis" x1="'+L+'" y1="'+y(v)+'" x2="'+(W-R)+'" y2="'+y(v)+'"/><text class="axis-text" x="'+(L-9)+'" y="'+(y(v)+4)+'" text-anchor="end">'+v+'%</text>';}
+ const points=data.map((d,i)=>x(i)+','+y(d.value)).join(' ');
+ s+='<polyline class="line" points="'+points+'"/>';
+ data.forEach((d,i)=>{s+='<circle class="dot" cx="'+x(i)+'" cy="'+y(d.value)+'" r="4"><title>'+d.year+': '+fmt(d.value)+'%</title></circle>';});
+ s+='<text class="axis-text" x="'+L+'" y="'+(H-10)+'">'+data[0].year+'</text><text class="axis-text" x="'+(W-R)+'" y="'+(H-10)+'" text-anchor="end">'+data[data.length-1].year+'</text></svg>';
+ return s;
+}
+function svgBars(data){
+ const vals=data.slice(1).map(d=>d.change),W=420,H=300,L=44,R=12,T=18,B=40,abs=Math.max(1,Math.ceil(Math.max(...vals)/2)*2),y=v=>H-B-v/abs*(H-T-B);
+ let s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Bar chart of annual percentage point changes">';
+ [0,abs/2,abs].forEach(v=>{s+='<line class="axis" x1="'+L+'" y1="'+y(v)+'" x2="'+(W-R)+'" y2="'+y(v)+'"/><text class="axis-text" x="'+(L-8)+'" y="'+(y(v)+4)+'" text-anchor="end">'+fmt(v)+'</text>';});
+ const slot=(W-L-R)/Math.max(1,vals.length),bw=Math.max(3,slot*.66);
+ vals.forEach((v,i)=>{const xx=L+i*slot+(slot-bw)/2, yy=y(v);s+='<rect class="bar" x="'+xx+'" y="'+yy+'" width="'+bw+'" height="'+Math.max(0,H-B-yy)+'"><title>'+(data[i+1].year)+': +'+fmt(v)+' percentage points</title></rect>';});
+ s+='<text class="axis-text" x="'+L+'" y="'+(H-10)+'">'+data[1].year+'</text><text class="axis-text" x="'+(W-R)+'" y="'+(H-10)+'" text-anchor="end">'+data[data.length-1].year+'</text></svg>';
+ return s;
+}
+function render(){
+ let a=Number(start.value),b=Number(end.value);
+ if(a>b){const t=a;a=b;b=t;start.value=String(a);end.value=String(b);}
+ const d=DATA.filter(x=>x.year>=a&&x.year<=b),first=d[0],last=d[d.length-1];
+ const diffs=d.slice(1).filter(x=>x.change!==null),largest=diffs.length?diffs.reduce((p,c)=>c.change>p.change?c:p):null;
+ $("range").textContent=a+"–"+b+" · "+d.length+" annual observations";
+ $("latest").textContent=fmt(last.value)+"%";$("latestNote").textContent="Selected end year: "+last.year;
+ $("change").textContent=(last.value-first.value>=0?"+":"")+fmt(last.value-first.value)+" pp";
+ $("average").textContent=fmt(d.reduce((s,x)=>s+x.value,0)/d.length)+"%";
+ $("largest").textContent=largest?"+"+fmt(largest.change)+" pp":"—";
+ $("largestNote").textContent=largest?"During "+(largest.year-1)+"–"+largest.year:"Select at least two years";
+ $("trend").innerHTML=svgLine(d);
+ $("growth").innerHTML=d.length>1?svgBars(d):'<p class="empty">Select at least two years to compare annual changes.</p>';
+ $("rows").innerHTML=d.map(x=>'<tr><td>'+x.year+'</td><td>'+fmt(x.value)+'%</td><td>'+(x.change===null?'—':(x.change>0?'+':'')+fmt(x.change))+'</td></tr>').join("");
+}
+start.addEventListener("change",render);end.addEventListener("change",render);
+$("reset").addEventListener("click",()=>{start.value="2000";end.value="2024";render();});
+render();
+</script>
+</body>
+</html>
