@@ -1,0 +1,11 @@
+order_id,order_date,service,customer_segment,order_value_ngn,status
+MS001,2026-10-01,AI Artwork,Individual,5000,Completed
+MS002,2026-10-02,Website Design,Small Business,50000,Completed
+MS003,2026-10-04,AI Artwork,Individual,5000,Completed
+MS004,2026-10-06,Chatbot,Small Business,50000,Completed
+MS005,2026-10-08,Automation,Small Business,20000,Completed
+MS006,2026-10-09,AI Artwork,Individual,5000,Completed
+MS007,2026-10-12,Website Design,Small Business,50000,Completed
+MS008,2026-10-15,Automation,Small Business,20000,Completed
+MS009,2026-10-19,AI Artwork,Individual,5000,Completed
+MS010,2026-10-23,AI Artwork,Individual,5000,Completed
