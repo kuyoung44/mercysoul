@@ -31,3 +31,5 @@ jobs:
         run: python analysis.py
       - name: Run automated tests
         run: python -m unittest discover -s tests -v
+      - name: Verify SQL portfolio project
+        run: python projects/nigeria-internet-adoption/verify_sql.py
