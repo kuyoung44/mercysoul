@@ -22,4 +22,4 @@ The dashboard uses the same rounded values as the CSV. It is descriptive and doe
 
 ## Verification
 
-The dashboard logic is plain JavaScript and the data are embedded in the HTML so it can be opened offline. The repository's analytics CI also validates the underlying SQL project and dataset. Check the displayed values against the CSV when making changes.
+The dashboard logic is plain JavaScript and the data are embedded in the HTML so it can be opened offline. Run `python verify_dashboard.py` with Python 3 and Node.js installed to check the embedded JavaScript syntax and required dashboard elements. The repository's analytics CI runs this check alongside the SQL verification, Python analysis and unit tests. Check the displayed values against the CSV when making changes.
