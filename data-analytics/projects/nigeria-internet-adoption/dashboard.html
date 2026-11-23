@@ -54,10 +54,8 @@ footer{color:var(--muted);font-size:12px;margin-top:18px}a{color:#244f8e} .empty
 </main>
 <script>
 "use strict";
-const DATA=[
-[2000,.06],[2001,.09],[2002,.32],[2003,.56],[2004,1.29],[2005,3.55],[2006,5.55],[2007,6.77],[2008,8],[2009,9.3],[2010,11.5],[2011,13.8],[2012,16.1],[2013,19.1],[2014,21],[2015,22.51],[2016,24.14],[2017,25.88],[2018,27.74],[2019,29.74],[2020,31.89],[2021,35.51],[2022,39.15],[2023,40.06],[2024,41.21]
-].map(([year,value],i)=>({year,value,change:i?+(value-DATA_RAW[i-1][1]).toFixed(2):null}));
 const DATA_RAW=[[2000,.06],[2001,.09],[2002,.32],[2003,.56],[2004,1.29],[2005,3.55],[2006,5.55],[2007,6.77],[2008,8],[2009,9.3],[2010,11.5],[2011,13.8],[2012,16.1],[2013,19.1],[2014,21],[2015,22.51],[2016,24.14],[2017,25.88],[2018,27.74],[2019,29.74],[2020,31.89],[2021,35.51],[2022,39.15],[2023,40.06],[2024,41.21]];
+const DATA=DATA_RAW.map(([year,value],i)=>({year,value,change:i?+(value-DATA_RAW[i-1][1]).toFixed(2):null}));
 const $=id=>document.getElementById(id), fmt=n=>Number(n).toFixed(2);
 const start=$("start"),end=$("end");
 DATA.forEach(d=>{start.add(new Option(d.year,d.year));end.add(new Option(d.year,d.year));});
