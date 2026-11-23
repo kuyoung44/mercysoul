@@ -33,3 +33,5 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Verify SQL portfolio project
         run: python projects/nigeria-internet-adoption/verify_sql.py
+      - name: Verify interactive dashboard
+        run: python projects/nigeria-internet-adoption/verify_dashboard.py
