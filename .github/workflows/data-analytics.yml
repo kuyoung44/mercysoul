@@ -1,0 +1,33 @@
+name: Data analytics checks
+
+on:
+  push:
+    paths:
+      - "data-analytics/**"
+      - ".github/workflows/data-analytics.yml"
+  pull_request:
+    paths:
+      - "data-analytics/**"
+      - ".github/workflows/data-analytics.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: data-analytics
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: data-analytics/requirements.txt
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Run analysis
+        run: python analysis.py
+      - name: Run automated tests
+        run: python -m unittest discover -s tests -v
