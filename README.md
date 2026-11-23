@@ -8,6 +8,7 @@ MercySoul OS is the JavaScript orchestration and governance codebase within the 
 - **Repository:** https://github.com/kuyoung44/mercysoul
 - **Project website:** https://mercysoul.vercel.app
 - **[AI Engineering Portfolio](docs/AI_ENGINEERING_PORTFOLIO.md)** — selected source files, tests, development instructions, and evidence boundaries.
+- **[Data Analytics Portfolio](data-analytics/PORTFOLIO.md)** — SQL and Python case studies, source notes, reproducible analysis, and verification.
 
 > Portfolio accuracy: repository source and test cases are documented separately from live deployment, configured model integrations, and test runs. A capability is not described as production-verified without corresponding evidence.
 
