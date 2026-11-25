@@ -218,6 +218,7 @@ export async function runVisionBrain(input = {}, integrations = {}, options = {}
   // v0.1 deliberately has no executor. Even an approval signal cannot turn
   // this planning core into an external-action engine.
   stages.push(stage('EXECUTE', 'not_enabled'));
+  stages.push(stage('RECOVER', 'not_needed'));
   stages.push(stage('VERIFY', 'ok', { verified: 'response-structure-only' }));
 
   const result = {
@@ -250,6 +251,7 @@ export async function runVisionBrain(input = {}, integrations = {}, options = {}
     intent: result.intent,
     executionOccurred: false,
   });
+  stages.push(stage('RECORD', typeof integrations.audit?.record === 'function' ? 'attempted' : 'not_configured'));
   return result;
 }
 
