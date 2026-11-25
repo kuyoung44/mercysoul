@@ -7,6 +7,7 @@ MercySoul OS is the JavaScript orchestration and governance codebase within the 
 - **Founder & Builder:** Anuoluwapo Adeoye
 - **Repository:** https://github.com/kuyoung44/mercysoul
 - **Project website:** https://mercysoul.vercel.app
+- **[MercySoul Vision Brain Architecture](docs/VISION_BRAIN_ARCHITECTURE.md)** — independent, provider-agnostic intelligence architecture and implementation boundaries.
 - **[AI Engineering Portfolio](docs/AI_ENGINEERING_PORTFOLIO.md)** — selected source files, tests, development instructions, and evidence boundaries.
 - **[Data Analytics Portfolio](data-analytics/PORTFOLIO.md)** — SQL and Python case studies, source notes, reproducible analysis, and verification.
 
