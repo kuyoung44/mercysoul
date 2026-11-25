@@ -52,7 +52,7 @@ test('retrieves optional context and produces a bounded answer without execution
   assert.equal(providerInput.constraints.noExternalExecution, true);
   assert.equal(result.governance.executionEnabled, false);
   assert.equal(result.governance.executionOccurred, false);
-  assert.equal(result.stages.at(-1).stage, 'VERIFY');
+  assert.equal(result.stages.at(-1).stage, 'RECORD');
 });
 
 test('consequential requests require human approval and never execute', async () => {
