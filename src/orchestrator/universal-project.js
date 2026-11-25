@@ -100,13 +100,13 @@ export function orderProjectTasks(tasks = []) {
 
   const incoming = new Map();
   const outgoing = new Map();
+  for (const id of byId.keys()) outgoing.set(id, new Set());
   for (const [id, task] of byId) {
     const dependencies = uniqueStrings(task.dependsOn);
     for (const dependency of dependencies) {
       if (!byId.has(dependency)) throw new TypeError(`Task ${id} depends on unknown task ${dependency}.`);
     }
     incoming.set(id, new Set(dependencies));
-    outgoing.set(id, new Set());
     for (const dependency of dependencies) outgoing.get(dependency).add(id);
   }
 
