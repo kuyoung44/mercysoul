@@ -120,7 +120,7 @@ export async function runPersonalBot({ message, sessionId, userId } = {}) {
       };
     }
 
-    if (openAiKey) {
+    if (openAiKey && !geminiKey) {
       const client = new OpenAI({ apiKey: openAiKey });
       const response = await client.responses.create({
         model: process.env.MERCYSOUL_PERSONAL_MODEL || 'gpt-5-mini',
@@ -130,6 +130,8 @@ export async function runPersonalBot({ message, sessionId, userId } = {}) {
       });
       reply = response.output_text?.trim();
     } else {
+      // Prefer the explicitly configured Gemini key so an exhausted OpenAI balance
+      // does not block the free-tier provider. OpenAI remains the fallback.
       reply = await generateWithGemini(geminiKey, history, userMessage);
     }
     if (!reply) {
