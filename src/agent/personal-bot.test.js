@@ -9,8 +9,40 @@ test('personal bot exposes human-centered boundaries', () => {
   assert.equal(status.privacy, 'minimal-data by default');
 });
 
-test('personal bot has a safe local fallback without an API key', async () => {
-  const result = await runPersonalBot({ message: 'hello', sessionId: 'test-session' });
-  assert.equal(result.ok, true);
-  assert.match(result.reply, /Hello/i);
+test('personal bot keeps ordinary greetings available without an API key', async () => {
+  const originalOpenAi = process.env.OPENAI_API_KEY;
+  const originalPersonal = process.env.MERCYSOUL_PERSONAL_API_KEY;
+  delete process.env.OPENAI_API_KEY;
+  delete process.env.MERCYSOUL_PERSONAL_API_KEY;
+  try {
+    const result = await runPersonalBot({ message: 'hello', sessionId: 'test-greeting' });
+    assert.equal(result.ok, true);
+    assert.match(result.reply, /Hello/i);
+  } finally {
+    if (originalOpenAi === undefined) delete process.env.OPENAI_API_KEY;
+    else process.env.OPENAI_API_KEY = originalOpenAi;
+    if (originalPersonal === undefined) delete process.env.MERCYSOUL_PERSONAL_API_KEY;
+    else process.env.MERCYSOUL_PERSONAL_API_KEY = originalPersonal;
+  }
+});
+
+test('personal bot does not disguise an unconfigured AI provider with a canned task reply', async () => {
+  const originalOpenAi = process.env.OPENAI_API_KEY;
+  const originalPersonal = process.env.MERCYSOUL_PERSONAL_API_KEY;
+  delete process.env.OPENAI_API_KEY;
+  delete process.env.MERCYSOUL_PERSONAL_API_KEY;
+  try {
+    const result = await runPersonalBot({
+      message: 'Create a detailed 30-day customer acquisition plan for a small shop.',
+      sessionId: 'test-provider-missing'
+    });
+    assert.equal(result.ok, false);
+    assert.equal(result.code, 'AI_PROVIDER_NOT_CONFIGURED');
+    assert.match(result.error, /OPENAI_API_KEY or MERCYSOUL_PERSONAL_API_KEY/);
+  } finally {
+    if (originalOpenAi === undefined) delete process.env.OPENAI_API_KEY;
+    else process.env.OPENAI_API_KEY = originalOpenAi;
+    if (originalPersonal === undefined) delete process.env.MERCYSOUL_PERSONAL_API_KEY;
+    else process.env.MERCYSOUL_PERSONAL_API_KEY = originalPersonal;
+  }
 });
