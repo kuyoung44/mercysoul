@@ -38,7 +38,7 @@ test('personal bot does not disguise an unconfigured AI provider with a canned t
     });
     assert.equal(result.ok, false);
     assert.equal(result.code, 'AI_PROVIDER_NOT_CONFIGURED');
-    assert.match(result.error, /OPENAI_API_KEY or MERCYSOUL_PERSONAL_API_KEY/);
+    assert.match(result.error, /OPENAI_API_KEY, MERCYSOUL_PERSONAL_API_KEY, or GEMINI_API_KEY/);
   } finally {
     if (originalOpenAi === undefined) delete process.env.OPENAI_API_KEY;
     else process.env.OPENAI_API_KEY = originalOpenAi;
