@@ -39,17 +39,16 @@ function trimHistory(history) {
   return history.slice(-MAX_MESSAGES);
 }
 
-function fallback(message) {
-  const text = message.trim();
-  const lower = text.toLowerCase();
-
-  if (/\b(emergency|danger|hurt|suicide|kill myself|overdose)\b/.test(lower)) {
+function localEmergencyReply(message) {
+  const lower = message.toLowerCase();
+  if (/\\b(emergency|danger|hurt|suicide|kill myself|overdose)\\b/.test(lower)) {
     return 'If there is immediate danger, contact local emergency services or a trusted person who can be physically with you now. I can help you focus on the next safe step.';
   }
+  return null;
+}
 
-  if (!text) return 'What would you like to work on?';
-
-  return 'I’m ready to help. Share the key details you have, and I’ll work from there.';
+function configuredApiKey() {
+  return String(process.env.OPENAI_API_KEY || process.env.MERCYSOUL_PERSONAL_API_KEY || '').trim();
 }
 
 export function personalBotStatus() {
@@ -62,7 +61,7 @@ export function personalBotStatus() {
     humanAgency: true,
     conversationMode: 'NATURAL CONVERSATION MODE v1.0',
     privacy: 'minimal-data by default',
-    modelConfigured: Boolean(process.env.OPENAI_API_KEY || process.env.MERCYSOUL_PERSONAL_API_KEY)
+    modelConfigured: Boolean(configuredApiKey())
   };
 }
 
@@ -72,23 +71,39 @@ export async function runPersonalBot({ message, sessionId, userId } = {}) {
 
   const key = sessionKey({ sessionId, userId });
   let history = trimHistory(sessions.get(key) || []);
-  const client = process.env.OPENAI_API_KEY
-    ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-    : null;
 
-  // Handle ordinary social turns directly so they remain natural even when no
-  // model is configured; substantive requests continue through the normal path.
+  // Ordinary social turns remain natural without a model. Both supported
+  // server-side key names must resolve to the same authenticated provider.
   let reply = naturalConversationReply(userMessage);
-  if (!reply && client) {
+  if (!reply) {
+    const apiKey = configuredApiKey();
+    if (!apiKey) {
+      const emergencyReply = localEmergencyReply(userMessage);
+      if (emergencyReply) {
+        return { ok: true, sessionId: key, reply: emergencyReply, memory: 'not stored', externalActions: 'confirmation-required' };
+      }
+      return {
+        ok: false,
+        code: 'AI_PROVIDER_NOT_CONFIGURED',
+        error: 'MercySoul AI is not connected yet. The server needs OPENAI_API_KEY or MERCYSOUL_PERSONAL_API_KEY before it can generate an AI response. No placeholder answer was generated.'
+      };
+    }
+
+    const client = new OpenAI({ apiKey });
     const response = await client.responses.create({
       model: process.env.MERCYSOUL_PERSONAL_MODEL || 'gpt-5-mini',
       instructions: SYSTEM,
       input: [...history, { role: 'user', content: userMessage }],
       max_output_tokens: 700
     });
-    reply = response.output_text?.trim() || fallback(userMessage);
-  } else if (!reply) {
-    reply = fallback(userMessage);
+    reply = response.output_text?.trim();
+    if (!reply) {
+      return {
+        ok: false,
+        code: 'AI_EMPTY_RESPONSE',
+        error: 'The AI provider returned an empty response. Please try again.'
+      };
+    }
   }
 
   history.push(
