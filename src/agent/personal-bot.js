@@ -47,8 +47,38 @@ function localEmergencyReply(message) {
   return null;
 }
 
-function configuredApiKey() {
+function configuredOpenAIKey() {
   return String(process.env.OPENAI_API_KEY || process.env.MERCYSOUL_PERSONAL_API_KEY || '').trim();
+}
+
+function configuredGeminiKey() {
+  return String(process.env.GEMINI_API_KEY || '').trim();
+}
+
+async function generateWithGemini(apiKey, history, userMessage) {
+  const model = process.env.MERCYSOUL_GEMINI_MODEL || 'gemini-2.5-flash-lite';
+  const contents = [...history, { role: 'user', content: userMessage }].map(item => ({
+    role: item.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: item.content }]
+  }));
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: SYSTEM }] },
+      contents,
+      generationConfig: { maxOutputTokens: 700, temperature: 0.7 }
+    }),
+    signal: AbortSignal.timeout(30000)
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const message = data.error?.message || 'Gemini request failed.';
+    const error = new Error(message);
+    error.status = response.status;
+    throw error;
+  }
+  return data.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('').trim() || '';
 }
 
 export function personalBotStatus() {
@@ -61,7 +91,7 @@ export function personalBotStatus() {
     humanAgency: true,
     conversationMode: 'NATURAL CONVERSATION MODE v1.0',
     privacy: 'minimal-data by default',
-    modelConfigured: Boolean(configuredApiKey())
+    modelConfigured: Boolean(configuredOpenAIKey() || configuredGeminiKey()),\n    availableProviders: ['openai', 'gemini']
   };
 }
 
@@ -76,8 +106,9 @@ export async function runPersonalBot({ message, sessionId, userId } = {}) {
   // server-side key names must resolve to the same authenticated provider.
   let reply = naturalConversationReply(userMessage);
   if (!reply) {
-    const apiKey = configuredApiKey();
-    if (!apiKey) {
+    const openAiKey = configuredOpenAIKey();
+    const geminiKey = configuredGeminiKey();
+    if (!openAiKey && !geminiKey) {
       const emergencyReply = localEmergencyReply(userMessage);
       if (emergencyReply) {
         return { ok: true, sessionId: key, reply: emergencyReply, memory: 'not stored', externalActions: 'confirmation-required' };
@@ -85,18 +116,22 @@ export async function runPersonalBot({ message, sessionId, userId } = {}) {
       return {
         ok: false,
         code: 'AI_PROVIDER_NOT_CONFIGURED',
-        error: 'MercySoul AI is not connected yet. The server needs OPENAI_API_KEY or MERCYSOUL_PERSONAL_API_KEY before it can generate an AI response. No placeholder answer was generated.'
+        error: 'MercySoul AI is not connected yet. The server needs OPENAI_API_KEY, MERCYSOUL_PERSONAL_API_KEY, or GEMINI_API_KEY before it can generate an AI response. No placeholder answer was generated.'
       };
     }
 
-    const client = new OpenAI({ apiKey });
-    const response = await client.responses.create({
-      model: process.env.MERCYSOUL_PERSONAL_MODEL || 'gpt-5-mini',
-      instructions: SYSTEM,
-      input: [...history, { role: 'user', content: userMessage }],
-      max_output_tokens: 700
-    });
-    reply = response.output_text?.trim();
+    if (openAiKey) {
+      const client = new OpenAI({ apiKey: openAiKey });
+      const response = await client.responses.create({
+        model: process.env.MERCYSOUL_PERSONAL_MODEL || 'gpt-5-mini',
+        instructions: SYSTEM,
+        input: [...history, { role: 'user', content: userMessage }],
+        max_output_tokens: 700
+      });
+      reply = response.output_text?.trim();
+    } else {
+      reply = await generateWithGemini(geminiKey, history, userMessage);
+    }
     if (!reply) {
       return {
         ok: false,
