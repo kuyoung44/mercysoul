@@ -167,7 +167,11 @@ export async function runContinuousToolBuild(inputMission, adapters) {
         event(mission, resultOk(tested) ? "tool_test_passed" : "tool_test_failed", { toolId: tool.id });
       }
       transition(mission, "INDEPENDENT_VERIFY");
-      const verification = await adapters.verify({ mission: clone(mission), tools: clone(mission.tools) });
+      // A failed build is a repair condition, not an independent-verification
+      // failure. Verify only artifacts that actually reached the testable state,
+      // then schedule bounded repair cycles for the remaining tools.
+      const verificationTools = mission.tools.filter(t => t.status !== "repair_needed");
+      const verification = await adapters.verify({ mission: clone(mission), tools: clone(verificationTools) });
       if (!resultOk(verification)) {
         mission.status = "paused_verification_failed";
         mission.blockers.push({ type: "independent_verification_failed", detail: String(verification?.reason ?? "No passing verification evidence").slice(0, 500) });

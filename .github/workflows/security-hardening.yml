@@ -31,17 +31,19 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 22
 
-      - name: Install dependencies
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          elif [ -f package.json ]; then
-            npm install --ignore-scripts
-          else
-            echo "No package.json found; skipping npm install."
-          fi
+      - name: Regenerate lockfile without lifecycle scripts
+        if: hashFiles('package.json') != ''
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+
+      - name: Apply non-breaking dependency security updates
+        if: hashFiles('package-lock.json') != ''
+        run: npm audit fix --package-lock-only --ignore-scripts --no-fund
+
+      - name: Install from regenerated lockfile
+        if: hashFiles('package-lock.json') != ''
+        run: npm ci --ignore-scripts --no-audit --no-fund
 
       - name: Scan for secrets
         run: |
@@ -98,7 +100,7 @@ jobs:
 
       - name: Dependency vulnerability audit
         if: hashFiles('package-lock.json') != ''
-        run: npm audit --audit-level=high
+        run: npm audit --audit-level=moderate
 
       - name: Run project checks
         if: hashFiles('package.json') != ''
@@ -129,4 +131,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mercysoul-security-hardening-report
-          path: security-hardening-report.md
+          path: |
+            security-hardening-report.md
+            package-lock.json
