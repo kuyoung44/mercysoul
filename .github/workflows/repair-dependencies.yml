@@ -32,7 +32,7 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Regenerate lockfile without lifecycle scripts
+      # This job intentionally avoids running package lifecycle scripts during lockfile repair.\n      - name: Regenerate lockfile without lifecycle scripts
         run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
 
       - name: Apply non-breaking security updates
