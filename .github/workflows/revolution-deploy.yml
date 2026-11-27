@@ -34,7 +34,7 @@ jobs:
         run: npm install
 
       - name: Run npm audit
-        run: npm audit --audit-level=high
+        run: npm audit --audit-level=moderate
         continue-on-error: true
 
       - name: Illegal and malicious content scan
