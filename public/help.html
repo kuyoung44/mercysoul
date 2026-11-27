@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#173b31">
+<meta name="description" content="A welcoming front door to MercySoul Dominion. Tell us what you are trying to build, learn, solve or explore.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://mercysoul.vercel.app/help.html">
+<title>Human Connection &amp; Help — MercySoul Dominion</title>
+<style>
+:root{color-scheme:light;--green:#173b31;--green2:#244d40;--cream:#f7f2e7;--paper:#fffdf8;--ink:#202820;--muted:#657168;--gold:#c99b36;--line:#dedfd4}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--cream);color:var(--ink);font:16px/1.65 Georgia,'Times New Roman',serif}
+a{color:inherit}
+.shell{width:min(1040px,100%);margin:auto;padding:0 22px}
+.topbar{background:var(--green);color:var(--cream);border-bottom:3px solid var(--gold)}
+.topinner{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{font-size:1.15rem;letter-spacing:.08em;font-weight:bold;text-decoration:none}
+.brand small{display:block;color:#d8cda9;font:10px/1.4 system-ui,sans-serif;letter-spacing:.2em}
+.toplink{font:600 13px system-ui,sans-serif;color:#f7e5b3;text-decoration:none}
+.hero{position:relative;overflow:hidden;background:radial-gradient(ellipse at 80% 20%,#31594b 0,#1b4035 40%,#102820 100%);color:#fffdf5;padding:clamp(58px,10vw,112px) 0 72px}
+.hero:after{content:"";position:absolute;width:340px;height:340px;border:1px solid #ffffff18;border-radius:50%;right:-130px;bottom:-210px;box-shadow:0 0 0 35px #ffffff08,0 0 0 70px #ffffff05;pointer-events:none}
+.eyebrow{font:700 11px system-ui,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#e6bd66}
+h1{font-size:clamp(2.6rem,8vw,5.5rem);line-height:1.03;letter-spacing:-.045em;font-weight:500;max-width:760px;margin:18px 0}
+.lede{max-width:660px;color:#f1eee3;font-size:clamp(1.05rem,2.5vw,1.25rem);line-height:1.8;margin:0}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+.button{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:12px 20px;border-radius:999px;background:#f3d58c;color:#1a3027;text-decoration:none;font:700 14px system-ui,sans-serif;border:1px solid #f3d58c}
+.button.secondary{background:transparent;color:#fffdf5;border-color:#ffffff80}
+main{padding:44px 0 70px}
+.intro{max-width:740px;margin:0 auto 30px;text-align:center}
+.intro h2{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:500;margin:0 0 10px;color:var(--green)}
+.intro p{color:var(--muted);margin:0}
+.grid{display:grid;grid-template-columns:1.05fr .95fr;gap:20px;align-items:start}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:clamp(20px,4vw,32px);box-shadow:0 12px 35px #1a30270a}
+.panel h2{margin:0 0 8px;font-size:1.55rem;font-weight:500;color:var(--green)}
+.muted{color:var(--muted);font:14px/1.65 system-ui,sans-serif}
+form{display:grid;gap:15px;margin-top:22px}
+label{display:grid;gap:7px;font:600 13px system-ui,sans-serif;color:#33463a}
+input,select,textarea{width:100%;border:1px solid #cdd4c9;border-radius:10px;background:#fff;color:#202820;padding:13px 14px;font:16px system-ui,sans-serif}
+textarea{min-height:140px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:3px solid #c99b3633;border-color:var(--gold)}
+.submit{min-height:52px;border:0;border-radius:999px;background:var(--green);color:#fff;font:700 14px system-ui,sans-serif;padding:13px 20px;cursor:pointer}
+.submit:hover{background:var(--green2)}
+.hint{font:12px/1.6 system-ui,sans-serif;color:var(--muted);margin:0}
+.side{display:grid;gap:16px}
+.step{display:flex;gap:13px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--line)}
+.step:last-child{border:0;padding-bottom:0}
+.number{flex:0 0 30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#f3e8c9;color:#72531b;font:700 12px system-ui,sans-serif}
+.step strong{display:block;color:var(--green);font:700 14px system-ui,sans-serif;margin-bottom:3px}
+.step p{margin:0;color:var(--muted);font:13px/1.6 system-ui,sans-serif}
+.contact{background:var(--green);color:#fffdf5;border-radius:20px;padding:24px}
+.contact h2{color:#f3d58c}
+.contact p{color:#e3e9df;font:14px/1.7 system-ui,sans-serif}
+.contact a{color:#f3d58c;font-weight:700}
+.notice{margin-top:18px;padding:15px 16px;border-left:3px solid var(--gold);background:#f2ead6;color:#4b493c;font:12px/1.7 system-ui,sans-serif}
+.footer{border-top:1px solid var(--line);padding:24px 0 34px;color:var(--muted);font:12px/1.8 system-ui,sans-serif}
+.footer a{color:var(--green)}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.topinner{min-height:68px}.hero{padding:60px 0 62px}.shell{padding-left:17px;padding-right:17px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="shell topinner"><a class="brand" href="/" aria-label="MercySoul Dominion home">MERCYSOUL DOMINION<small>44MS16 · HUMAN CONNECTION</small></a><a class="toplink" href="/">← Back to MercySoul</a></div></header>
+<section class="hero"><div class="shell"><div class="eyebrow">A place to begin · We will listen</div><h1>You don't have to figure it out alone.</h1><p class="lede">Whether you are trying to bring an idea to life, build a business, learn new technology, solve a digital problem, or explore a collaboration, tell us what is happening. We will read your message and look for a practical next step together.</p><div class="hero-actions"><a class="button" href="#tell-us">Tell us what you need</a><a class="button secondary" href="https://wa.me/2348135278110" target="_blank" rel="noopener noreferrer">Open WhatsApp instead</a></div></div></section>
+<main class="shell">
+<div class="intro"><h2>Start wherever you are.</h2><p>You do not need the perfect words. A few honest details are enough to begin.</p><p style="margin-top:16px"><a class="button" href="/builder.html">I have an idea — build my path →</a></p></div>
+<div class="grid">
+<section class="panel" id="tell-us" aria-labelledby="form-title"><h2 id="form-title">Tell us your story</h2><p class="muted">Choose the closest topic and describe the outcome you hope for. This form prepares a WhatsApp message; nothing is sent until you review and press Send in WhatsApp.</p>
+<form id="helpForm">
+<label for="name">What should we call you?<input id="name" name="name" maxlength="80" autocomplete="name" placeholder="Your name (optional)"></label>
+<label for="topic">What would you like help with?
+<select id="topic" name="topic" required><option value="">Choose a topic</option><option>Website or digital presence</option><option>AI assistant or business automation</option><option>Creative work, design or digital content</option><option>Learning and digital skills</option><option>Business or livelihood collaboration</option><option>Community support or referral enquiry</option><option>Something else</option></select></label>
+<label for="message">What is happening, and what would help?<textarea id="message" name="message" maxlength="1800" required placeholder="Share only what you feel comfortable sharing. What are you trying to do, what is getting in the way, and what would a useful next step look like?"></textarea></label>
+<button class="submit" type="submit">Continue to WhatsApp →</button>
+<p class="hint" id="formStatus" role="status" aria-live="polite">Your message stays on this page until you choose to open WhatsApp. You can review it before sending.</p>
+</form>
+</section>
+<aside class="side">
+<section class="panel"><h2>What happens next?</h2><div class="step"><span class="number">1</span><div><strong>You tell us</strong><p>Share the situation in your own words. You can leave out anything private.</p></div></div><div class="step"><span class="number">2</span><div><strong>We review your message</strong><p>We will consider the request and whether it fits MercySoul's current services or capacity.</p></div></div><div class="step"><span class="number">3</span><div><strong>We discuss a realistic next step</strong><p>That may be a service conversation, learning resource, collaboration discussion or a referral suggestion where we know a relevant contact.</p></div></div></section>
+<section class="contact"><h2>Prefer to speak directly?</h2><p>Use the official MercySoul WhatsApp contact to start a conversation without this form.</p><p><a href="https://wa.me/2348135278110" target="_blank" rel="noopener noreferrer">+234 813 527 8110 · Open WhatsApp →</a></p><p>We are an independent creative technology initiative. We are not an emergency-response service or a guaranteed source of financial aid, housing or grants.</p></section>
+</aside>
+</div>
+<div class="notice"><strong>Your safety and privacy matter.</strong> Do not send passwords, PINs, BVN, NIN, private keys, full payment-card details or identity documents through this page or an unsolicited chat. Selecting Continue opens WhatsApp with a draft; WhatsApp handles any message you choose to send under its own privacy terms. Read our <a href="/privacy-policy.html">Privacy Policy</a>. MercySoul cannot promise an immediate reply or assistance it has not confirmed. If you are in immediate danger or need urgent medical help, contact local emergency services or a trusted person directly.</div>
+</main>
+<footer class="footer"><div class="shell">MercySoul Dominion · Built around dignity, integrity and practical help.<br><a href="/">Home</a> · <a href="/privacy-policy.html">Privacy</a> · <a href="/terms.html">Terms</a></div></footer>
+<script>
+(function(){
+  const form=document.getElementById('helpForm');
+  const status=document.getElementById('formStatus');
+  form.addEventListener('submit',function(event){
+    event.preventDefault();
+    if(!form.reportValidity())return;
+    const name=document.getElementById('name').value.trim();
+    const topic=document.getElementById('topic').value;
+    const message=document.getElementById('message').value.trim();
+    const body=['Hello MercySoul Dominion. I would like to start a conversation.','Name: '+(name||'Not provided'),'Topic: '+topic,'My message: '+message].join('\n\n');
+    const url='https://wa.me/2348135278110?text='+encodeURIComponent(body);
+    // Open synchronously from the submit gesture so popup blockers are less likely to interfere.
+    const whatsappWindow=window.open(url,'_blank');
+    status.textContent='';
+    if(whatsappWindow){
+      whatsappWindow.opener=null;
+      status.textContent='WhatsApp opened. Review your message there and choose whether to send it.';
+    }else{
+      status.textContent='Your browser blocked the new tab. Use this link to continue to WhatsApp: ';
+      const link=document.createElement('a');
+      link.href=url;
+      link.target='_blank';
+      link.rel='noopener noreferrer';
+      link.textContent='Continue to WhatsApp';
+      status.appendChild(link);
+    }
+  });
+})();
+</script>
+</body>
+</html>

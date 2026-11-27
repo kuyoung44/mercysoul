@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#173b31">
+<meta name="description" content="Turn an idea into a practical, free-first building plan with MercySoul Dominion.">
+<meta name="robots" content="index,follow">
+<title>Builder Path — MercySoul Dominion</title>
+<style>
+:root{color-scheme:light;--green:#173b31;--green2:#244d40;--cream:#f7f2e7;--paper:#fffdf8;--ink:#202820;--muted:#657168;--gold:#c99b36;--line:#dedfd4}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font:16px/1.65 Georgia,'Times New Roman',serif}
+a{color:inherit}.shell{width:min(980px,100%);margin:auto;padding:0 20px}.topbar{background:var(--green);color:var(--cream);border-bottom:3px solid var(--gold)}
+.topinner{min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:14px}.brand{font-weight:bold;letter-spacing:.08em;text-decoration:none}.brand small{display:block;color:#d8cda9;font:10px system-ui,sans-serif;letter-spacing:.2em}.toplink{font:600 13px system-ui,sans-serif;color:#f7e5b3;text-decoration:none}
+.hero{background:radial-gradient(ellipse at 80% 20%,#31594b,#1b4035 45%,#102820);color:#fffdf5;padding:64px 0 58px}.eyebrow{font:700 11px system-ui,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#e6bd66}
+h1{font-size:clamp(2.5rem,8vw,4.8rem);line-height:1.04;letter-spacing:-.04em;font-weight:500;margin:14px 0}.lede{max-width:670px;color:#f1eee3;font-size:1.1rem;margin:0}
+main{padding:36px 0 68px}.layout{display:grid;grid-template-columns:.85fr 1.15fr;gap:20px;align-items:start}.panel{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:clamp(18px,4vw,28px);box-shadow:0 12px 35px #1a30270a}
+h2{font-size:1.5rem;font-weight:500;color:var(--green);margin:0 0 8px}.muted{font:14px/1.65 system-ui,sans-serif;color:var(--muted)}
+form{display:grid;gap:15px;margin-top:20px}label{display:grid;gap:7px;font:600 13px system-ui,sans-serif;color:#33463a}
+input,select{width:100%;border:1px solid #cdd4c9;border-radius:10px;background:#fff;color:var(--ink);padding:13px;font:16px system-ui,sans-serif}
+button{min-height:48px;border:0;border-radius:999px;background:var(--green);color:#fff;padding:12px 18px;font:700 14px system-ui,sans-serif;cursor:pointer}button:hover{background:var(--green2)}button.secondary{background:#f3e8c9;color:#594319;border:1px solid #e3d3a8}
+.result{display:none}.result.visible{display:block}.result-head{padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:16px}.tag{display:inline-block;background:#f3e8c9;color:#72531b;border-radius:99px;padding:5px 10px;font:700 11px system-ui,sans-serif;letter-spacing:.06em}
+.phase{display:grid;grid-template-columns:32px 1fr;gap:12px;padding:15px 0;border-bottom:1px solid var(--line)}.phase:last-of-type{border:0}.num{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#f3e8c9;color:#72531b;font:700 12px system-ui,sans-serif}
+.phase h3{margin:0 0 4px;color:var(--green);font:700 15px system-ui,sans-serif}.phase p{margin:0;color:#536057;font:13px/1.65 system-ui,sans-serif}.deliverable{margin-top:6px;color:#72531b!important;font-weight:700!important}
+.next{background:#f2ead6;border-left:3px solid var(--gold);padding:14px 16px;margin-top:16px;font:13px/1.7 system-ui,sans-serif}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}.smallprint{font:12px/1.7 system-ui,sans-serif;color:var(--muted);margin-top:18px}
+.footer{border-top:1px solid var(--line);padding:22px 0 32px;color:var(--muted);font:12px/1.8 system-ui,sans-serif}.footer a{color:var(--green)}
+@media(max-width:740px){.layout{grid-template-columns:1fr}.hero{padding:54px 0}.shell{padding-left:16px;padding-right:16px}}
+@media print{.topbar,.hero,.form-panel,.actions,.footer{display:none!important}body{background:#fff}.shell{width:100%;padding:0}.layout{display:block}.panel{box-shadow:none;border:0;padding:0}.result{display:block!important}}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="shell topinner"><a class="brand" href="/" aria-label="MercySoul Dominion home">MERCYSOUL DOMINION<small>44MS16 · BUILDER PATH</small></a><a class="toplink" href="/help.html">← Human Connection</a></div></header>
+<section class="hero"><div class="shell"><div class="eyebrow">Crawl · Walk · Build · Grow</div><h1>Your next step starts here.</h1><p class="lede">A practical route from idea to first working result. Start small, use what you already have, and build proof one step at a time. No paid course or laptop required to begin.</p></div></section>
+<main class="shell"><div class="layout">
+<section class="panel form-panel"><h2>Shape your path</h2><p class="muted">A few choices help us make the plan realistic. Nothing is uploaded or saved; the plan is generated in this browser.</p>
+<form id="builderForm">
+<label for="goal">What do you want to build?
+<select id="goal"><option value="website">A website or landing page</option><option value="assistant">An AI assistant or automation</option><option value="business">A digital service business</option><option value="creative">A creative brand or portfolio</option><option value="learn">My technology skills and first project</option></select></label>
+<label for="level">Where are you starting?
+<select id="level"><option value="beginner">Beginner — guide me from the basics</option><option value="some">I have tried a few things</option><option value="builder">I can already build simple projects</option></select></label>
+<label for="device">What can you use right now?
+<select id="device"><option value="phone">A smartphone and internet</option><option value="computer">A computer and internet</option><option value="both">A phone and occasional computer access</option></select></label>
+<label for="time">How much time can you give each week?
+<select id="time"><option value="3">About 3 hours</option><option value="5" selected>About 5 hours</option><option value="10">About 10 hours</option><option value="flex">My time changes week to week</option></select></label>
+<button type="submit">Generate my Builder Path →</button>
+</form>
+<p class="smallprint">Free-first principle: use free tools and learning materials wherever possible. Avoid paying for courses, templates, hosting or subscriptions before you have validated the idea.</p>
+</section>
+<section class="panel result" id="result" aria-live="polite" aria-labelledby="resultTitle">
+<div class="result-head"><span class="tag">YOUR FIRST BUILD PLAN</span><h2 id="resultTitle">Your Builder Path</h2><p class="muted" id="summary"></p></div>
+<div id="phases"></div>
+<div class="next" id="firstAction"></div>
+<div class="actions"><button type="button" id="copyPlan">Copy my plan</button><button type="button" class="secondary" id="printPlan">Print / Save PDF</button></div>
+<p class="smallprint">This is a starter plan, not a promise of income or guaranteed access to tools. Keep passwords, identity numbers, payment details and private keys out of project notes. Progress is not stored by this page.</p>
+</section>
+</div></main>
+<footer class="footer"><div class="shell">MercySoul Dominion · Intelligence with purpose. Vision with direction. Power with responsibility.<br><a href="/">Home</a> · <a href="/help.html">Ask for human help</a> · <a href="/privacy-policy.html">Privacy</a></div></footer>
+<script>
+(function(){
+const form=document.getElementById('builderForm'),result=document.getElementById('result'),phases=document.getElementById('phases');
+const labels={website:'a website or landing page',assistant:'an AI assistant or automation',business:'a digital service business',creative:'a creative brand or portfolio',learn:'technology skills and a first project'};
+let currentPlan='';
+function planFor(goal,level,device,time){
+ const phone=device==='phone',computer=device==='computer',hours=time==='flex'?'small, repeatable sessions':time+' focused hours each week';
+ const levelNote=level==='beginner'?'Start with the basics; do not rush into complex tools.':level==='some'?'Build on what you have tried and finish one small outcome.':'Use your existing skills to ship a small, reviewable version.';
+ const project=goal==='website'?'a one-page site for a real local service, with a clear offer and contact method':goal==='assistant'?'a simple FAQ assistant using a small set of approved questions and answers':goal==='business'?'one clearly defined digital service with a sample result and transparent price':goal==='creative'?'a focused portfolio with three original examples and a contact route':'a small web page or digital tool that solves one problem you understand';
+ const tools=phone?'Use your phone browser, notes app and a free code editor or browser-based workspace. Keep files backed up in a folder you control.':computer?'Use a browser, a code editor and a local project folder; keep a backup copy.':'Plan and write on your phone, then use computer access for heavier editing and testing.';
+ const stages=[
+ ['Define one useful problem','Write one sentence describing who you want to help, the problem they face and the result they need. Keep the first version narrow.','A one-sentence project brief.'],
+ ['Learn only what the build needs',levelNote+' Find free beginner documentation or tutorials for the exact skill needed. Practice for 20–30 minutes, then apply it immediately.','Three short notes and one tiny practice exercise.'],
+ ['Make the smallest working version','Create '+project+'. Use placeholder content first; make the main action work before polishing colours or animation. '+tools,'A working first version you can show someone.'],
+ ['Test with one real person','Ask one potential user to try the result. Watch where they hesitate. Ask what was useful and what was confusing. Do not collect sensitive personal data.','Three observations and one improvement.'],
+ ['Publish carefully and improve','Use a free preview or shareable demo where available. Check mobile layout, links, spelling, accessibility and privacy. Do not publish secrets or private information.','A safe demo link and a short change log.']
+ ];
+ if(goal==='assistant'){stages[2][1]='Create a narrow FAQ assistant with 5–10 approved questions, clear fallback wording and no access to private accounts or external actions. '+tools;}
+ if(goal==='business'){stages[2][1]='Create a sample deliverable for '+project+'. Define exactly what is included, what is not included and how a customer can contact you. '+tools;}
+ if(goal==='creative'){stages[2][1]='Create '+project+'. Use your own work or assets you have permission to use, and add a short explanation for each example. '+tools;}
+ if(goal==='learn'){stages[2][1]='Build '+project+'. Keep it small enough to finish, and write down what each part does in your own words. '+tools;}
+ const first=phone?'Today on your phone: write your one-sentence project brief in Notes, then list the three things your first version must do.': 'Today: write your one-sentence project brief, then list the three things your first version must do.';
+ const list=stages.map((s,i)=>'<div class="phase"><span class="num">'+(i+1)+'</span><div><h3>'+s[0]+'</h3><p>'+s[1]+'</p><p class="deliverable">Deliverable: '+s[2]+'</p></div></div>').join('');
+ const textPlan='MERCYSOUL BUILDER PATH\nGoal: '+labels[goal]+'\nStarting point: '+level+'\nDevice: '+device+'\nTime: '+hours+'\n\n'+stages.map((s,i)=>(i+1)+'. '+s[0]+'\n'+s[1]+'\nDeliverable: '+s[2]).join('\n\n')+'\n\nFIRST ACTION: '+first;
+ return {list,textPlan,first,summary:'Your goal is '+labels[goal]+'. Plan for '+hours+'. '+(phone?'This route is designed to work from a smartphone.':computer?'This route assumes computer access.':'This route can move between phone and computer.')};
+}
+form.addEventListener('submit',function(e){e.preventDefault();const p=planFor(document.getElementById('goal').value,document.getElementById('level').value,document.getElementById('device').value,document.getElementById('time').value);phases.innerHTML=p.list;document.getElementById('summary').textContent=p.summary;document.getElementById('firstAction').textContent=p.first;currentPlan=p.textPlan;result.classList.add('visible');result.scrollIntoView({behavior:'smooth',block:'start'});});
+document.getElementById('copyPlan').addEventListener('click',async function(){try{await navigator.clipboard.writeText(currentPlan);this.textContent='Copied';}catch(e){const area=document.createElement('textarea');area.value=currentPlan;document.body.appendChild(area);area.select();try{document.execCommand('copy');this.textContent='Copied';}catch(ignore){this.textContent='Select and copy from your browser';}area.remove();}});
+document.getElementById('printPlan').addEventListener('click',function(){window.print();});
+})();
+</script>
+</body></html>

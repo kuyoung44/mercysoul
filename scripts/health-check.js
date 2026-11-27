@@ -7,7 +7,8 @@ const request = http.get(url, { timeout: 5000 }, res => {
   res.on('end', () => {
     let data;
     try { data = JSON.parse(body); } catch { console.error('Health endpoint returned invalid JSON'); process.exit(1); }
-    const healthy = res.statusCode === 200 && data.ok === true;
+    const payload = data?.data ?? data;
+    const healthy = res.statusCode === 200 && payload?.ok === true;
     console.log(JSON.stringify({ url, statusCode: res.statusCode, healthy, data }, null, 2));
     process.exitCode = healthy ? 0 : 1;
   });

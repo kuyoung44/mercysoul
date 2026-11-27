@@ -47,7 +47,13 @@ jobs:
         run: node scripts/security-check.js
 
       - name: Start server for health gate
-        run: node server.js > /tmp/mercysoul-server.log 2>&1 &
+        env:
+          # Non-production placeholders: health checks must not depend on live provider credentials.
+          GEMINI_API_KEY: ci-test-placeholder-not-a-real-key
+          GEMINI_MODEL: gemini-2.5-flash
+          ALLOWED_ORIGINS: http://127.0.0.1:3000
+          ADMIN_API_TOKEN: ci-test-only-placeholder
+        run: node agent-bootstrap.js > /tmp/mercysoul-server.log 2>&1 &
 
       - name: Runtime health gate
         run: |
