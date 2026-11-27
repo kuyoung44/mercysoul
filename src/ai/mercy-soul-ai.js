@@ -2,10 +2,11 @@ import crypto from 'node:crypto';
 import { generateText } from 'ai';
 import { processInput } from '../os-core.js';
 import { persistEventBestEffort } from '../supabase.js';
+import { selectMercySoulModel, mercySoulModelRouterStatus } from './model-router.js';
 
 export const MERCYSOUL_AI_POLICY = Object.freeze({
   name: 'MercySoul AI',
-  version: '1.0.0',
+  version: '1.1.0',
   human_judgment_required: true,
   mustMustRule: 'NO ILLEGAL USE OF AI',
   lifecycle: ['RECEIVE','ROUTE','THINK','PLAN','GUARDIAN','APPROVE','EXECUTE','VERIFY','RECOVER','RECORD'],
@@ -26,7 +27,7 @@ const SYSTEM_PROMPT = [
   'Never retaliate, threaten, harass, unlawfully surveil, defraud, or unlawfully interfere with people or systems.',
   'Respond in proportion to verified facts, never beyond them.',
   'Keep responses practical and explain important uncertainty or constraints.',
-].join('\n');
+].join('\\n');
 
 function normalizeMessages(input) {
   if (Array.isArray(input?.messages)) {
@@ -47,7 +48,8 @@ export function mercySoulAiStatus() {
     service: 'MercySoul AI',
     version: MERCYSOUL_AI_POLICY.version,
     policy: MERCYSOUL_AI_POLICY,
-    model: process.env.MERCYSOUL_AI_MODEL || 'not-configured',
+    model: process.env.MERCYSOUL_AI_MODEL || process.env.MERCYSOUL_MODEL_PRIMARY || process.env.GEMINI_MODEL || 'not-configured',
+    modelRouter: mercySoulModelRouterStatus(),
     gateway: 'Vercel AI Gateway via AI SDK',
     durableAudit: String(process.env.REQUIRE_DURABLE_PERSISTENCE || '').toLowerCase() === 'true',
   };
@@ -60,7 +62,7 @@ export async function runMercySoulAI(input = {}, options = {}) {
     return { ok: false, requestId, decision: 'review', error: 'A message or messages array is required.' };
   }
 
-  const userText = messages.filter((m) => m.role === 'user').map((m) => m.content).join('\n');
+  const userText = messages.filter((m) => m.role === 'user').map((m) => m.content).join('\\n');
   const preflight = processInput({
     type: 'post',
     text: userText,
@@ -84,17 +86,19 @@ export async function runMercySoulAI(input = {}, options = {}) {
     return result;
   }
 
-  const model = String(process.env.MERCYSOUL_AI_MODEL || '').trim();
-  if (!model) {
+  const selection = selectMercySoulModel({ task: input.task || 'general' });
+  if (!selection.ok) {
     return {
       ok: false,
       requestId,
       decision: 'review',
-      error: 'MERCYSOUL_AI_MODEL is not configured. No model execution will occur.',
+      error: selection.error,
+      modelSelection: selection,
       preflight: { decision: preflight.decision, riskScore: preflight.riskScore },
     };
   }
 
+  const model = selection.model;
   try {
     const result = await generateText({
       model,
@@ -108,6 +112,7 @@ export async function runMercySoulAI(input = {}, options = {}) {
       requestId,
       decision: 'allow',
       model,
+      modelSelection: { task: selection.task, source: selection.source },
       response: result.text,
       usage: result.usage,
       governance: {
@@ -122,6 +127,8 @@ export async function runMercySoulAI(input = {}, options = {}) {
       requestId,
       payload: {
         model,
+        task: selection.task,
+        modelSource: selection.source,
         decision: response.decision,
         usage: response.usage,
         messageCount: messages.length,
@@ -135,6 +142,7 @@ export async function runMercySoulAI(input = {}, options = {}) {
       requestId,
       decision: 'review',
       error: error instanceof Error ? error.message : 'MercySoul AI generation failed',
+      modelSelection: { task: selection.task, source: selection.source },
     };
     await persistEventBestEffort({ eventType: 'mercy_soul_ai_error', requestId, payload: failure });
     return failure;
