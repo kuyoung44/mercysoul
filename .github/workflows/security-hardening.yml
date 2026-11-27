@@ -131,4 +131,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mercysoul-security-hardening-report
-          path: |\n            security-hardening-report.md\n            package-lock.json
+          path: |
+            security-hardening-report.md
+            package-lock.json
