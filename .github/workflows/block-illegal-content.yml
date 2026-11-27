@@ -60,29 +60,29 @@ jobs:
           # Detect card-like numeric strings with the Luhn checksum rather than
           # flagging every 13-19 digit identifier (for example, international phone numbers).
           CANDIDATES=$(git grep -I -h -o -E '[0-9]{13,19}' -- ':!*.md' ':!*.txt' ':!.git/*' ':!node_modules/*' ':!vendor/*' ':!dist/*' ':!build/*' ':!.next/*' ':!coverage/*' ':!*.lock' ':!package-lock.json' ':!yarn.lock' ':!pnpm-lock.yaml' ':!*.csv' ':!public/acceptable-use.html' ':!public/cookie-policy.html' ':!public/privacy-policy.html' ':!public/terms.html' || true)
-          if [ -n "$CANDIDATES" ] && printf '%s\\n' "$CANDIDATES" | node --input-type=module -e '
-            let input = "";
-            for await (const chunk of process.stdin) input += chunk;
-            const luhn = value => {
-              let sum = 0;
-              let doubleDigit = false;
-              for (let i = value.length - 1; i >= 0; i--) {
-                let digit = Number(value[i]);
-                if (doubleDigit) { digit *= 2; if (digit > 9) digit -= 9; }
-                sum += digit;
-                doubleDigit = !doubleDigit;
+          if [ -n "$CANDIDATES" ]; then
+            if ! printf '%s\n' "$CANDIDATES" | node --input-type=module -e '
+              let input = "";
+              for await (const chunk of process.stdin) input += chunk;
+              const luhn = value => {
+                let sum = 0;
+                let doubleDigit = false;
+                for (let i = value.length - 1; i >= 0; i--) {
+                  let digit = Number(value[i]);
+                  if (doubleDigit) { digit *= 2; if (digit > 9) digit -= 9; }
+                  sum += digit;
+                  doubleDigit = !doubleDigit;
+                }
+                return sum % 10 === 0;
+              };
+              const matches = [...new Set((input.match(/[0-9]{13,19}/g) || []).filter(luhn))];
+              if (matches.length) {
+                console.error("Potential payment-card number detected (masked):", matches.map(n => n.slice(0, 4) + "…" + n.slice(-4)).join(", "));
+                process.exit(1);
               }
-              return sum % 10 === 0;
-            };
-            const matches = [...new Set((input.match(/[0-9]{13,19}/g) || []).filter(luhn))];
-            if (matches.length) {
-              console.error("Potential payment-card number detected (masked):", matches.map(n => n.slice(0, 4) + "…" + n.slice(-4)).join(", "));
-              process.exit(1);
-            }
-          '; then
-            :
-          else
-            FOUND=1
+            '; then
+              FOUND=1
+            fi
           fi
 
           if git grep -I -n -E 'CVV[^A-Za-z0-9]*[=:][^A-Za-z0-9]*[0-9]{3,4}' -- ':!*.md' ':!*.txt' ':!.git/*' ':!node_modules/*' ':!vendor/*' ':!dist/*' ':!build/*' ':!.next/*' ':!coverage/*' ':!*.lock' ':!package-lock.json' ':!yarn.lock' ':!pnpm-lock.yaml' ':!*.csv' ':!public/acceptable-use.html' ':!public/cookie-policy.html' ':!public/privacy-policy.html' ':!public/terms.html'; then
