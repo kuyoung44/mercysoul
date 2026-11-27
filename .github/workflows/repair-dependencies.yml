@@ -1,0 +1,65 @@
+name: Repair dependency lockfile
+
+on:
+  push:
+    branches:
+      - fix/ci-retry-and-payment-scan
+    paths:
+      - .github/workflows/repair-dependencies.yml
+      - package.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dependency-repair-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  repair-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repair branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/ci-retry-and-payment-scan
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Regenerate lockfile without lifecycle scripts
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+
+      - name: Apply non-breaking security updates
+        run: npm audit fix --package-lock-only --ignore-scripts --no-fund
+
+      - name: Verify clean reproducible install
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Require a clean dependency audit
+        run: npm audit --audit-level=moderate
+
+      - name: Run project tests
+        run: npm run check --if-present
+
+      - name: Verify production build
+        run: npm run build --if-present
+
+      - name: Commit regenerated lockfile
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- package-lock.json; then
+            echo "Lockfile already current; no commit needed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "fix: regenerate audited npm lockfile"
+          git push origin HEAD:fix/ci-retry-and-payment-scan
