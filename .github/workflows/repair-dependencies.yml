@@ -1,16 +1,12 @@
 name: Repair dependency lockfile
 
 on:
-  push:
-    branches:
-      - fix/ci-retry-and-payment-scan
-    paths:
-      - .github/workflows/repair-dependencies.yml
-      - package.json
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: dependency-repair-${{ github.ref }}
@@ -21,10 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Checkout repair branch
+      - name: Checkout pull request
         uses: actions/checkout@v4
         with:
-          ref: fix/ci-retry-and-payment-scan
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Setup Node.js 22
         uses: actions/setup-node@v4
@@ -32,7 +28,7 @@ jobs:
           node-version: 22
           cache: npm
 
-      # This job intentionally avoids running package lifecycle scripts during lockfile repair.\n      - name: Regenerate lockfile without lifecycle scripts
+      - name: Regenerate lockfile without lifecycle scripts
         run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
 
       - name: Apply non-breaking security updates
@@ -50,16 +46,10 @@ jobs:
       - name: Verify production build
         run: npm run build --if-present
 
-      - name: Commit regenerated lockfile
-        shell: bash
-        run: |
-          set -euo pipefail
-          if git diff --quiet -- package-lock.json; then
-            echo "Lockfile already current; no commit needed."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package-lock.json
-          git commit -m "fix: regenerate audited npm lockfile"
-          git push origin HEAD:fix/ci-retry-and-payment-scan
+      - name: Upload generated lockfile for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: repaired-package-lock
+          path: package-lock.json
+          if-no-files-found: error
+          retention-days: 3
