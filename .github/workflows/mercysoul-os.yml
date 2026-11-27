@@ -53,7 +53,7 @@ jobs:
           GEMINI_MODEL: gemini-2.5-flash
           ALLOWED_ORIGINS: http://127.0.0.1:3000
           ADMIN_API_TOKEN: ci-test-only-placeholder
-        run: node server.js > /tmp/mercysoul-server.log 2>&1 &
+        run: node agent-bootstrap.js > /tmp/mercysoul-server.log 2>&1 &
 
       - name: Runtime health gate
         run: |
