@@ -100,7 +100,7 @@ jobs:
 
       - name: Dependency vulnerability audit
         if: hashFiles('package-lock.json') != ''
-        run: npm audit --audit-level=high
+        run: npm audit --audit-level=moderate
 
       - name: Run project checks
         if: hashFiles('package.json') != ''
