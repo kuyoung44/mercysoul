@@ -27,7 +27,7 @@ const SYSTEM_PROMPT = [
   'Never retaliate, threaten, harass, unlawfully surveil, defraud, or unlawfully interfere with people or systems.',
   'Respond in proportion to verified facts, never beyond them.',
   'Keep responses practical and explain important uncertainty or constraints.',
-].join('\\n');
+].join('\n');
 
 function normalizeMessages(input) {
   if (Array.isArray(input?.messages)) {
@@ -62,7 +62,7 @@ export async function runMercySoulAI(input = {}, options = {}) {
     return { ok: false, requestId, decision: 'review', error: 'A message or messages array is required.' };
   }
 
-  const userText = messages.filter((m) => m.role === 'user').map((m) => m.content).join('\\n');
+  const userText = messages.filter((m) => m.role === 'user').map((m) => m.content).join('\n');
   const preflight = processInput({
     type: 'post',
     text: userText,
