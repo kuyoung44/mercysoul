@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#09080d">
+<title>Work with MercySoul Dominion</title>
+<meta name="description" content="Request a website, AI assistant, workflow automation, or creative technology service from MercySoul Dominion.">
+<style>
+:root{color-scheme:dark;--bg:#09080d;--panel:#15121d;--line:#30283c;--gold:#e2bd55;--muted:#b8afc2;--ink:#f8f4ea}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 85% 0%,#302044 0,transparent 42%),var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}.wrap{width:min(960px,100%);margin:auto;padding:24px 18px 64px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px;border-bottom:1px solid var(--line);padding:8px 0 20px}.brand{font-weight:800;letter-spacing:.04em}.brand span{color:var(--gold)}a{color:var(--gold)}.back{font-size:.9rem}.eyebrow{color:var(--gold);font-size:.76rem;letter-spacing:.18em;font-weight:700;margin:44px 0 10px}.hero h1{font-size:clamp(2.2rem,7vw,4.5rem);line-height:1.04;max-width:780px;margin:0}.hero p{max-width:680px;color:var(--muted);font-size:1.08rem}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:30px 0}.service{background:#15121dcc;border:1px solid var(--line);border-radius:16px;padding:18px}.service h2{font-size:1.05rem;margin:0 0 6px}.service p{color:var(--muted);font-size:.92rem;margin:0}.formbox{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:22px;margin-top:30px}.formbox h2{margin:0 0 4px}.hint{color:var(--muted);font-size:.9rem;margin:0 0 20px}label{display:block;font-size:.9rem;font-weight:650;margin:14px 0 6px}input,select,textarea{width:100%;padding:13px;border:1px solid #494052;border-radius:10px;background:#0d0b12;color:var(--ink);font:inherit}textarea{min-height:130px;resize:vertical}button{border:0;border-radius:999px;padding:13px 20px;background:var(--gold);color:#17120a;font-weight:800;font:inherit;cursor:pointer;margin-top:16px}button.secondary{background:transparent;border:1px solid var(--gold);color:var(--gold)}.privacy{color:var(--muted);font-size:.82rem;margin-top:14px}.result{display:none;margin-top:18px;padding:14px;border:1px solid var(--gold);border-radius:12px;white-space:pre-wrap;overflow-wrap:anywhere}.foot{margin-top:36px;border-top:1px solid var(--line);padding-top:18px;color:var(--muted);font-size:.84rem}.tag{display:inline-block;border:1px solid #62502b;color:var(--gold);border-radius:999px;padding:4px 10px;font-size:.75rem}
+</style>
+</head>
+<body><main class="wrap">
+<header class="top"><div class="brand">MERCYSOUL <span>DOMINION</span></div><a class="back" href="/">← Back to MercySoul</a></header>
+<section class="hero"><div class="eyebrow">44MS16 · CLIENT SERVICES</div><span class="tag">Independent creative technology · Nigeria</span><h1>Bring your next idea to life.</h1><p>Tell us what you are trying to build or solve. MercySoul Dominion works on practical digital experiences, thoughtful AI tools, and creative technology—with clear scope and human approval at every consequential step.</p></section>
+<section class="grid" aria-label="Services">
+<article class="service"><h2>Websites & landing pages</h2><p>Mobile-first business websites, service pages, portfolios, and product landing pages.</p></article>
+<article class="service"><h2>AI assistants</h2><p>Customer support assistants, knowledge helpers, and guided conversational experiences.</p></article>
+<article class="service"><h2>Workflow automation</h2><p>Reduce repetitive work with carefully scoped integrations and approval-aware workflows.</p></article>
+<article class="service"><h2>Creative technology</h2><p>Digital branding, AI-assisted artwork concepts, and visual direction for your project.</p></article>
+</section>
+<section class="formbox"><h2>Start a project conversation</h2><p class="hint">Share the basics. This page prepares a message for you to copy; it does not send or store your information.</p>
+<form id="request">
+<label for="name">Your name or business</label><input id="name" name="name" maxlength="100" autocomplete="name" placeholder="How should we address you" required>
+<label for="service">What do you need?</label><select id="service" name="service" required><option value="">Choose a service</option><option>Website or landing page</option><option>AI assistant or chatbot</option><option>Workflow automation</option><option>Creative technology or branding</option><option>Technical troubleshooting</option><option>Other / not sure yet</option></select>
+<label for="budget">Estimated budget (optional)</label><select id="budget" name="budget"><option value="">Prefer to discuss</option><option>Under ₦50,000</option><option>₦50,000–₦150,000</option><option>₦150,000–₦500,000</option><option>Above ₦500,000</option><option>Not yet determined</option></select>
+<label for="details">What outcome are you looking for?</label><textarea id="details" name="details" maxlength="2000" placeholder="A few sentences about your goal, timeline, and any useful links…" required></textarea>
+<button type="submit">Prepare my project message</button>
+</form><div class="result" id="result" role="status" aria-live="polite"></div><button class="secondary" id="copy" type="button" hidden>Copy message</button><p class="privacy">Privacy first: no account is required, and nothing is transmitted by this form. Do not include passwords, payment details, or sensitive personal information.</p></section>
+<footer class="foot">MercySoul Dominion · An independent creative technology and AI platform founded in Oyan, Osun State, Nigeria.<br>Clear scope. Honest expectations. Your approval before consequential action.</footer>
+</main>
+<script>
+const form=document.querySelector('#request'),result=document.querySelector('#result'),copy=document.querySelector('#copy');let prepared='';
+form.addEventListener('submit',e=>{e.preventDefault();const d=new FormData(form);prepared=['PROJECT ENQUIRY — MERCYSOUL DOMINION','', 'Name / business: '+d.get('name'),'Service: '+d.get('service'),'Budget: '+(d.get('budget')||'Prefer to discuss'),'Project details: '+d.get('details')].join('\n');result.textContent='Your project message is ready. Copy it and send it through a contact channel you trust.'+'\n\n'+prepared;result.style.display='block';copy.hidden=false;});
+copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(prepared);copy.textContent='Copied';}catch{result.textContent='Select and copy the message below manually:\n\n'+prepared;}});
+</script></body></html>
