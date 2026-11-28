@@ -3,6 +3,7 @@ import { createCommandTask, getCommandTask, controlCommandTask } from '../agent/
 import { routeCommand } from './router.js';
 import { toolRegistryStatus } from './tool-registry.js';
 import { authorizeOrchestration } from './guard.js';
+import { evaluateExecutionGate } from './policy.js';
 import { executeOrchestrationTask } from './executor.js';
 
 const router = express.Router();
@@ -26,10 +27,20 @@ router.post('/orchestrator/command', async (req, res) => {
   if (!auth.ok) return res.status(auth.status).json({ ok: false, error: auth.error });
   const command = req.body?.command;
   if (!command) return res.status(400).json({ ok: false, error: 'command is required' });
+
   const plan = routeCommand(command);
-  if (plan.requiresApproval && req.body?.execute !== true) {
-    return res.status(202).json({ ok: true, execution: 'approval-required', plan });
+  const gate = evaluateExecutionGate(plan, req.body || {});
+  if (!gate.allowed) {
+    return res.status(gate.status).json({
+      ok: true,
+      execution: gate.execution,
+      approvalRequired: gate.approvalRequired,
+      executionPerformed: false,
+      reason: gate.reason,
+      plan,
+    });
   }
+
   try {
     const accepted = await createCommandTask(command, { agents: req.body?.agents, priority: req.body?.priority });
     const execution = await executeOrchestrationTask(accepted.task.id, { payload: req.body?.payload || {}, continueOnError: req.body?.continueOnError === true });
@@ -50,12 +61,13 @@ router.get('/orchestrator/tasks/:id', async (req, res) => {
 router.post('/orchestrator/tasks/:id/control', async (req, res) => {
   const auth = authorizeOrchestration(req, { allowWrite: true });
   if (!auth.ok) return res.status(auth.status).json({ ok: false, error: auth.error });
-  try {
-    const result = await controlCommandTask(req.params.id, req.body?.action, req.body?.payload || {});
-    res.json({ ok: true, ...result });
-  } catch (error) {
-    res.status(400).json({ ok: false, error: error.message });
-  }
+  return res.status(202).json({
+    ok: true,
+    execution: 'approval-required',
+    approvalRequired: true,
+    executionPerformed: false,
+    reason: 'Task-control mutations are held until scoped human approval is connected.',
+  });
 });
 
 export default router;
