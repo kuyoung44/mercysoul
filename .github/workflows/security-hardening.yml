@@ -46,11 +46,46 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --no-fund
 
       - name: Scan for secrets
+        shell: bash
         run: |
+          set -uo pipefail
+          mkdir -p reports "$RUNNER_TEMP/gitleaks"
+          set +e
           docker run --rm \
             -v "$PWD:/repo:ro" \
+            -v "$RUNNER_TEMP/gitleaks:/out" \
             zricethezav/gitleaks:v8.28.0 \
-            detect --source=/repo --no-banner --redact
+            detect --source=/repo --config=/repo/.gitleaks.toml --no-banner --redact \
+            --report-format json --report-path /out/findings.json
+          scan_status=$?
+          set -e
+
+          # Keep only location and rule metadata. Never print or upload secret values.
+          if [ -s "$RUNNER_TEMP/gitleaks/findings.json" ]; then
+            node --input-type=module -e '
+              import fs from "node:fs";
+              const findings = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+              const safe = findings.map(({ RuleID, File, StartLine, Commit, Description }) => ({
+                rule: RuleID, file: File, line: StartLine, commit: Commit, description: Description
+              }));
+              fs.writeFileSync("reports/gitleaks-findings.json", JSON.stringify(safe, null, 2));
+              console.log("Gitleaks finding metadata (secret values excluded):");
+              console.log(JSON.stringify(safe, null, 2));
+            ' "$RUNNER_TEMP/gitleaks/findings.json"
+          else
+            printf '[]\n' > reports/gitleaks-findings.json
+            echo "Gitleaks produced no findings report."
+          fi
+          exit "$scan_status"
+
+      - name: Upload redacted secret-scan metadata
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mercysoul-gitleaks-metadata
+          path: reports/gitleaks-findings.json
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Scan for prohibited content
         shell: bash

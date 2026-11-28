@@ -1,0 +1,15 @@
+# Narrow historical false-positive exceptions only.
+# Conditions are ANDed: both the exact commit and exact path must match.
+# All other files, commits, and findings remain subject to the normal scan.
+
+[[allowlists]]
+description = "Secret-shaped literal used only by the memory-policy test fixture in this historical commit."
+condition = "AND"
+commits = ["9ae19bbb9b0bb489331a7f36e52e121bfa7c7d4e"]
+paths = ['''^src/agent/memory-policy\.test\.js$''']
+
+[[allowlists]]
+description = "Supabase publishable client key in a historical browser demo; publishable keys are intended for client-side use."
+condition = "AND"
+commits = ["65751d5e096353d72972616adb2b7d2c55332389"]
+paths = ['''^community-pilot/index\.html$''']
