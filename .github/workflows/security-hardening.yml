@@ -55,7 +55,7 @@ jobs:
             -v "$PWD:/repo:ro" \
             -v "$RUNNER_TEMP/gitleaks:/out" \
             zricethezav/gitleaks:v8.28.0 \
-            detect --source=/repo --no-banner --redact \
+            detect --source=/repo --config=/repo/.gitleaks.toml --no-banner --redact \
             --report-format json --report-path /out/findings.json
           scan_status=$?
           set -e
