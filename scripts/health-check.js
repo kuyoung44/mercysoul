@@ -7,8 +7,13 @@ const request = http.get(url, { timeout: 5000 }, res => {
   res.on('end', () => {
     let data;
     try { data = JSON.parse(body); } catch { console.error('Health endpoint returned invalid JSON'); process.exit(1); }
-    const healthy = res.statusCode === 200 && data.ok === true;
-    console.log(JSON.stringify({ url, statusCode: res.statusCode, healthy, data }, null, 2));
+
+    // The Express response normalizer wraps legacy payloads in { success, data }.
+    // Accept both the legacy shape and the normalized health response.
+    const payloadHealthy = data?.ok === true || (data?.success === true && data?.data?.ok === true);
+    const healthy = res.statusCode === 200 && payloadHealthy;
+
+    console.log(JSON.stringify({ url, statusCode: res.statusCode, healthy }, null, 2));
     process.exitCode = healthy ? 0 : 1;
   });
 });
